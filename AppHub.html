@@ -263,8 +263,14 @@
     .nav-tabs{display:flex;border-bottom:0.5px solid var(--divider)}
     .nav-tab{flex:1;padding:10px 0;font-size:12px;font-weight:500;color:var(--text-3);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-0.5px;cursor:pointer;transition:all 0.15s;font-family:var(--font)}
     .nav-tab:hover{color:var(--text-2)}.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    #screen-zentrale input[type=text]{transition:border-color .15s,box-shadow .15s}
+    #screen-zentrale input[type=text]:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--active-bg)}
     .zc-tabs{gap:6px;border-bottom:none;padding-bottom:2px}
     .zc-tabs .nav-tab{flex:none;padding:7px 13px;font-size:12px;font-weight:600;white-space:nowrap;border:0.5px solid var(--divider);border-radius:18px;margin-bottom:0;background:var(--surface);color:var(--text-2);transition:all .15s}
+    @media (max-width:640px){
+      .zc-tabs{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px}
+      .zc-tabs::-webkit-scrollbar{display:none}
+    }
     .zc-tabs .nav-tab:hover{background:var(--surface-hover);color:var(--text)}
     .zc-tabs .nav-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px var(--glow,rgba(0,0,0,0.18))}
     .page{display:none;padding:24px}.page.active{display:block}
@@ -2699,7 +2705,8 @@
         <span class="title-text" style="flex:1;text-align:center">Spielzentrale</span>
       </div>
     </div>
-    <div style="padding:16px;max-width:640px;margin:0 auto;text-align:left">
+    <div style="padding:16px;max-width:860px;margin:0 auto;text-align:left">
+      <div id="zc-head"></div>
       <div class="nav-tabs zc-tabs" style="margin-bottom:14px;flex-wrap:wrap">
         <button class="nav-tab active" id="zc-tab-profile" onclick="zcShow('profile')">👤 Profil</button>
         <button class="nav-tab" id="zc-tab-board" onclick="zcShow('board')">🏆 Hall of Fame</button>

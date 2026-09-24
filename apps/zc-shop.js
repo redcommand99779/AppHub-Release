@@ -579,7 +579,7 @@ function zcNotifToggle(on){
 function zcPlayerInput(id){
   const z=zcp(),names=typeof zcProfiles==='function'?zcProfiles().map(p=>p.name):[];
   return`<datalist id="zc-names4">${[...new Set([...names,...zcAllNames()])].map(n=>`<option value="${escHtml(n)}"></option>`).join('')}</datalist>
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">${z.player?zcAvatarHtml(z.player,38):''}
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;padding:8px 10px;background:var(--surface);border:0.5px solid var(--divider);border-radius:14px">${z.player?zcAvatarHtml(z.player,38):'<span style="font-size:24px;padding:0 4px">👤</span>'}
     <input type="text" id="${id}" list="zc-names4" value="${escHtml(z.player||'')}" placeholder="Dein Spielername…" oninput="zcSetPlayerPlus(this.value)" onchange="zcApplyPlayer()" style="flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;background:var(--bg);border:0.5px solid var(--divider);border-radius:10px;color:var(--text);font-size:14px"/>
     ${typeof zcWhoOpen==='function'?`<button class="timer-btn" onclick="zcWhoOpen(true)" style="padding:9px 12px;font-size:12px;white-space:nowrap">👥 Wechseln</button>`:''}</div>`;
 }

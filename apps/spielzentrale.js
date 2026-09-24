@@ -88,8 +88,26 @@ function zcInit(){
   if(!zcName)zcName=zcState().zc.player||'';
   zcShow(zcView);
 }
+/* Kopf der Spielzentrale: Titel + aktueller Spieler mit Rang und Coins */
+function zcRenderHead(){
+  const el=document.getElementById('zc-head');if(!el)return;
+  let name='';try{name=(zcState().zc.player||'').trim();}catch(e){}
+  let chips='';
+  if(name){
+    try{
+      const ri=smRankInfo('zentrale',zcOverallTotal(name)),coins=typeof zcCoinsOf==='function'?zcCoinsOf(name):0;
+      chips=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:14px;background:rgba(255,255,255,0.2);font-size:12px;font-weight:700">${ri.icon} ${escHtml(ri.label)}</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:14px;background:rgba(255,255,255,0.2);font-size:12px;font-weight:700">🪙 ${coins}</span></div>`;
+    }catch(e){}
+  }
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 18px;margin-bottom:14px;border-radius:18px;background:linear-gradient(120deg,var(--accent),#7c4dff 60%,#e040fb);color:#fff;box-shadow:0 6px 20px rgba(124,77,255,0.25)">
+    <div style="font-size:40px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">🎮</div>
+    <div style="flex:1;min-width:160px"><div style="font-size:21px;font-weight:800;line-height:1.15;letter-spacing:-0.3px">Spielzentrale</div><div style="font-size:12px;opacity:0.9;margin-top:2px">Ränge, Challenges, Saison, Shop und mehr – alles an einem Ort</div></div>
+    ${chips}</div>`;
+}
 function zcShow(v){
-  zcView=v;
+  zcView=v;zcRenderHead();
   ['profile','board','chal','cmp','champ','season','replays'].forEach(x=>{
     document.getElementById('zc-tab-'+x)?.classList.toggle('active',x===v);
     const e=document.getElementById('zc-view-'+x);if(e)e.style.display=x===v?'block':'none';
