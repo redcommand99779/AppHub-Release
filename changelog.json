@@ -33,5 +33,15 @@
       "Der Schläger bewegt sich mit gehaltener Pfeiltaste gleichmäßig, ohne Anlauf-Pause, und startet in der Mitte.",
       "Nach Game Over startest du per Klick neu. Tetris, Breakout und Flappy Bird sehen außerdem hübscher aus."
     ]
+  },
+  {
+    "id": 4,
+    "date": "24.09.2026",
+    "title": "Neues Spiel: Super Jumper",
+    "items": [
+      "Ein Jump-and-Run mit drei Leveln (Wiesen, Abendrot-Schlucht, Mitternachts-Burg): laufen, springen, Münzen sammeln, Gegnern auf den Kopf springen und die Zielfahne erreichen.",
+      "Steuerung: ←/→ oder A/D, Leertaste zum Springen (länger halten = höher), Shift zum Rennen. Auf dem Handy gibt es Bildschirm-Tasten.",
+      "Du findest es unter „Spiele“. Level werden nacheinander freigeschaltet, dein Rekord wird gespeichert."
+    ]
   }
 ]

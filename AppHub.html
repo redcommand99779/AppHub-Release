@@ -265,6 +265,14 @@
     .nav-tab:hover{color:var(--text-2)}.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
     #screen-zentrale input[type=text]{transition:border-color .15s,box-shadow .15s}
     #screen-zentrale input[type=text]:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--active-bg)}
+    /* Super Jumper */
+    #screen-jumprun canvas{border-radius:18px;box-shadow:0 8px 28px rgba(0,0,0,0.25);outline:1px solid var(--divider)}
+    #screen-jumprun .units-cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px var(--glow,rgba(0,0,0,0.2))}
+    #screen-jumprun .units-cat-btn:disabled{cursor:not-allowed}
+    .jr-pad{min-width:64px;height:56px;border-radius:16px;border:1px solid var(--divider);background:var(--surface);color:var(--text);font-size:22px;font-weight:700;box-shadow:0 3px 10px rgba(0,0,0,0.12);touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer}
+    .jr-pad:active{background:var(--accent);color:#fff}
+    .jr-pad-jump{min-width:84px;background:var(--accent);color:#fff}
+    @media (hover:none),(pointer:coarse),(max-width:700px){#jr-touch{display:flex!important}}
     /* Weitere Spiele – schöner */
     #screen-tetris canvas,#screen-g2048 canvas,#screen-pacman canvas,#screen-flappy canvas,#screen-breakout canvas{border-radius:16px!important;box-shadow:0 8px 28px rgba(0,0,0,0.22);max-width:100%}
     #screen-tetris .units-cat-btn.active,#screen-g2048 .units-cat-btn.active,#screen-pacman .units-cat-btn.active,#screen-flappy .units-cat-btn.active,#screen-wordle .units-cat-btn.active,#screen-breakout .units-cat-btn.active,#screen-puzzle15 .units-cat-btn.active,#screen-mathe .units-cat-btn.active,#screen-typing .units-cat-btn.active,#screen-vokabeln .units-cat-btn.active,#screen-laenderquiz .units-cat-btn.active,#screen-flaggenquiz .units-cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px var(--glow,rgba(0,0,0,0.2))}
@@ -664,6 +672,11 @@
           <div class="app-icon" style="background:linear-gradient(135deg,#34c759,#30aaff)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" width="26" height="26"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/></svg></div>
           <div class="app-tile-name" data-i18n="app.flappy">Flappy Bird</div>
           <div class="app-tile-desc" data-i18n="desc.flappy">Durch Rohre fliegen</div>
+        </button>
+        <button class="app-tile" type="button" onclick="goTo('jumprun')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('jumprun')}" data-appid="jumprun" data-cat="spiele">
+          <div class="app-icon" style="background:linear-gradient(135deg,#ffb300,#e53935)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M5 21V4"/><path d="M5 4l12 4-12 5"/><path d="M3 21h18"/></svg></div>
+          <div class="app-tile-name">Super Jumper</div>
+          <div class="app-tile-desc">Jump-and-Run mit 3 Leveln</div>
         </button>
         <button class="app-tile" type="button" onclick="goTo('tictactoe')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('tictactoe')}" data-appid="tictactoe" data-cat="spiele">
           <div class="app-icon" style="background:linear-gradient(135deg,#ff3b30,#ff9f0a)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" width="26" height="26"><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/></svg></div>
@@ -1771,6 +1784,45 @@
         </div>
         <canvas id="flappy-canvas" width="320" height="480" style="border:2px solid var(--divider);border-radius:8px;background:#70c5ce;display:block;margin:0 auto;cursor:pointer" onclick="flappyJump()" ontouchstart="event.preventDefault();flappyJump()"></canvas>
         <div style="font-size:12px;color:var(--text-3);margin-top:6px">Klicken, Leertaste oder ↑</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="screen" id="screen-jumprun">
+    <div class="titlebar">
+      <div class="title-wrap">
+        <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
+        <span class="title-text" style="flex:1;text-align:center">Super Jumper</span>
+      </div>
+    </div>
+    <div style="padding:20px;max-width:860px;margin:0 auto">
+
+      <div style="text-align:center">
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
+          <span class="game-chip">🪙 <strong id="jr-coins">0</strong></span>
+          <span class="game-chip">⭐ <strong id="jr-score">0</strong></span>
+          <span class="game-chip">❤️ <strong id="jr-lives">3</strong></span>
+          <span class="game-chip">🏁 <strong id="jr-level">1</strong></span>
+          <span class="game-chip">⏱ <strong id="jr-time">300</strong></span>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px">
+          <button class="units-cat-btn" id="jr-lv-1" onclick="jrPickLevel(1)">Level 1</button>
+          <button class="units-cat-btn" id="jr-lv-2" onclick="jrPickLevel(2)">Level 2</button>
+          <button class="units-cat-btn" id="jr-lv-3" onclick="jrPickLevel(3)">Level 3</button>
+        </div>
+        <canvas id="jr-canvas" width="640" height="384" style="display:block;margin:0 auto;max-width:100%;height:auto;cursor:pointer;touch-action:none"></canvas>
+        <div id="jr-touch" style="display:none;justify-content:space-between;align-items:center;gap:10px;max-width:640px;margin:14px auto 0;padding:0 4px">
+          <div style="display:flex;gap:10px">
+            <button class="jr-pad" onpointerdown="jrTouch('left',true)" onpointerup="jrTouch('left',false)" onpointerleave="jrTouch('left',false)" oncontextmenu="return false">◀</button>
+            <button class="jr-pad" onpointerdown="jrTouch('right',true)" onpointerup="jrTouch('right',false)" onpointerleave="jrTouch('right',false)" oncontextmenu="return false">▶</button>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="jr-pad" onpointerdown="jrTouch('run',true)" onpointerup="jrTouch('run',false)" onpointerleave="jrTouch('run',false)" oncontextmenu="return false" style="font-size:14px">Rennen</button>
+            <button class="jr-pad jr-pad-jump" onpointerdown="jrTouch('jump',true)" onpointerup="jrTouch('jump',false)" onpointerleave="jrTouch('jump',false)" oncontextmenu="return false">⬆</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:12px">⌨️ ←/→ oder A/D laufen · Leertaste, ↑ oder W springen (länger halten = höher) · Shift oder X rennen · Gegnern auf den Kopf springen! · 🏆 Rekord: <strong id="jr-best">0</strong></div>
       </div>
 
     </div>
@@ -3367,7 +3419,7 @@ function applyTranslations(lang){
 
 // Prevent page scroll with arrow keys on game screens
 document.addEventListener('keydown',function(e){
-  var gameScreens=['screen-pacman','screen-snake','screen-tetris','screen-g2048','screen-flappy','screen-breakout'];
+  var gameScreens=['screen-pacman','screen-snake','screen-tetris','screen-g2048','screen-flappy','screen-breakout','screen-jumprun'];
   var active=document.querySelector('.screen.active');
   if(active&&gameScreens.includes(active.id)&&
      ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)){
@@ -3473,6 +3525,7 @@ function goTo(id){
   if(id==='g2048'){g2048Best2=parseInt(localStorage.getItem('g2048_best')||'0');g2048New();}
   if(id==='pacman') pacInit();
   if(id==='flappy'){flappyBest2=parseInt(localStorage.getItem('flappy_best')||'0');flappyInit();}
+  if(id==='jumprun') jrInit();
   if(id==='tictactoe') tttNew();
   if(id==='viergewinnt') vgNew();
   if(id==='maumau') mmNew();
@@ -3976,6 +4029,7 @@ function initSavedSettings(){
 
 </script>
 <script src="apps/flappy-bird.js"></script>
+<script src="apps/jump-run.js"></script>
 <script>
 </script>
 <script src="apps/tic-tac-toe.js"></script>

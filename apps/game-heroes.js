@@ -7,6 +7,7 @@ const GAME_HEROES={
   g2048:['🔢','#f57c00','Kombiniere gleiche Kacheln bis zur 2048'],
   pacman:['🟡','#fbc02d','Sammle alle Punkte und meide die Geister'],
   flappy:['🐦','#0288d1','Flattere durch die Lücken, ohne anzustoßen'],
+  jumprun:['🏁','#e53935','Laufen, springen, Münzen sammeln – bis zur Zielfahne'],
   wordle:['🟩','#43a047','Errate das Wort in sechs Versuchen'],
   breakout:['🧱','#e53935','Zerstöre alle Steine mit dem Ball'],
   puzzle15:['🔲','#00897b','Schiebe die Kacheln in die richtige Reihenfolge'],
