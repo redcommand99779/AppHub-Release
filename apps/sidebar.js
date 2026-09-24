@@ -323,7 +323,7 @@
   function sbHomeRender(){
     if(currentScreen()!=='home')return;
     const gt=document.getElementById('home-greeting-text');if(gt)gt.textContent=greeting();
-    const hs=document.getElementById('home-sub');if(hs)hs.textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
+    const hs=document.getElementById('home-sub');if(hs)hs.textContent=new Date().toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})+' · Update-Test ✓';
     const dash=document.getElementById('sb-dash'),sh=document.getElementById('sb-sech');if(!dash||!sh)return;
     const chip=t=>`<button class="dsh-chip" onclick="goTo('${t.id}')">${t.icon}<span>${esc(t.name)}</span></button>`;
     const favChip=t=>`<button class="dsh-chip" draggable="true" title="Zum Sortieren ziehen" onclick="goTo('${t.id}')" ondragstart="sbDragStart(event,'${t.id}')" ondragover="sbDragOver(event)" ondragleave="this.classList.remove('sb-drag-over')" ondrop="sbDrop(event,'${t.id}')" ondragend="sbDragEnd()">${t.icon}<span>${esc(t.name)}</span></button>`;
