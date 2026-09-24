@@ -40,6 +40,8 @@ Der Installer lädt die App selbst herunter (dadurch fehlt die „aus dem Intern
 powershell -File publish-release.ps1
 ```
 
+Vorher läuft automatisch ein Schnelltest (`node tests/check.js`, braucht nur Node.js): Syntax aller Skripte, Buttons ohne Funktion, Rang-/Pass-Logik, Server-Schnittstellen und die Liste der veröffentlichten Dateien. Schlägt er fehl, wird nichts veröffentlicht (`-SkipTests` überspringt ihn). Neuerungen für die Freunde trägst du vor dem Veröffentlichen in `changelog.json` ein (neuer Eintrag mit höherer `id`) – sie sehen sie danach einmalig als „Neu in AppHub“.
+
 Das Skript kopiert nur die App-Dateien (nie `appdata.json`/`backups/`) in einen lokalen Klon des Release-Repos, schreibt eine neue `version.txt` und pusht. Beim nächsten Start holen sich alle Installationen die neue Version.
 
 Für Entwicklung/Testen mit lokalem Server geht auch:

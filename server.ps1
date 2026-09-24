@@ -72,6 +72,24 @@ function Handle($ctx) {
       if (Test-Path $Data) { return (Send $ctx 200 ([System.IO.File]::ReadAllBytes($Data)) 'application/json; charset=utf-8') }
       return (SendText $ctx 404 'no data')
     }
+    if ($path -eq '/api/backups') {
+      # Liste der taeglichen Sicherungen (neueste zuerst) als JSON
+      $list = @()
+      if (Test-Path $Backups) {
+        Get-ChildItem $Backups -Filter 'appdata-*.json' | Sort-Object Name -Descending | ForEach-Object {
+          $list += @{ name = $_.Name; size = $_.Length; t = [long]([DateTimeOffset]$_.LastWriteTimeUtc).ToUnixTimeMilliseconds() }
+        }
+      }
+      $js = New-Object System.Web.Script.Serialization.JavaScriptSerializer
+      return (Send $ctx 200 ($Utf8.GetBytes($js.Serialize(@($list)))) 'application/json; charset=utf-8')
+    }
+    if ($path.StartsWith('/api/backup/')) {
+      $name = $path.Substring(12)
+      if ($name -notmatch '^appdata-[0-9A-Za-z\-]+\.json$') { return (SendText $ctx 400 'bad name') }
+      $bf = Join-Path $Backups $name
+      if (-not (Test-Path $bf -PathType Leaf)) { return (SendText $ctx 404 'not found') }
+      return (Send $ctx 200 ([System.IO.File]::ReadAllBytes($bf)) 'application/json; charset=utf-8')
+    }
     if ($path -eq '/') { $path = '/AppHub.html' }
     $parts = @($path.Replace('\', '/').TrimStart('/').Split('/') | Where-Object { $_ })
     if (($parts | Where-Object { $_.StartsWith('.') }) -or ($parts.Count -gt 0 -and ($parts[0].StartsWith('appdata') -or $parts[0] -eq 'backups'))) {
@@ -84,6 +102,14 @@ function Handle($ctx) {
     return (Send $ctx 200 ([System.IO.File]::ReadAllBytes($full)) $ct)
   }
 
+  if ($method -eq 'POST' -and $path -eq '/api/update') {
+    # Updater (update.ps1) anstossen und auf das Ergebnis warten; gibt die dann gueltige Version zurueck
+    $upd = Join-Path $Root 'update.ps1'
+    if (-not (Test-Path $upd)) { return (SendText $ctx 404 'no updater') }
+    try { Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$upd`" -Dir `"$Root`"" -WindowStyle Hidden -Wait } catch { return (SendText $ctx 500 'update failed') }
+    $vf = Join-Path $Root 'version.txt'
+    return (SendText $ctx 200 $(if (Test-Path $vf) { (Get-Content $vf -Raw).Trim() } else { '' }))
+  }
   if ($method -eq 'PUT' -or $method -eq 'POST') {
     if ($path -ne '/api/data') { return (SendText $ctx 404 'not found') }
     $ms = New-Object System.IO.MemoryStream

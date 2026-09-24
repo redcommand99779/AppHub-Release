@@ -337,7 +337,7 @@ function zcSkinApply(id){
   if(!s){
     root.removeAttribute('data-skin');
     const th=localStorage.getItem('zf_theme')||'auto';
-    root.setAttribute('data-theme',(th==='dark'||(th==='auto'&&window.matchMedia('(prefers-color-scheme:dark)').matches))?'dark':'light');
+    root.setAttribute('data-theme',(typeof zfThemeDark==='function'?zfThemeDark(th):(th==='dark'||(th==='auto'&&window.matchMedia('(prefers-color-scheme:dark)').matches)))?'dark':'light');
     return;
   }
   const vars=s.custom?zcMythicSkinVars(zcCustomGet('skin')):s.vars;
@@ -503,12 +503,17 @@ function zcShopBuy(kind,id){
     if(!admin)z.coins[k]-=price;
   }
   (z.inv[k]=z.inv[k]||[]).push(key);smSave('zentrale');
-  sfx(it.req?'rankup':'coin');zcShopEquip(kind,id,true);
+  // Kaufklang nach Seltenheit: gewöhnlich/selten = Münze, episch = Fanfare, legendär+ = Rang-Aufstieg mit Konfetti
+  const rk=zcRarityKey(it);
+  if(it.req||rk==='legend'||rk==='mythic'||rk==='admin'){sfx('rankup');if(typeof smConfetti==='function')smConfetti();}
+  else sfx(rk==='epic'?'win':'coin');
+  zcShopEquip(kind,id,true);
   showToast(it.req?`🔓 Freigeschaltet: ${it.name}`:`🛍️ Gekauft: ${it.name}`,2500);
 }
 function zcShopEquip(kind,id,quiet){
   const z=zcp(),name=(z.player||'').trim(),k=zcKey(name),key=kind+':'+id;
   if(!zcOwn(name,key))return;
+  if(!quiet)sfx('click');
   if(kind==='title'){z.titles[k]=z.titles[k]===id&&!quiet?'':id;}
   else{const eq=zcEq();eq[kind]=eq[kind]===id&&!quiet?'':id;}
   if(kind==='skin')zcSkinApply();

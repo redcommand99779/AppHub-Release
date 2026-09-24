@@ -265,6 +265,19 @@
     .nav-tab:hover{color:var(--text-2)}.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
     #screen-zentrale input[type=text]{transition:border-color .15s,box-shadow .15s}
     #screen-zentrale input[type=text]:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--active-bg)}
+    /* Weitere Spiele – schöner */
+    #screen-tetris canvas,#screen-g2048 canvas,#screen-pacman canvas,#screen-flappy canvas,#screen-breakout canvas{border-radius:16px!important;box-shadow:0 8px 28px rgba(0,0,0,0.22);max-width:100%}
+    #screen-tetris .units-cat-btn.active,#screen-g2048 .units-cat-btn.active,#screen-pacman .units-cat-btn.active,#screen-flappy .units-cat-btn.active,#screen-wordle .units-cat-btn.active,#screen-breakout .units-cat-btn.active,#screen-puzzle15 .units-cat-btn.active,#screen-mathe .units-cat-btn.active,#screen-typing .units-cat-btn.active,#screen-vokabeln .units-cat-btn.active,#screen-laenderquiz .units-cat-btn.active,#screen-flaggenquiz .units-cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px var(--glow,rgba(0,0,0,0.2))}
+    /* Sudoku & Snake – schöner */
+    .game-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:14px;background:var(--surface);border:0.5px solid var(--divider);font-size:13px;color:var(--text-2);box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+    .game-chip strong{font-size:16px;color:var(--text);font-variant-numeric:tabular-nums}
+    #sudoku-board{border-radius:6px}
+    #sudoku-board input{transition:background .12s;-moz-appearance:textfield;cursor:pointer;caret-color:var(--accent)}
+    #sudoku-board input::-webkit-outer-spin-button,#sudoku-board input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+    #sudoku-board input:focus{background:var(--active-bg)!important;box-shadow:inset 0 0 0 2px var(--accent)}
+    #sudoku-board input:not([readonly]){font-weight:600!important}
+    #screen-sudoku #sudoku-board{box-shadow:0 8px 28px rgba(0,0,0,0.18)}
+    @media (max-width:520px){#sudoku-board{grid-template-columns:repeat(9,minmax(0,1fr))!important;width:calc(100vw - 52px)}#sudoku-board input{width:100%!important;height:auto!important;aspect-ratio:1;font-size:15px!important;padding:0}}
     /* Kniffel & Monopoly – schöner */
     #kniffel-setup-panel,#mono-setup-panel{max-width:520px!important}
     #kniffel-setup-panel > div,#mono-setup-panel > div{border-radius:18px!important;box-shadow:0 4px 18px rgba(0,0,0,0.08);padding:22px!important}
@@ -1474,14 +1487,18 @@
     </div>
     <div style="padding:20px;max-width:800px;margin:0 auto">
 
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:16px;border-radius:18px;background:linear-gradient(120deg,#1e88e5,var(--accent));color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.15)">
+        <div style="font-size:36px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">🔢</div>
+        <div><div style="font-size:20px;font-weight:800;line-height:1.15;letter-spacing:-0.3px">Sudoku</div><div style="font-size:12px;opacity:0.92;margin-top:2px">Fülle jede Zeile, Spalte und jeden 3×3-Block mit 1–9</div></div>
+      </div>
       <div style="text-align:center">
-        <div style="display:flex;gap:8px;margin-bottom:14px;justify-content:center;align-items:center">
+        <div style="display:flex;gap:8px;margin-bottom:14px;justify-content:center;align-items:center;flex-wrap:wrap">
           <select id="sudoku-diff" style="padding:7px 10px;background:var(--surface);border:0.5px solid var(--divider);border-radius:8px;font-size:13px;color:var(--text);outline:none;cursor:pointer">
             <option value="easy">Leicht</option><option value="medium" selected>Mittel</option><option value="hard">Schwer</option>
           </select>
           <button class="btn-generate" onclick="sudokuNew()" style="padding:8px 16px;width:auto">Neues Spiel</button>
           <button class="timer-btn" onclick="sudokuSolve()" style="padding:8px 14px">Lösen</button>
-          <span id="sudoku-time" style="font-family:var(--mono);font-size:13px;color:var(--text-3)">00:00</span>
+          <span id="sudoku-time" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);padding:6px 12px;border-radius:12px;background:var(--surface);border:0.5px solid var(--divider)">00:00</span>
         </div>
         <div style="display:inline-block;background:var(--text-2);border:2px solid var(--text-2);border-radius:8px;overflow:hidden">
           <div id="sudoku-board" style="display:grid;grid-template-columns:repeat(9,52px);gap:1px"></div>
@@ -1599,14 +1616,18 @@
     </div>
     <div style="padding:20px;max-width:800px;margin:0 auto">
 
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:16px;border-radius:18px;background:linear-gradient(120deg,#43a047,var(--accent));color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.15)">
+        <div style="font-size:36px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">🐍</div>
+        <div><div style="font-size:20px;font-weight:800;line-height:1.15;letter-spacing:-0.3px">Snake</div><div style="font-size:12px;opacity:0.92;margin-top:2px">Friss die Äpfel – aber beiß dir nicht in den Schwanz</div></div>
+      </div>
       <div style="text-align:center">
-        <div style="display:flex;gap:16px;justify-content:center;margin-bottom:10px;align-items:center">
-          <span style="font-size:13px;color:var(--text-2)">Punkte: <strong id="snake-score">0</strong></span>
-          <span style="font-size:13px;color:var(--text-2)">Rekord: <strong id="snake-best">0</strong></span>
+        <div style="display:flex;gap:10px;justify-content:center;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+          <span class="game-chip">🍎 Punkte <strong id="snake-score">0</strong></span>
+          <span class="game-chip">🏆 Rekord <strong id="snake-best">0</strong></span>
           <button class="btn-generate" onclick="snakeStart()" style="padding:7px 16px;width:auto" id="snake-btn">Starten</button>
         </div>
-        <canvas id="snake-canvas" width="320" height="320" style="border:2px solid var(--divider);border-radius:8px;background:var(--surface);display:block;margin:0 auto"></canvas>
-        <div style="font-size:12px;color:var(--text-3);margin-top:8px">Pfeiltasten oder WASD</div>
+        <canvas id="snake-canvas" width="320" height="320" style="border:4px solid var(--surface);outline:1px solid var(--divider);border-radius:18px;background:#18241c;display:block;margin:0 auto;box-shadow:0 8px 28px rgba(0,0,0,0.25);max-width:100%;height:auto"></canvas>
+        <div style="font-size:12px;color:var(--text-3);margin-top:12px">⌨️ Pfeiltasten oder WASD</div>
       </div>
 
     </div>
@@ -2006,6 +2027,7 @@
             <button onclick="setTheme('light')" id="theme-light" class="set-btn">☀️ Hell</button>
             <button onclick="setTheme('dark')" id="theme-dark" class="set-btn">🌙 Dunkel</button>
             <button onclick="setTheme('auto')" id="theme-auto" class="set-btn">Auto</button>
+            <button onclick="setTheme('time')" id="theme-time" class="set-btn" title="Dunkel von 19 bis 7 Uhr, sonst hell">🌆 Zeit</button>
           </div>
         </div>
 
@@ -2055,6 +2077,24 @@
           <button class="set-btn" onclick="document.getElementById('sync-import').click()">⬆️ Sicherung einlesen</button>
           <input type="file" id="sync-import" accept=".json,application/json" style="display:none" onchange="syncImport(this)"/>
         </div>
+      </div>
+
+      <!-- 🔄 Version & Updates -->
+      <div style="background:var(--surface);border:0.5px solid var(--divider);border-radius:14px;padding:16px 20px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px">🔄 Version &amp; Updates</div>
+        <div id="upd-status" style="font-size:13px;color:var(--text);line-height:1.5;margin-bottom:12px">Version wird ermittelt …</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="set-btn" onclick="zfUpdateCheck(true)">🔄 Nach Updates suchen</button>
+          <button class="set-btn" onclick="zfWhatsNewShow()">📋 Was ist neu?</button>
+        </div>
+      </div>
+
+      <!-- 🗄️ Sicherungen -->
+      <div style="background:var(--surface);border:0.5px solid var(--divider);border-radius:14px;padding:16px 20px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px">🗄️ Automatische Sicherungen</div>
+        <div style="font-size:12px;color:var(--text-3);line-height:1.5;margin-bottom:10px">Der AppHub-Server legt einmal pro Tag eine Kopie deines Stands an (die letzten 14 Tage). Hier kannst du eine davon zurückspielen.</div>
+        <button class="set-btn" onclick="zfBackupsShow()">🗄️ Sicherungen anzeigen</button>
+        <div id="bk-list" style="margin-top:12px"></div>
       </div>
 
       <!-- 📱 Startseite -->
@@ -3789,11 +3829,17 @@ function setTheme(t){
   showToast('Design gespeichert ✓');
   localStorage.setItem('zf_theme',t);
   applyTheme(t);
-  ['light','dark','auto'].forEach(x=>setBtn('theme-'+x,x===t));
+  ['light','dark','auto','time'].forEach(x=>setBtn('theme-'+x,x===t));
 }
+/* Farbmodus „Zeit“: abends und nachts dunkel (19–7 Uhr), tagsüber hell */
+function zfThemeDark(t){
+  if(t==='dark')return true;
+  if(t==='time'){const h=new Date().getHours();return h>=19||h<7;}
+  return t==='auto'&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+}
+setInterval(()=>{try{if((localStorage.getItem('zf_theme')||'auto')==='time'&&!document.documentElement.getAttribute('data-skin')){applyTheme('time');}}catch(e){}},10*60*1000);
 function applyTheme(t){
-  const prefersDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
-  const dark=(t==='dark')||(t==='auto'&&prefersDark);
+  const dark=zfThemeDark(t);
   document.documentElement.setAttribute('data-theme',dark?'dark':'light');
 }
 
@@ -3900,6 +3946,8 @@ function initSavedSettings(){
 <script src="apps/sound.js"></script>
 <script src="apps/spielmeta.js"></script>
 <script src="apps/replay.js"></script>
+<script src="apps/updater.js"></script>
+<script src="apps/game-heroes.js"></script>
 <script>
 /* ── Hangman ── */
 </script>

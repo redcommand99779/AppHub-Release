@@ -105,6 +105,17 @@ sub handle {
             return defined $d ? respond($c, $method, 200, $d, 'application/json; charset=utf-8')
                               : respond($c, $method, 404, 'no data');
         }
+        if ($path eq '/api/backups') {
+            # Liste der taeglichen Sicherungen (neueste zuerst) als JSON
+            my @all = sort { $b cmp $a } glob("$BACKUPS/appdata-*.json");
+            my @items = map { my $n = (split m{/}, $_)[-1]; { name => $n, size => (-s $_) || 0, t => ((stat $_)[9] || 0) * 1000 } } @all;
+            return respond($c, $method, 200, JSON::PP->new->utf8->encode(\@items), 'application/json; charset=utf-8');
+        }
+        if ($path =~ m{^/api/backup/(appdata-[0-9A-Za-z\-]+\.json)$}) {
+            my $bf = "$BACKUPS/$1";
+            my $d = slurp($bf);
+            return defined $d ? respond($c, $method, 200, $d, 'application/json; charset=utf-8') : respond($c, $method, 404, 'not found');
+        }
         $path = '/AppHub.html' if $path eq '/';
         (my $rel = $path) =~ s{\\}{/}g;
         my @parts = grep { length } split m{/}, $rel;
@@ -115,6 +126,16 @@ sub handle {
         my ($ext) = $full =~ /\.([^.\/]+)$/;
         my $ct = $MIME{lc($ext || '')} || 'application/octet-stream';
         return respond($c, $method, 200, slurp($full), $ct);
+    }
+
+    if ($method eq 'POST' && $path eq '/api/update') {
+        # Updater (update-mac.sh) anstossen und auf das Ergebnis warten; gibt die dann gueltige Version zurueck
+        return respond($c, $method, 404, 'no updater') unless -f "$ROOT/update-mac.sh";
+        system('bash', "$ROOT/update-mac.sh", $ROOT);
+        my $v = slurp("$ROOT/version.txt");
+        $v = '' unless defined $v;
+        $v =~ s/\s+//g;
+        return respond($c, $method, 200, $v);
     }
 
     if ($method eq 'PUT' || $method eq 'POST') {

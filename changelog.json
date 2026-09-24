@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "date": "24.09.2026",
+    "title": "Große Aufräum-Runde",
+    "items": [
+      "Saison-Pass: Jeder Rang-Aufstieg ist eine neue Stufe. Belohnungen holst du selbst ab – am Saisonende wird alles Übrige automatisch eingefordert.",
+      "Shop: Fünf wechselnde Artikel alle 15 Minuten, für jeden Account anders. Dazu Sets, mythische Artikel und Vorschau für alles.",
+      "Replays, „Zuletzt genutzt“ und Shop-Rotation gehören jetzt zu deinem Account.",
+      "Spielzentrale, Startseite, Einstellungen, Hilfe und viele Spiele haben ein neues, aufgeräumtes Design.",
+      "Updates kommen jetzt automatisch – ganz ohne Git oder Python. Neue Version verfügbar? Du bekommst einen Hinweis.",
+      "Neu in den Einstellungen: Sicherungen ansehen und zurückspielen."
+    ]
+  },
+  {
+    "id": 2,
+    "date": "24.09.2026",
+    "title": "Mehr Komfort",
+    "items": [
+      "Update-Hinweis: Gibt es eine neue Version, erscheint unten rechts „Jetzt aktualisieren“ – ein Klick genügt.",
+      "Neu in den Einstellungen: Version & Updates sowie automatische Sicherungen ansehen und zurückspielen.",
+      "Neuer Farbmodus „Zeit“: abends und nachts dunkel (19–7 Uhr), tagsüber hell.",
+      "Shop-Käufe klingen jetzt nach Seltenheit – bei legendären und mythischen Artikeln mit Konfetti.",
+      "Alle Spiele und Lern-Apps haben ein einheitliches Kopfbanner im neuen Design."
+    ]
+  }
+]
