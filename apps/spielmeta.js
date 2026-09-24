@@ -594,6 +594,20 @@ function smRegister(cfg){
   SM_CFG[cfg.id]=cfg;SM_UI[cfg.id]={view:'play',profileName:'',colorPickerFor:null};
   if(!cfg.noMount)smMount(cfg.id);
 }
+/* Kopfbanner über jedem Spiel: Icon, Name, kurzer Hinweis und Sprung in die Spielzentrale */
+const SM_HERO={ttt:['⭕','#5c6bc0','Drei in einer Reihe – wer zuerst?'],vg:['🔴','#e53935','Vier in einer Reihe gewinnt'],chess:['♟️','#455a64','Das Spiel der Könige'],bs:['🚢','#0277bd','Versenke die gegnerische Flotte'],mem:['🃏','#8e24aa','Finde alle Paare'],hm:['🔤','#00897b','Errate das Wort Buchstabe für Buchstabe'],mm:['🂡','#d81b60','Wirf deine Karten zuerst ab']};
+function smMountHero(id,screen,content){
+  try{
+    const h=SM_HERO[id];if(!h||content.querySelector('.sm-hero'))return;
+    const title=(screen.querySelector('.title-text')||{}).textContent||id;
+    const d=document.createElement('div');d.className='sm-hero';
+    d.style.cssText=`display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:14px;border-radius:18px;background:linear-gradient(120deg,${h[1]},var(--accent));color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.15)`;
+    d.innerHTML=`<div style="font-size:36px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">${h[0]}</div>
+      <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800;line-height:1.15;letter-spacing:-0.3px">${title.replace(/</g,'&lt;')}</div><div style="font-size:12px;opacity:0.92;margin-top:2px">${h[2]}</div></div>
+      <button onclick="goTo('zentrale');if(typeof zcShow==='function')zcShow('board')" style="flex:none;padding:7px 12px;font-size:12px;font-weight:700;border-radius:12px;border:1px solid rgba(255,255,255,0.6);background:rgba(255,255,255,0.18);color:#fff;cursor:pointer;white-space:nowrap">🏆 Ränge</button>`;
+    content.insertBefore(d,content.firstChild);
+  }catch(e){}
+}
 function smMount(id){
   const cfg=SM_CFG[id],screen=document.getElementById(cfg.screen);
   if(!screen||screen.dataset.smMounted)return;
@@ -601,5 +615,6 @@ function smMount(id){
   screen.dataset.smMounted='1';
   const meta=document.createElement('div');meta.id=`sm-${id}-meta`;
   content.insertBefore(meta,content.firstChild);
+  smMountHero(id,screen,content);
   smSeasonCheck(id);smRenderMeta(id);smNotify(id);
 }

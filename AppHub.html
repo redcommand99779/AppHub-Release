@@ -265,6 +265,18 @@
     .nav-tab:hover{color:var(--text-2)}.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
     #screen-zentrale input[type=text]{transition:border-color .15s,box-shadow .15s}
     #screen-zentrale input[type=text]:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--active-bg)}
+    /* Kniffel & Monopoly – schöner */
+    #kniffel-setup-panel,#mono-setup-panel{max-width:520px!important}
+    #kniffel-setup-panel > div,#mono-setup-panel > div{border-radius:18px!important;box-shadow:0 4px 18px rgba(0,0,0,0.08);padding:22px!important}
+    #kniffel-setup-panel > div > div[style*="letter-spacing:0.06em"],#mono-setup-panel > div > div[style*="letter-spacing:0.06em"]{font-size:14px!important;font-weight:800!important;text-transform:none!important;letter-spacing:0!important;color:var(--text)!important;padding-bottom:8px;border-bottom:0.5px solid var(--divider)}
+    #kniffel-setup-panel .btn-generate,#mono-setup-panel .btn-generate{padding:14px!important;font-size:15px!important;border-radius:14px!important;box-shadow:0 4px 14px var(--glow,rgba(0,0,0,0.2))}
+    #screen-kniffel table,#screen-kniffel .kniff-sheet{border-radius:14px}
+    /* Spiele – schöner */
+    #screen-tictactoe .units-cat-btn.active,#screen-viergewinnt .units-cat-btn.active,#screen-schach .units-cat-btn.active,#screen-schiffe .units-cat-btn.active,#screen-memory .units-cat-btn.active,#screen-hangman .units-cat-btn.active,#screen-maumau .units-cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px var(--glow,rgba(0,0,0,0.2))}
+    #screen-tictactoe .units-cat-btn,#screen-viergewinnt .units-cat-btn,#screen-schach .units-cat-btn,#screen-schiffe .units-cat-btn,#screen-memory .units-cat-btn,#screen-hangman .units-cat-btn,#screen-maumau .units-cat-btn{padding:7px 15px;font-size:12px;font-weight:600}
+    #ttt-status,#vg-status,#chess-status,#bs-status,#mem-status,#hm-status,#mm-status{display:table;margin-left:auto!important;margin-right:auto!important;padding:8px 18px;border-radius:20px;background:var(--surface);border:0.5px solid var(--divider);box-shadow:0 1px 4px rgba(0,0,0,0.06);font-weight:600!important}
+    #ttt-board{padding:12px;border-radius:20px;background:var(--surface);border:0.5px solid var(--divider);box-shadow:0 4px 18px rgba(0,0,0,0.08)}
+    .sm-hero{animation:hilfePop .25s ease-out}
     /* Hilfe – schöner */
     @keyframes hilfePop{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
     #hilfe-cats{gap:6px}
@@ -2649,7 +2661,13 @@
     </div>
     <div style="padding:16px;max-width:1100px;margin:0 auto">
 
-      <div class="nav-tabs" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:14px;border-radius:18px;background:linear-gradient(120deg,#2e7d32,var(--accent));color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.15)">
+        <div style="font-size:36px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">🏠</div>
+        <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800;line-height:1.15;letter-spacing:-0.3px">Monopoly</div><div style="font-size:12px;opacity:0.92;margin-top:2px">Kaufe, handle und werde Grundstücks-Tycoon</div></div>
+        <button onclick="goTo('zentrale');if(typeof zcShow==='function')zcShow('board')" style="flex:none;padding:7px 12px;font-size:12px;font-weight:700;border-radius:12px;border:1px solid rgba(255,255,255,0.6);background:rgba(255,255,255,0.18);color:#fff;cursor:pointer;white-space:nowrap">🏆 Ränge</button>
+      </div>
+
+      <div class="nav-tabs zc-tabs" style="margin-bottom:14px">
         <button class="nav-tab active" id="mono-tab-setup" onclick="monoShowView('setup')">Spielen</button>
         <button class="nav-tab" id="mono-tab-editor" onclick="monoShowView('editor')">Brett bearbeiten</button>
         <button class="nav-tab" id="mono-tab-cards" onclick="monoShowView('cards')">Karten bearbeiten</button>
@@ -2784,7 +2802,13 @@
     </div>
     <div style="padding:16px;max-width:640px;margin:0 auto">
 
-      <div class="nav-tabs" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:14px;border-radius:18px;background:linear-gradient(120deg,#e53935,var(--accent));color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.15)">
+        <div style="font-size:36px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">🎲</div>
+        <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800;line-height:1.15;letter-spacing:-0.3px">Kniffel</div><div style="font-size:12px;opacity:0.92;margin-top:2px">Würfle, kombiniere und jage den Kniffel</div></div>
+        <button onclick="goTo('zentrale');if(typeof zcShow==='function')zcShow('board')" style="flex:none;padding:7px 12px;font-size:12px;font-weight:700;border-radius:12px;border:1px solid rgba(255,255,255,0.6);background:rgba(255,255,255,0.18);color:#fff;cursor:pointer;white-space:nowrap">🏆 Ränge</button>
+      </div>
+
+      <div class="nav-tabs zc-tabs" style="margin-bottom:14px">
         <button class="nav-tab active" id="kniffel-tab-play" onclick="kniffShowView('play')">Spielen</button>
         <button class="nav-tab" id="kniffel-tab-rules" onclick="kniffShowView('rules')">Regeln</button>
       </div>
