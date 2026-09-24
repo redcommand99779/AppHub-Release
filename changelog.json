@@ -43,5 +43,16 @@
       "Steuerung: ←/→ oder A/D, Leertaste zum Springen (länger halten = höher), Shift zum Rennen. Auf dem Handy gibt es Bildschirm-Tasten.",
       "Du findest es unter „Spiele“. Level werden nacheinander freigeschaltet, dein Rekord wird gespeichert."
     ]
+  },
+  {
+    "id": 5,
+    "date": "24.09.2026",
+    "title": "Super Jumper: Checkpoints, Ducken und Slam",
+    "items": [
+      "Checkpoint-Fahnen in jedem Level: Nach einem Tod geht es dort weiter, gesammelte Münzen und zerstörte Blöcke bleiben erhalten.",
+      "Kein Sprint mehr. Dafür kannst du dich ducken (↓ oder S) und durch niedrige Tunnel mit Münzen kriechen.",
+      "Slam-Attacke: In der Luft ↓ oder S drücken – du stürzt mit Wucht nach unten, zerstörst Ziegel und ?-Blöcke unter dir und besiegst Gegner in der Nähe.",
+      "Behoben: Die Laufgeschwindigkeit stieg vorher immer weiter an – jetzt bleibt sie konstant."
+    ]
   }
 ]

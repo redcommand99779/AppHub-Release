@@ -2,10 +2,13 @@
    SUPER JUMPER – Jump-and-Run (eigene Figuren und Grafik, komplett gezeichnet)
    Laufen, Springen, Münzen sammeln, Gegnern auf den Kopf springen, Stacheln und Löcher meiden,
    am Ende des Levels die Zielfahne erreichen. 3 Level, 3 Leben.
-   Steuerung: ←/→ oder A/D laufen · Leertaste/↑/W springen (länger halten = höher) · Shift/X rennen
+   Steuerung: ←/→ oder A/D laufen · Leertaste/↑/W springen (länger halten = höher)
+   ↓/S ducken · in der Luft ↓/S = Slam-Attacke (zerstört Blöcke unter dir und besiegt Gegner in der Nähe)
+   Checkpoint-Fahnen in der Mitte jedes Levels: nach einem Tod geht es dort weiter
 ══════════════════════════════════ */
 const JR_T=32,JR_W=640,JR_H=384,JR_ROWS=12;
-const JR_GRAV=0.5,JR_JUMP=11.2,JR_MAXFALL=12;
+const JR_GRAV=0.5,JR_JUMP=11.2,JR_MAXFALL=12,JR_MAXV=3.4,JR_SLAM=14;
+const JR_H_STAND=34,JR_H_DUCK=20;
 
 /* ── Level-Bau: Boden-Abschnitte, Plattformen, Blöcke, Münzen, Gegner, Röhren, Stacheln ── */
 function jrBuild(spec){
@@ -19,14 +22,19 @@ function jrBuild(spec){
   (spec.coins||[]).forEach(([x,y])=>{if(g[y][x]==='.')g[y][x]='o';});
   (spec.coinRows||[]).forEach(([x,y,n])=>{for(let i=0;i<n;i++)if(g[y][x+i]==='.')g[y][x+i]='o';});
   for(let r=2;r<=9;r++)g[r][spec.flag]='F';
+  (spec.checkpoint||[]).forEach(x=>{g[8][x]='K';g[9][x]='K';});
+  // Tunnel: 1 Kachel niedrig -> nur geduckt passierbar, mit Münzen als Belohnung
+  (spec.tunnels||[]).forEach(([x,len])=>{for(let i=0;i<len;i++){g[8][x+i]='B';g[9][x+i]='o';}});
   const enemies=(spec.enemies||[]).map(([x,y])=>({x:x*JR_T+3,y:(y+1)*JR_T-24,w:26,h:24,vx:-0.8,dir:-1,alive:true,squash:0}));
   return {w,g,enemies,start:spec.start||[2,8],theme:spec.theme||0,time:spec.time||300,name:spec.name};
 }
 const JR_SPECS=[
   {name:'Grüne Wiesen',theme:0,w:112,flag:106,time:300,
    ground:[[0,24],[27,52],[56,80],[83,111]],
-   platforms:[[11,7,5,'B'],[36,7,4,'B'],[60,6,3,'B'],[70,7,6,'B'],[93,7,4,'B']],
-   blocks:[[13,7],[38,7],[61,6],[72,7],[95,7]],
+   checkpoint:[50],
+   tunnels:[[33,4]],
+   platforms:[[11,7,5,'B'],[36,7,4,'B'],[60,7,3,'B'],[70,7,6,'B'],[93,7,4,'B']],
+   blocks:[[13,7],[38,7],[61,7],[72,7],[95,7]],
    pipes:[[20,2],[45,3],[66,2],[88,2]],
    coinRows:[[12,6,4],[37,6,3],[70,6,5],[92,6,5]],
    coins:[[25,7],[26,6],[54,7],[55,6],[81,7],[82,6]],
@@ -34,30 +42,33 @@ const JR_SPECS=[
    stairs:[[100,4]]},
   {name:'Abendrot-Schlucht',theme:1,w:136,flag:130,time:300,
    ground:[[0,17],[21,38],[42,58],[62,80],[84,100],[104,122],[125,135]],
-   platforms:[[8,7,4,'B'],[18,6,2,'B'],[26,7,5,'B'],[40,6,2,'B'],[48,7,4,'B'],[59,6,2,'B'],[68,6,4,'B'],[81,6,2,'B'],[90,7,5,'B'],[101,6,2,'B'],[110,7,4,'B'],[123,6,2,'B']],
-   blocks:[[9,7],[28,7],[49,7],[70,6],[92,7],[112,7]],
+   checkpoint:[64],
+   tunnels:[[43,3]],
+   platforms:[[8,7,4,'B'],[26,7,5,'B'],[48,7,4,'B'],[68,7,4,'B'],[90,7,5,'B'],[110,7,4,'B']],
+   blocks:[[9,7],[28,7],[49,7],[70,7],[92,7],[112,7]],
    pipes:[[14,2],[34,3],[54,2],[76,3],[96,2],[116,3]],
-   coinRows:[[8,6,4],[26,6,5],[48,6,4],[68,5,4],[90,6,5],[110,6,4]],
+   coinRows:[[8,6,4],[26,6,5],[48,6,4],[68,6,4],[90,6,5],[110,6,4]],
    coins:[[19,5],[40,5],[59,5],[81,5],[101,5],[123,5]],
    enemies:[[10,9],[24,9],[30,9],[46,9],[52,9],[66,9],[72,9],[88,9],[94,9],[108,9],[114,9]],
    stairs:[[126,4]]},
   {name:'Mitternachts-Burg',theme:2,w:158,flag:152,time:260,
    ground:[[0,14],[18,32],[36,50],[54,68],[72,86],[90,104],[108,122],[126,140],[144,157]],
-   platforms:[[9,7,4,'B'],[27,7,4,'B'],[45,7,4,'B'],[63,7,4,'B'],[81,7,4,'B'],[99,7,4,'B'],[117,7,4,'B'],[135,7,4,'B'],
-              [15,6,2,'B'],[33,6,2,'B'],[51,6,2,'B'],[69,6,2,'B'],[87,6,2,'B'],[105,6,2,'B'],[123,6,2,'B'],[141,6,2,'B']],
+   checkpoint:[75],
+   tunnels:[[55,3]],
+   platforms:[[9,7,4,'B'],[27,7,4,'B'],[45,7,4,'B'],[63,7,4,'B'],[81,7,4,'B'],[99,7,4,'B'],[117,7,4,'B'],[135,7,4,'B']],
    blocks:[[10,7],[28,7],[46,7],[64,7],[82,7],[100,7],[118,7],[136,7]],
    pipes:[[6,2],[24,3],[60,3],[96,3],[132,3]],
    spikes:[[42,43],[78,79],[114,115]],
    coinRows:[[9,6,4],[27,6,4],[45,6,4],[63,6,4],[81,6,4],[99,6,4],[117,6,4],[135,6,4]],
    coins:[[15,5],[16,5],[33,5],[34,5],[51,5],[52,5],[69,5],[70,5],[87,5],[88,5],[105,5],[106,5],[123,5],[124,5],[141,5],[142,5]],
-   enemies:[[12,9],[21,9],[30,9],[39,9],[48,9],[57,9],[66,9],[75,9],[84,9],[93,9],[102,9],[111,9],[120,9],[129,9],[138,9],[148,9]],
+   enemies:[[12,9],[21,9],[30,9],[66,9],[93,9],[102,9],[129,9],[148,9]],
    stairs:[[146,4]]}
 ];
 const JR_LEVELS=JR_SPECS.map(jrBuild);
 
 /* ── Zustand ── */
 let jrState=null,jrRaf=null,jrLast=0,jrAcc=0,jrFrame=0;
-const jrIn={left:false,right:false,jump:false,jumpHeld:false,run:false};
+const jrIn={left:false,right:false,jump:false,jumpHeld:false,down:false,downPress:false};
 function jrLoad(k,d){try{const v=localStorage.getItem(k);return v===null?d:parseInt(v,10)||d;}catch(e){return d;}}
 function jrSave(k,v){try{localStorage.setItem(k,String(v));}catch(e){}}
 
@@ -67,17 +78,17 @@ function jrCloneLevel(idx){
     enemies:L.enemies.map(e=>({...e})),start:L.start.slice(),time:L.time};
 }
 function jrPlayerAt(level){
-  return {x:level.start[0]*JR_T+5,y:level.start[1]*JR_T,w:22,h:30,vx:0,vy:0,onGround:false,face:1,coyote:0,jbuf:0,anim:0};
+  return {x:level.start[0]*JR_T+5,y:level.start[1]*JR_T,w:22,h:JR_H_STAND,vx:0,vy:0,onGround:false,face:1,coyote:0,jbuf:0,anim:0,duck:false,slam:false,inv:0};
 }
 /* Neues Spiel (idx = Startlevel) */
 function jrNewState(idx){
   const lvl=jrCloneLevel(idx||0);
   return {mode:'menu',level:lvl,p:jrPlayerAt(lvl),cam:0,coins:0,score:0,lives:3,timeLeft:lvl.time,frames:0,
-    popups:[],timer:0,bumps:{},best:jrLoad('zf_jump_best',0),unlocked:Math.max(1,Math.min(3,jrLoad('zf_jump_unlocked',1))),msg:''};
+    popups:[],fx:[],shake:0,shock:null,checkpoint:null,timer:0,bumps:{},best:jrLoad('zf_jump_best',0),unlocked:Math.max(1,Math.min(3,jrLoad('zf_jump_unlocked',1))),msg:''};
 }
 /* Level (neu) laden, Fortschritt (Münzen, Punkte, Leben) bleibt */
 function jrLoadLevel(st,idx){
-  st.level=jrCloneLevel(idx);st.p=jrPlayerAt(st.level);st.cam=0;st.timeLeft=st.level.time;st.frames=0;st.popups=[];st.bumps={};
+  st.level=jrCloneLevel(idx);st.p=jrPlayerAt(st.level);st.cam=0;st.timeLeft=st.level.time;st.frames=0;st.popups=[];st.bumps={};st.fx=[];st.shake=0;st.shock=null;st.checkpoint=null;
 }
 function jrStart(idx){
   const keep=jrState;
@@ -116,6 +127,7 @@ function jrMove(st,o){
 function jrStep(st,inp){
   inp=inp||jrIn;
   st.frames++;
+  jrFx(st);
   if(st.mode==='dying'){
     const p=st.p;p.vy=Math.min(JR_MAXFALL,p.vy+JR_GRAV);p.y+=p.vy;
     if(--st.timer<=0)jrAfterDeath(st);
@@ -129,18 +141,41 @@ function jrStep(st,inp){
   const p=st.p,T=JR_T;
   // Zeit
   if(st.frames%60===0){st.timeLeft--;if(st.timeLeft<=0){jrDie(st);return;}}
+  if(p.inv>0)p.inv--;
+  // Ducken (nur am Boden). Aufstehen nur, wenn über dem Kopf Platz ist.
+  const wantDuck=!!inp.down&&p.onGround&&!p.slam;
+  if(wantDuck&&!p.duck){p.duck=true;p.y+=JR_H_STAND-JR_H_DUCK;p.h=JR_H_DUCK;}
+  else if(!wantDuck&&p.duck){
+    const ny=p.y-(JR_H_STAND-JR_H_DUCK),x0=Math.floor(p.x/T),x1=Math.floor((p.x+p.w-0.01)/T),ty=Math.floor(ny/T);
+    let free=true;for(let tx=x0;tx<=x1;tx++)if(jrSolid(st,tx,ty))free=false;
+    if(free||!p.onGround){p.duck=false;p.y=ny;p.h=JR_H_STAND;}
+  }
+  // Slam-Attacke: in der Luft ↓ drücken -> mit Wucht senkrecht nach unten
+  if(inp.downPress){inp.downPress=false;if(!p.onGround&&!p.slam&&!p.duck){p.slam=true;p.vx=0;p.jbuf=0;if(typeof sfx==='function')sfx('click');}}
   // Eingabe -> Bewegung
-  const dir=(inp.right?1:0)-(inp.left?1:0),maxV=inp.run?4.6:3.2,acc=p.onGround?0.6:0.4;
-  if(dir){p.vx+=dir*acc;p.face=dir;if(Math.abs(p.vx)>maxV)p.vx=Math.sign(p.vx)*Math.max(maxV,Math.abs(p.vx)-0.5);}
-  else p.vx*=p.onGround?0.78:0.96;
-  if(Math.abs(p.vx)<0.08)p.vx=0;
+  const dir=(inp.right?1:0)-(inp.left?1:0),maxV=p.duck?1.3:JR_MAXV,acc=p.onGround?0.6:0.4;
+  if(p.slam)p.vx=0;
+  else{
+    if(dir){
+      p.face=dir;
+      let nv=p.vx+dir*acc;
+      if(Math.abs(nv)>maxV)nv=Math.sign(nv)*Math.max(maxV,Math.abs(p.vx)-0.5);   // am Limit: nie schneller werden, zu schnelles Tempo abbauen
+      p.vx=nv;
+    }
+    else p.vx*=p.onGround?0.78:0.96;
+    if(Math.abs(p.vx)<0.08)p.vx=0;
+  }
   if(inp.jump){p.jbuf=8;inp.jump=false;}else if(p.jbuf>0)p.jbuf--;
   if(p.onGround)p.coyote=6;else if(p.coyote>0)p.coyote--;
-  if(p.jbuf>0&&p.coyote>0){p.vy=-JR_JUMP;p.jbuf=0;p.coyote=0;p.onGround=false;}
-  if(!inp.jumpHeld&&p.vy<-4)p.vy=-4;     // kurzer Tipp = kleiner Sprung
-  p.vy=Math.min(JR_MAXFALL,p.vy+JR_GRAV);
+  if(p.jbuf>0&&p.coyote>0&&!p.slam){p.vy=-JR_JUMP;p.jbuf=0;p.coyote=0;p.onGround=false;}
+  if(p.slam)p.vy=JR_SLAM;
+  else{
+    if(!inp.jumpHeld&&p.vy<-4)p.vy=-4;     // kurzer Tipp = kleiner Sprung
+    p.vy=Math.min(JR_MAXFALL,p.vy+JR_GRAV);
+  }
   const r=jrMove(st,p);
   p.onGround=r.ground;
+  if(p.slam&&r.ground)jrSlamLand(st);
   p.anim+=Math.abs(p.vx)*0.15;
   // Kopf an Blöcken
   r.head.forEach(([tx,ty])=>{
@@ -151,12 +186,13 @@ function jrStep(st,inp){
       jrCheckLife(st);
     }else st.bumps[tx+','+ty]=8;
   });
-  // Münzen, Stacheln, Fahne
+  // Münzen, Stacheln, Checkpoint, Fahne
   const cx0=Math.floor(p.x/T),cx1=Math.floor((p.x+p.w)/T),cy0=Math.floor(p.y/T),cy1=Math.floor((p.y+p.h-0.01)/T);
   for(let ty=cy0;ty<=cy1;ty++)for(let tx=cx0;tx<=cx1;tx++){
     const t=jrTile(st,tx,ty);
     if(t==='o'){st.level.g[ty][tx]='.';st.coins++;st.score+=10;jrCheckLife(st);if(typeof sfx==='function')sfx('coin');}
     else if(t==='s'){if(p.y+p.h>ty*T+14){jrDie(st);return;}}
+    else if(t==='K'){jrCheckpoint(st,tx);}
     else if(t==='F'){jrClear(st);return;}
   }
   // Abgrund
@@ -176,10 +212,10 @@ function jrStep(st,inp){
     if(p.x<e.x+e.w&&p.x+p.w>e.x&&p.y<e.y+e.h&&p.y+p.h>e.y){
       if(p.vy>0&&(p.y+p.h)-e.y<18){
         e.alive=false;e.squash=25;st.score+=100;
-        p.vy=inp.jumpHeld?-9.5:-7;p.onGround=false;
+        if(!p.slam){p.vy=inp.jumpHeld?-10.5:-8;p.onGround=false;}
         st.popups.push({x:e.x+e.w/2,y:e.y,t:30,txt:'+100'});
         if(typeof sfx==='function')sfx('click');
-      }else{jrDie(st);return;}
+      }else if(p.inv<=0){jrDie(st);return;}
     }
   }
   // Popups / Wackeln
@@ -189,10 +225,58 @@ function jrStep(st,inp){
   const target=Math.max(0,Math.min(st.level.w*T-JR_W,p.x+p.w/2-JR_W/2+p.face*30));
   st.cam+=(target-st.cam)*0.12;
 }
+/* Partikel, Stoßwelle, Bildschirmwackeln */
+function jrFx(st){
+  if(!st.fx)return;
+  st.fx.forEach(f=>{f.x+=f.vx;f.y+=f.vy;f.vy+=0.4;f.t--;});
+  st.fx=st.fx.filter(f=>f.t>0);
+  if(st.shock&&--st.shock.t<=0)st.shock=null;
+  if(st.shake>0)st.shake--;
+}
+function jrBurst(st,x,y,color,n){
+  for(let i=0;i<n;i++)st.fx.push({x,y,vx:(Math.random()-0.5)*6,vy:-Math.random()*5-1,t:28+Math.floor(Math.random()*10),color,s:3+Math.floor(Math.random()*3)});
+}
+const JR_BREAKABLE={'B':1,'?':1,'U':1};
+/* Slam-Landung: bricht Blöcke direkt unter den Füßen (die Attacke geht dann weiter nach unten);
+   auf hartem Boden endet sie mit einer Stoßwelle, die Gegner in der Nähe besiegt. */
+function jrSlamLand(st){
+  const p=st.p,T=JR_T,ty=Math.floor((p.y+p.h+1)/T),x0=Math.floor(p.x/T),x1=Math.floor((p.x+p.w-0.01)/T);
+  let broke=0;
+  for(let tx=x0;tx<=x1;tx++){
+    const c=jrTile(st,tx,ty);
+    if(JR_BREAKABLE[c]){
+      st.level.g[ty][tx]='.';broke++;
+      if(c==='?'){st.coins++;st.score+=50;st.popups.push({x:tx*T+T/2,y:ty*T,t:30,txt:'+50'});jrCheckLife(st);}
+      else st.score+=10;
+      jrBurst(st,tx*T+T/2,ty*T+T/2,c==='?'?'#ffca28':'#c8642a',8);
+    }
+  }
+  if(broke){
+    st.shake=6;p.onGround=false;p.vy=JR_SLAM;
+    if(typeof sfx==='function')sfx('click');
+    return;                       // Slam läuft weiter durch die zerstörten Blöcke
+  }
+  p.slam=false;p.vy=0;
+  st.shake=10;st.shock={x:p.x+p.w/2,y:p.y+p.h,t:16};
+  jrBurst(st,p.x+p.w/2,p.y+p.h,'#d7ccc8',10);
+  const cx=p.x+p.w/2,fy=p.y+p.h;
+  for(const e of st.level.enemies){
+    if(e.alive&&Math.abs(e.x+e.w/2-cx)<72&&Math.abs(e.y+e.h-fy)<22){
+      e.alive=false;e.squash=25;st.score+=100;st.popups.push({x:e.x+e.w/2,y:e.y,t:30,txt:'+100'});
+    }
+  }
+  if(typeof sfx==='function')sfx('win');
+}
+function jrCheckpoint(st,tx){
+  if(st.checkpoint&&st.checkpoint.col===tx)return;
+  st.checkpoint={col:tx,x:tx*JR_T+5,y:10*JR_T-JR_H_STAND-0.01};
+  st.popups.push({x:tx*JR_T+JR_T/2,y:7*JR_T,t:70,txt:'Checkpoint!'});
+  if(typeof sfx==='function')sfx('rankup');
+}
 function jrCheckLife(st){if(st.coins>0&&st.coins%25===0){st.lives++;st.popups.push({x:st.p.x,y:st.p.y-10,t:60,txt:'❤️ +1'});if(typeof sfx==='function')sfx('rankup');}}
 function jrDie(st){
   if(st.mode!=='play')return;
-  st.mode='dying';st.timer=70;st.p.vy=-9;st.p.vx=0;
+  st.mode='dying';st.timer=70;st.p.vy=-9;st.p.vx=0;st.p.slam=false;
   if(typeof sfx==='function')sfx('error');
 }
 function jrAfterDeath(st){
@@ -201,7 +285,16 @@ function jrAfterDeath(st){
     st.mode='gameover';jrSaveBest(st);
     return;
   }
-  jrLoadLevel(st,st.level.idx);st.mode='play';
+  if(st.checkpoint){jrRespawn(st);}
+  else jrLoadLevel(st,st.level.idx);
+  st.mode='play';
+}
+/* Nach dem Tod am Checkpoint weitermachen: Level-Stand (Münzen, Blöcke, besiegte Gegner) bleibt erhalten */
+function jrRespawn(st){
+  const cp=st.checkpoint;
+  st.p=jrPlayerAt(st.level);st.p.x=cp.x;st.p.y=cp.y;st.p.inv=120;
+  st.cam=Math.max(0,Math.min(st.level.w*JR_T-JR_W,cp.x-JR_W/2));
+  st.timeLeft=Math.max(st.timeLeft,120);st.fx=[];st.shake=0;st.shock=null;
 }
 function jrClear(st){
   if(st.mode!=='play')return;
@@ -272,6 +365,13 @@ function jrDrawTile(ctx,st,ch,tx,ty,x,y,t){
     const w=Math.abs(Math.cos(t*0.06+tx))*8+2;
     ctx.fillStyle='#ffca28';ctx.beginPath();ctx.ellipse(x+T/2,y+T/2+Math.sin(t*0.08+tx)*2,w,10,0,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle='#f57f17';ctx.lineWidth=1.5;ctx.stroke();
+  }else if(ch==='K'){
+    if(jrTile(st,tx,ty-1)!=='K'){
+      const on=st.checkpoint&&st.checkpoint.col===tx;
+      ctx.fillStyle='#b0bec5';ctx.fillRect(x+14,y,4,T*2);
+      ctx.fillStyle=on?'#43a047':'#1e88e5';ctx.beginPath();ctx.moveTo(x+18,y+3);ctx.lineTo(x+18+20+(on?Math.sin(t*0.15)*3:0),y+11);ctx.lineTo(x+18,y+19);ctx.fill();
+      ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='left';ctx.fillText(on?'✓':'',x+21,y+15);
+    }
   }else if(ch==='F'){
     ctx.fillStyle='#b0bec5';ctx.fillRect(x+14,y,4,T);
     if(jrTile(st,tx,ty-1)!=='F'){ctx.fillStyle='#ffca28';ctx.beginPath();ctx.arc(x+16,y+2,5,0,Math.PI*2);ctx.fill();
@@ -280,8 +380,14 @@ function jrDrawTile(ctx,st,ch,tx,ty,x,y,t){
 }
 function jrDrawPlayer(ctx,st,t){
   const p=st.p,x=Math.round(p.x-st.cam),y=Math.round(p.y),f=p.face;
-  ctx.save();ctx.translate(x+p.w/2,y+p.h/2);
+  ctx.save();
+  if(p.inv>0&&Math.floor(p.inv/4)%2===0)ctx.globalAlpha=0.35;
+  // Füße bleiben am Boden: beim Ducken zusammengedrückt, beim Slam gestreckt
+  ctx.translate(x+p.w/2,y+p.h);
   if(st.mode==='dying')ctx.rotate(0.3);
+  if(p.duck)ctx.scale(1,0.62);
+  if(p.slam){ctx.scale(0.86,1.22);ctx.fillStyle='rgba(255,255,255,0.55)';for(let i=0;i<3;i++)ctx.fillRect(-8+i*8,-46-i*4,3,22);}
+  ctx.translate(0,-17);
   ctx.scale(f,1);
   const run=p.onGround&&Math.abs(p.vx)>0.5,leg=run?Math.sin(p.anim*2)*5:0,air=!p.onGround;
   // Stiefel
@@ -322,16 +428,22 @@ function jrCard(ctx,title,lines,color){
   lines.forEach((l,i)=>ctx.fillText(l,JR_W/2,JR_H/2-h/2+76+i*26));
 }
 function jrDraw(ctx,st){
-  const t=jrFrame;jrBackground(ctx,st);
+  const t=jrFrame;
+  ctx.save();if(st.shake>0)ctx.translate((Math.random()-0.5)*st.shake,(Math.random()-0.5)*st.shake);
+  jrBackground(ctx,st);
   const cam=st.cam,T=JR_T,c0=Math.max(0,Math.floor(cam/T)),c1=Math.min(st.level.w-1,Math.floor((cam+JR_W)/T)+1);
   for(let ty=0;ty<JR_ROWS;ty++)for(let tx=c0;tx<=c1;tx++){
     const ch=st.level.g[ty][tx];if(ch!=='.')jrDrawTile(ctx,st,ch,tx,ty,Math.round(tx*T-cam),ty*T,t);
   }
   st.level.enemies.forEach(e=>jrDrawEnemy(ctx,e,st,t));
   jrDrawPlayer(ctx,st,t);
+  // Partikel und Stoßwelle
+  st.fx.forEach(f=>{ctx.globalAlpha=Math.min(1,f.t/14);ctx.fillStyle=f.color;ctx.fillRect(f.x-cam-f.s/2,f.y-f.s/2,f.s,f.s);ctx.globalAlpha=1;});
+  if(st.shock){const k=1-st.shock.t/16;ctx.strokeStyle='rgba(255,255,255,'+(0.8*(1-k))+')';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(st.shock.x-cam,st.shock.y-2,10+k*70,3+k*9,0,0,Math.PI*2);ctx.stroke();}
   ctx.textAlign='center';ctx.font='bold 15px sans-serif';
   st.popups.forEach(o=>{ctx.globalAlpha=Math.min(1,o.t/15);ctx.fillStyle='#fff';ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=3;ctx.strokeText(o.txt,o.x-cam,o.y);ctx.fillText(o.txt,o.x-cam,o.y);ctx.globalAlpha=1;});
-  if(st.mode==='menu')jrCard(ctx,'SUPER JUMPER',['Klicken oder Leertaste zum Starten','←/→ laufen · Leertaste springen · Shift rennen','Rekord: '+st.best],'#ffca28');
+  ctx.restore();
+  if(st.mode==='menu')jrCard(ctx,'SUPER JUMPER',['Klicken oder Leertaste zum Starten','←/→ laufen · Leertaste springen','↓ ducken · in der Luft ↓ = Slam','Rekord: '+st.best],'#ffca28');
   else if(st.mode==='clear')jrCard(ctx,st.msg.split('  ')[0],[st.msg.split('  ')[1]||'','Punkte: '+st.score],'#69f0ae');
   else if(st.mode==='win')jrCard(ctx,'GESCHAFFT! 🎉',['Alle Level abgeschlossen','Punkte: '+st.score+(st.score>=st.best?'  🏆 Rekord':''),'Klicken für ein neues Spiel'],'#69f0ae');
   else if(st.mode==='gameover')jrCard(ctx,'GAME OVER',['Punkte: '+st.score+(st.score>=st.best&&st.score>0?'  🏆 Rekord':''),'Klicken für Neustart'],'#ff5a52');
@@ -356,7 +468,7 @@ function jrKeyState(e,down){
   if(k==='ArrowLeft'||k==='a'||k==='A')jrIn.left=down;
   else if(k==='ArrowRight'||k==='d'||k==='D')jrIn.right=down;
   else if(k===' '||k==='ArrowUp'||k==='w'||k==='W'){if(down&&!jrIn.jumpHeld)jrIn.jump=true;jrIn.jumpHeld=down;}
-  else if(k==='Shift'||k==='x'||k==='X')jrIn.run=down;
+  else if(k==='ArrowDown'||k==='s'||k==='S'){if(down&&!jrIn.down)jrIn.downPress=true;jrIn.down=down;}
   else return false;
   return true;
 }
@@ -368,10 +480,11 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='Enter'&&jrState&&jrState.mode!=='play')jrClick();
 });
 document.addEventListener('keyup',e=>{jrKeyState(e,false);});
-window.addEventListener('blur',()=>{jrIn.left=jrIn.right=jrIn.jumpHeld=jrIn.run=false;});
+window.addEventListener('blur',()=>{jrIn.left=jrIn.right=jrIn.jumpHeld=jrIn.down=false;});
 /* Touch-Tasten */
 function jrTouch(k,down){
   if(k==='jump'){if(down&&!jrIn.jumpHeld)jrIn.jump=true;jrIn.jumpHeld=down;}
+  else if(k==='down'){if(down&&!jrIn.down)jrIn.downPress=true;jrIn.down=down;}
   else jrIn[k]=down;
 }
 function jrClick(){
