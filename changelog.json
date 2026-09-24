@@ -23,5 +23,15 @@
       "Shop-Käufe klingen jetzt nach Seltenheit – bei legendären und mythischen Artikeln mit Konfetti.",
       "Alle Spiele und Lern-Apps haben ein einheitliches Kopfbanner im neuen Design."
     ]
+  },
+  {
+    "id": 3,
+    "date": "24.09.2026",
+    "title": "Breakout überarbeitet",
+    "items": [
+      "Alle Steine abgeräumt? Jetzt geht es im nächsten Level weiter – mit neuem Feld, schnellerem Ball und 100 Bonuspunkten. Vorher hing das Spiel an dieser Stelle.",
+      "Der Schläger bewegt sich mit gehaltener Pfeiltaste gleichmäßig, ohne Anlauf-Pause, und startet in der Mitte.",
+      "Nach Game Over startest du per Klick neu. Tetris, Breakout und Flappy Bird sehen außerdem hübscher aus."
+    ]
   }
 ]
