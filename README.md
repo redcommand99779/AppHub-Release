@@ -18,6 +18,22 @@ Der Launcher braucht **weder Git noch Python**:
 - **Server:** Windows startet `server.ps1` (reines PowerShell), der Mac `server.pl` (Perl, ist vorinstalliert). Beide speichern alle Daten in `appdata.json` (mit täglichen Sicherungen in `backups/`), genau wie `server.py`.
 - **Updates:** In einem Ordner **ohne** `.git` lädt der Launcher beim Start die neueste Version als ZIP aus dem öffentlichen Repo `redcommand99779/AppHub-Release` (`update.ps1` bzw. `update-mac.sh`). `appdata.json` und `backups/` bleiben dabei unberührt. Ist kein Internet da, startet einfach die vorhandene Version. Ein Ordner mit `.git` (Entwicklung) nutzt weiter `git pull` und wird nie überschrieben.
 
+**Installation für Freunde ohne Browser-Download (umgeht Windows Smart App Control / macOS Gatekeeper):**
+
+Windows – in PowerShell einfügen:
+
+```powershell
+irm https://raw.githubusercontent.com/redcommand99779/AppHub-Release/main/install.ps1 | iex
+```
+
+Mac – im Terminal einfügen:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/redcommand99779/AppHub-Release/main/install-mac.sh | bash
+```
+
+Der Installer lädt die App selbst herunter (dadurch fehlt die „aus dem Internet“-Markierung), legt sie in `~/AppHub` bzw. `%USERPROFILE%\AppHub` ab und startet sie. Erneutes Ausführen aktualisiert sie, Daten bleiben erhalten.
+
 **Neue Version für alle veröffentlichen** (im App-Ordner, auf dem Entwicklungsrechner):
 
 ```powershell
