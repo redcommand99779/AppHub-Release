@@ -449,22 +449,47 @@ function zcRenderCompare(){
   const tro=n=>((zcState().zc.trophies||{})[zcKey(n)]||[]).length;
   const rate=x=>x.T.games?Math.round(x.T.wins/x.T.games*100):0;
   const metrics=[['Gesamt-PR',A.total,B.total],['Spiele',A.T.games,B.T.games],['Siege',A.T.wins,B.T.wins],['Siegquote',rate(A),rate(B),'%'],['Beste Serie',A.T.bestStreak,B.T.bestStreak],['PR verdient',A.T.prEarned,B.T.prEarned],['Cups',A.T.cups,B.T.cups],['Trophäen',tro(zcCmp.a),tro(zcCmp.b)]];
-  const cell=(v,o,u)=>`<td style="text-align:center;padding:7px 4px;font-size:13px;font-weight:${v>o?'700':'400'};color:${v>o?'var(--accent)':'var(--text)'}">${v}${u||''}</td>`;
-  const rk=x=>{const i=smRankInfo('zentrale',x.total);return`<span style="font-size:11px;color:${i.tier.color}">${i.icon} ${escHtml(i.label)}</span>`;};
+  const rk=x=>{const i=smRankInfo('zentrale',x.total);return`<span style="font-size:11px;font-weight:700;color:${i.tier.color}">${i.icon} ${escHtml(i.label)}</span>`;};
+  const av=n=>typeof zcAvatarHtml==='function'?zcAvatarHtml(n,54):'';
   const h2h=zcH2H(zcCmp.a,zcCmp.b),tot=h2h.reduce((s,x)=>({W:s.W+x.W,D:s.D+x.D,L:s.L+x.L}),{W:0,D:0,L:0});
-  const games=ZC_GAMES.map(g=>{const ra=A.rows.find(x=>x.g.id===g.id),rb=B.rows.find(x=>x.g.id===g.id);if(!ra&&!rb)return'';
-    const f=r=>r?`${r.r.wins}/${r.r.games} (${r.r.games?Math.round(r.r.wins/r.r.games*100):0}%)`:'–';
+  const ca='var(--accent)',cb='#ff7043';
+  // Kennzahlen als gespiegelte Balken (Gewinner farbig hervorgehoben)
+  const metricRow=m=>{
+    const [l,va,vb,u]=m,mx=Math.max(va,vb,1),wa=va>vb,wb=vb>va;
+    return`<div style="padding:7px 0;border-top:0.5px solid var(--divider)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="width:64px;text-align:right;font-size:14px;font-weight:${wa?800:500};color:${wa?ca:'var(--text)'}">${va}${u||''}</span>
+        <span style="flex:1;text-align:center;font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-3)">${l}</span>
+        <span style="width:64px;font-size:14px;font-weight:${wb?800:500};color:${wb?cb:'var(--text)'}">${vb}${u||''}</span></div>
+      <div style="display:flex;gap:4px;margin-top:4px;height:5px">
+        <div style="flex:1;display:flex;justify-content:flex-end;background:var(--divider);border-radius:3px;overflow:hidden"><div style="width:${Math.round(va/mx*100)}%;background:${ca};opacity:${wa?1:0.45}"></div></div>
+        <div style="flex:1;display:flex;background:var(--divider);border-radius:3px;overflow:hidden"><div style="width:${Math.round(vb/mx*100)}%;background:${cb};opacity:${wb?1:0.45}"></div></div></div></div>`;};
+  const gameRow=g=>{
+    const ra=A.rows.find(x=>x.g.id===g.id),rb=B.rows.find(x=>x.g.id===g.id);if(!ra&&!rb)return'';
+    const f=r=>r?`${r.r.wins}/${r.r.games} <span style="font-weight:400;color:var(--text-3)">(${r.r.games?Math.round(r.r.wins/r.r.games*100):0}%)</span>`:'–';
     const wa=ra&&ra.r.games?ra.r.wins/ra.r.games:-1,wb=rb&&rb.r.games?rb.r.wins/rb.r.games:-1;
-    return`<tr><td style="padding:6px 4px;font-size:12px">${g.icon} ${escHtml(g.title)}</td><td style="text-align:center;font-size:12px;font-weight:${wa>wb?700:400};color:${wa>wb?'var(--accent)':'var(--text)'}">${f(ra)}</td><td style="text-align:center;font-size:12px;font-weight:${wb>wa?700:400};color:${wb>wa?'var(--accent)':'var(--text)'}">${f(rb)}</td></tr>`;}).join('');
-  wrap.innerHTML=`<table style="width:100%;border-collapse:collapse;background:var(--surface);border:0.5px solid var(--divider);border-radius:12px;overflow:hidden">
-    <thead><tr><th style="padding:8px 4px;text-align:left;font-size:11px;color:var(--text-3)"></th><th style="padding:8px 4px;font-size:13px">${escHtml(zcCmp.a)}<div>${rk(A)}</div></th><th style="padding:8px 4px;font-size:13px">${escHtml(zcCmp.b)}<div>${rk(B)}</div></th></tr></thead>
-    <tbody>${metrics.map(m=>`<tr style="border-top:0.5px solid var(--divider)"><td style="padding:7px 8px;font-size:11px;color:var(--text-3)">${m[0]}</td>${cell(m[1],m[2],m[3])}${cell(m[2],m[1],m[3])}</tr>`).join('')}</tbody></table>
-    <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.04em;margin:16px 0 6px">Direktduelle (2-Spieler-Spiele)</div>
-    <div style="background:var(--surface);border:0.5px solid var(--divider);border-radius:12px;padding:10px 14px">
-      ${h2h.length?`<div style="font-size:14px;font-weight:700;text-align:center;margin-bottom:6px">${escHtml(zcCmp.a)} ${tot.W} : ${tot.L} ${escHtml(zcCmp.b)}${tot.D?` <span style="font-size:11px;color:var(--text-3)">(${tot.D} unentschieden)</span>`:''}</div>`+h2h.map(x=>`<div style="display:flex;font-size:12px;padding:2px 0;color:var(--text-2)"><span style="flex:1">${x.g.icon} ${escHtml(x.g.title)}</span><span>${x.W}S · ${x.D}U · ${x.L}N</span></div>`).join(''):`<div style="font-size:12px;color:var(--text-3);text-align:center">Noch keine direkten Duelle gespielt.</div>`}
+    return`<div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-top:0.5px solid var(--divider);font-size:12px">
+      <span style="flex:1;min-width:0;color:var(--text-2)">${g.icon} ${escHtml(g.title)}</span>
+      <span style="width:88px;text-align:center;font-weight:${wa>wb?800:500};color:${wa>wb?ca:'var(--text)'}">${f(ra)}</span>
+      <span style="width:88px;text-align:center;font-weight:${wb>wa?800:500};color:${wb>wa?cb:'var(--text)'}">${f(rb)}</span></div>`;};
+  const sec=t=>`<div style="font-size:12px;font-weight:800;color:var(--text-2);margin:20px 0 8px">${t}</div>`;
+  const leadA=tot.W>tot.L,leadB=tot.L>tot.W;
+  wrap.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-around;gap:6px;padding:16px 10px;border-radius:18px;background:linear-gradient(120deg,${ca}33,var(--surface) 50%,${cb}33);border:0.5px solid var(--divider)">
+      <div style="flex:1;min-width:0;text-align:center"><div style="display:flex;justify-content:center">${av(zcCmp.a)}</div><div style="font-size:15px;font-weight:800;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(zcCmp.a)}</div>${rk(A)}<div style="font-size:11px;color:var(--text-3)">${A.total} PR</div></div>
+      <div style="flex:none;font-size:22px;font-weight:900;color:var(--text-3);letter-spacing:0.05em">VS</div>
+      <div style="flex:1;min-width:0;text-align:center"><div style="display:flex;justify-content:center">${av(zcCmp.b)}</div><div style="font-size:15px;font-weight:800;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(zcCmp.b)}</div>${rk(B)}<div style="font-size:11px;color:var(--text-3)">${B.total} PR</div></div>
     </div>
-    <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.04em;margin:16px 0 6px">Pro Spiel (Siege / Partien)</div>
-    <table style="width:100%;border-collapse:collapse;background:var(--surface);border:0.5px solid var(--divider);border-radius:12px;overflow:hidden">${games}</table>`;
+    <div style="background:var(--surface);border:0.5px solid var(--divider);border-radius:16px;padding:6px 16px 10px;margin-top:12px">${metrics.map(metricRow).join('')}</div>
+    ${sec('⚔️ Direktduelle (2-Spieler-Spiele)')}
+    <div style="background:var(--surface);border:0.5px solid var(--divider);border-radius:16px;padding:14px 16px">
+      ${h2h.length?`<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px"><span style="font-size:30px;font-weight:900;color:${leadA?ca:'var(--text-2)'}">${tot.W}</span><span style="font-size:18px;color:var(--text-3)">:</span><span style="font-size:30px;font-weight:900;color:${leadB?cb:'var(--text-2)'}">${tot.L}</span></div>
+      <div style="text-align:center;font-size:11px;color:var(--text-3);margin-bottom:8px">${escHtml(zcCmp.a)} vs ${escHtml(zcCmp.b)}${tot.D?` · ${tot.D} unentschieden`:''}</div>`
+      +h2h.map(x=>`<div style="display:flex;font-size:12px;padding:4px 0;border-top:0.5px solid var(--divider);color:var(--text-2)"><span style="flex:1">${x.g.icon} ${escHtml(x.g.title)}</span><span>${x.W}S · ${x.D}U · ${x.L}N</span></div>`).join(''):`<div style="font-size:12px;color:var(--text-3);text-align:center">Noch keine gemeinsamen Partien.</div>`}
+    </div>
+    ${sec('🎮 Pro Spiel (Siege / Partien)')}
+    <div style="background:var(--surface);border:0.5px solid var(--divider);border-radius:16px;overflow:hidden">
+      <div style="display:flex;gap:8px;padding:8px 12px;font-size:11px;font-weight:700;color:var(--text-3)"><span style="flex:1"></span><span style="width:88px;text-align:center;color:${ca}">${escHtml(zcCmp.a)}</span><span style="width:88px;text-align:center;color:${cb}">${escHtml(zcCmp.b)}</span></div>
+      ${ZC_GAMES.map(gameRow).join('')}</div>`;
 }
 
 /* ── Trophäen im Profil ── */
@@ -769,7 +794,9 @@ function zcRenderChamp(){
   const z=zcState().zc,c=z.champ,f=zcChampForm;
   const inp='padding:9px 10px;background:var(--bg);border:0.5px solid var(--divider);border-radius:10px;color:var(--text);font-size:14px;width:100%;box-sizing:border-box';
   if(!c){
-    wrap.innerHTML=`<div style="font-size:12px;color:var(--text-3);margin-bottom:10px">Zwei Spieler messen sich in mehreren Spielen nacheinander. Sieg = 3 Punkte, Unentschieden = 1. Wer am Ende die meisten Punkte hat, wird Meister (+60 Bonus-PR). Normale PR gibt es dabei nicht.</div>
+    wrap.innerHTML=`<div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;background:linear-gradient(120deg,#ff8f00,#e53935);color:#fff;margin-bottom:14px">
+        <div style="font-size:36px;line-height:1">🏅</div>
+        <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.9">Meisterschaft</div><div style="font-size:12px;opacity:0.95;margin-top:2px;line-height:1.4">Zwei Spieler messen sich in mehreren Spielen nacheinander. Sieg = 3 Punkte, Unentschieden = 1. Wer am Ende die meisten Punkte hat, wird Meister (+60 Bonus-PR). Normale PR gibt es dabei nicht.</div></div></div>
       <div style="display:flex;gap:8px;margin-bottom:10px">${zcAccountSelect(f.a,[f.b],"zcChampForm_('a',this.value)",{guest:false,neu:false,placeholder:'Spieler 1 wählen…',style:inp})}${zcAccountSelect(f.b,[f.a],"zcChampForm_('b',this.value)",{guest:false,neu:false,placeholder:'Spieler 2 wählen…',style:inp})}</div>
       <datalist id="zc-names4"></datalist>
       <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px">Spiele</div>
@@ -780,14 +807,20 @@ function zcRenderChamp(){
     return;
   }
   const next=c.done?null:c.games[c.idx];
-  wrap.innerHTML=`<div style="text-align:center;background:var(--surface);border:0.5px solid var(--divider);border-radius:12px;padding:14px;margin-bottom:12px">
-      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.04em">Meisterschaft</div>
-      <div style="font-size:20px;font-weight:700;margin-top:4px">${escHtml(c.players[0])} <span style="color:var(--accent)">${c.pts[0]} : ${c.pts[1]}</span> ${escHtml(c.players[1])}</div>
-      ${c.done?`<div style="margin-top:6px;font-weight:700;color:var(--accent)">${c.winners.length>1?'Unentschieden!':'🏵️ Meister: '+escHtml(c.players[c.winners[0]])+' (+60 PR)'}</div>`:''}
+  const cav=n=>typeof zcAvatarHtml==='function'?zcAvatarHtml(n,52):'';
+  const lead0=c.pts[0]>c.pts[1],lead1=c.pts[1]>c.pts[0];
+  wrap.innerHTML=`<div style="padding:16px 12px;border-radius:18px;margin-bottom:14px;background:linear-gradient(120deg,var(--accent)33,var(--surface) 50%,#ff704333);border:0.5px solid var(--divider)">
+      <div style="text-align:center;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">🏅 Meisterschaft</div>
+      <div style="display:flex;align-items:center;justify-content:space-around;gap:6px">
+        <div style="flex:1;min-width:0;text-align:center"><div style="display:flex;justify-content:center">${cav(c.players[0])}</div><div style="font-size:14px;font-weight:800;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(c.players[0])}</div></div>
+        <div style="flex:none;display:flex;align-items:center;gap:10px"><span style="font-size:34px;font-weight:900;color:${lead0?'var(--accent)':'var(--text)'}">${c.pts[0]}</span><span style="font-size:20px;color:var(--text-3)">:</span><span style="font-size:34px;font-weight:900;color:${lead1?'#ff7043':'var(--text)'}">${c.pts[1]}</span></div>
+        <div style="flex:1;min-width:0;text-align:center"><div style="display:flex;justify-content:center">${cav(c.players[1])}</div><div style="font-size:14px;font-weight:800;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(c.players[1])}</div></div>
+      </div>
+      ${c.done?`<div style="margin-top:12px;text-align:center;font-weight:800;font-size:14px;color:var(--accent)">${c.winners.length>1?'🤝 Unentschieden!':'🏵️ Meister: '+escHtml(c.players[c.winners[0]])+' (+60 PR)'}</div>`:''}
     </div>
     ${c.games.map((id,i)=>{const gi=zcChampGameInfo(id),r=c.results[i],cur=i===c.idx&&!c.done;
       const res=r?(r.winner===-1?'🤝 Unentschieden':'✅ '+escHtml(c.players[r.winner])):cur?'⏳ als Nächstes':'⬜';
-      return`<div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:0.5px solid ${cur?'var(--accent)':'var(--divider)'};border-radius:10px;padding:8px 12px;margin-bottom:6px"><span style="font-size:18px">${gi.icon}</span><span style="flex:1;font-size:13px;font-weight:600">${escHtml(gi.title)}${i%2===1?' <span style="font-size:10px;color:var(--text-3)">(Seiten getauscht)</span>':''}</span><span style="font-size:12px;color:var(--text-2)">${res}</span></div>`;}).join('')}
+      return`<div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:0.5px solid ${cur?'var(--accent)':'var(--divider)'};border-left:4px solid ${r?(r.winner===-1?'#fb8c00':'#43a047'):cur?'var(--accent)':'var(--divider)'};border-radius:12px;padding:10px 14px;margin-bottom:8px;${cur?'box-shadow:0 0 12px var(--glow,rgba(0,0,0,0.15));':''}"><span style="font-size:22px">${gi.icon}</span><span style="flex:1;font-size:13px;font-weight:600">${escHtml(gi.title)}${i%2===1?' <span style="font-size:10px;color:var(--text-3)">(Seiten getauscht)</span>':''}</span><span style="font-size:12px;color:var(--text-2)">${res}</span></div>`;}).join('')}
     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
       ${c.done?`<button class="btn-generate" onclick="zcState().zc.champ=null;smSave('zentrale');zcRenderChamp()" style="width:auto;padding:10px 20px">Neue Meisterschaft</button>`:`<button class="btn-generate" onclick="zcChampLaunch()" style="width:auto;padding:10px 20px">▶ ${escHtml(zcChampGameInfo(next).title)} starten</button><button class="timer-btn" onclick="zcChampCancel()" style="padding:10px 16px;font-size:12px">Abbrechen</button>`}
     </div>`;
