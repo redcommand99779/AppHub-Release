@@ -126,5 +126,15 @@
       "Ausgaben: Einnahmen und Ausgaben pro Monat mit Saldo, Monatsbudget, Ring-Diagramm nach Kategorie, Bearbeiten, Suche und CSV-Export.",
       "Behoben: Datumsfehler rund um Mitternacht (Datum wurde in UTC gespeichert). Alle bisherigen Einträge bleiben erhalten."
     ]
+  },
+  {
+    "id": 12,
+    "date": "25.09.2026",
+    "title": "Lesezeichen und Sudoku neu",
+    "items": [
+      "Lesezeichen: Ordner, Favoriten, Suche, Sortierung, Bearbeiten sowie Import und Export. Nur sichere http(s)-Adressen, Doppelte werden erkannt.",
+      "Sudoku: Jedes Rätsel hat jetzt genau eine Lösung. Dazu Notizen (Bleistift), Tipp, Rückgängig, Fehlermarkierung, Zahlenfeld für Handy und Tastatur-Steuerung.",
+      "Sudoku speichert dein laufendes Spiel, führt Bestzeiten pro Konto und gibt für Rätsel ohne Tipp AppHub-Coins."
+    ]
   }
 ]

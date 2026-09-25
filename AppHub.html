@@ -335,6 +335,24 @@
     .nt-back{display:none}
     .lrn-btn.ghost.active{background:var(--active-bg);color:var(--accent);border-color:var(--accent)}
     @media (max-width:700px){.nt-wrap{grid-template-columns:1fr}.nt-wrap .nt-main{display:none}.nt-wrap.editing .nt-side{display:none}.nt-wrap.editing .nt-main{display:block}.nt-back{display:inline-block}}
+    /* Sudoku */
+    .sd-board{position:relative;display:grid;grid-template-columns:repeat(9,1fr);width:min(100%,468px);margin:0 auto;border:2px solid var(--text-2);border-radius:10px;overflow:hidden;background:var(--divider);gap:1px}
+    .sd-cell{aspect-ratio:1;border:0;background:var(--surface);color:var(--accent);font-size:clamp(16px,5vw,26px);font-weight:600;cursor:pointer;padding:0;font-family:inherit;display:flex;align-items:center;justify-content:center;min-width:0}
+    .sd-cell.fixed{color:var(--text);font-weight:800}
+    .sd-cell.peer{background:var(--active-bg)}
+    .sd-cell.same{background:rgba(255,204,0,0.3)}
+    .sd-cell.sel{background:var(--accent);color:#fff}
+    .sd-cell.wrong{color:#ff3b30;background:rgba(255,59,48,0.14)}
+    .sd-cell.br{box-shadow:1px 0 0 var(--text-2)}
+    .sd-cell.bb{box-shadow:0 1px 0 var(--text-2)}
+    .sd-cell.br.bb{box-shadow:1px 1px 0 var(--text-2)}
+    .sd-notes{display:grid;grid-template-columns:repeat(3,1fr);width:100%;height:100%;font-size:clamp(7px,1.8vw,10px);color:var(--text-3);font-weight:600}
+    .sd-notes i{font-style:normal;display:flex;align-items:center;justify-content:center}
+    .sd-pad{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;width:min(100%,468px);margin:12px auto 0}
+    .sd-num{padding:8px 0 3px;border-radius:10px;border:0.5px solid var(--divider);background:var(--surface);color:var(--text);font-size:clamp(16px,4.5vw,22px);font-weight:700;cursor:pointer;font-family:inherit}
+    .sd-num small{display:block;font-size:9px;color:var(--text-3);min-height:11px;font-weight:500}
+    .sd-num.done{opacity:0.35}
+    .sd-win{position:absolute;inset:0;background:rgba(20,24,36,0.88);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
     /* Super Jumper – Editor */
     #jr-editor-bar{max-width:640px;margin-left:auto;margin-right:auto}
     .jr-ed-tools{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px}
@@ -1342,16 +1360,7 @@
         <span class="title-text" style="flex:1;text-align:center">Lesezeichen</span>
       </div>
     </div>
-    <div style="padding:20px;max-width:800px;margin:0 auto">
-
-      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-        <input type="text" id="bm-title" placeholder="Titel" style="flex:1;min-width:120px;padding:8px 12px;background:var(--surface);border:0.5px solid var(--divider);border-radius:8px;font-size:13px;color:var(--text);outline:none"/>
-        <input type="url" id="bm-url" placeholder="URL" style="flex:2;min-width:180px;padding:8px 12px;background:var(--surface);border:0.5px solid var(--divider);border-radius:8px;font-size:13px;color:var(--text);outline:none" onkeydown="if(event.key==='Enter')bmAdd()"/>
-        <button class="btn-generate" onclick="bmAdd()" style="padding:8px 16px;width:auto">+</button>
-      </div>
-      <div id="bm-list"></div>
-
-    </div>
+    <div class="lrn-wrap"><div id="bm-root"></div></div>
   </div>
 
   <div class="screen" id="screen-pomodoro">
@@ -1487,28 +1496,7 @@
         <span class="title-text" style="flex:1;text-align:center">Sudoku</span>
       </div>
     </div>
-    <div style="padding:20px;max-width:800px;margin:0 auto">
-
-      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:16px;border-radius:18px;background:linear-gradient(120deg,#1e88e5,var(--accent));color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.15)">
-        <div style="font-size:36px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">🔢</div>
-        <div><div style="font-size:20px;font-weight:800;line-height:1.15;letter-spacing:-0.3px">Sudoku</div><div style="font-size:12px;opacity:0.92;margin-top:2px">Fülle jede Zeile, Spalte und jeden 3×3-Block mit 1–9</div></div>
-      </div>
-      <div style="text-align:center">
-        <div style="display:flex;gap:8px;margin-bottom:14px;justify-content:center;align-items:center;flex-wrap:wrap">
-          <select id="sudoku-diff" style="padding:7px 10px;background:var(--surface);border:0.5px solid var(--divider);border-radius:8px;font-size:13px;color:var(--text);outline:none;cursor:pointer">
-            <option value="easy">Leicht</option><option value="medium" selected>Mittel</option><option value="hard">Schwer</option>
-          </select>
-          <button class="btn-generate" onclick="sudokuNew()" style="padding:8px 16px;width:auto">Neues Spiel</button>
-          <button class="timer-btn" onclick="sudokuSolve()" style="padding:8px 14px">Lösen</button>
-          <span id="sudoku-time" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);padding:6px 12px;border-radius:12px;background:var(--surface);border:0.5px solid var(--divider)">00:00</span>
-        </div>
-        <div style="display:inline-block;background:var(--text-2);border:2px solid var(--text-2);border-radius:8px;overflow:hidden">
-          <div id="sudoku-board" style="display:grid;grid-template-columns:repeat(9,52px);gap:1px"></div>
-        </div>
-        <div id="sudoku-msg" style="font-size:13px;color:var(--accent);margin-top:10px;min-height:20px"></div>
-      </div>
-
-    </div>
+    <div class="lrn-wrap"><div id="sudoku-root"></div></div>
   </div>
 
   <div class="screen" id="screen-memory">
@@ -3456,7 +3444,7 @@ function goTo(id){
   if(id==='laender') laenderInit();
   if(id==='zeitzonen') tzInit();
   if(id==='schach') chessInit();
-  if(id==='sudoku') sudokuNew();
+  if(id==='sudoku') sudokuInit();
   if(id==='memory') memoryNew();
   if(id==='hangman') hangmanNew();
   if(id==='snake') snakeInit();
