@@ -1333,22 +1333,7 @@
         <span class="title-text" style="flex:1;text-align:center">Todo-Liste</span>
       </div>
     </div>
-    <div style="padding:20px;max-width:800px;margin:0 auto">
-
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <input type="text" id="todo-input" placeholder="Neue Aufgabe…" style="flex:1;padding:9px 12px;background:var(--surface);border:0.5px solid var(--divider);border-radius:10px;font-size:14px;color:var(--text);outline:none" onkeydown="if(event.key==='Enter')todoAdd()"/>
-        <select id="todo-prio" style="padding:8px;background:var(--surface);border:0.5px solid var(--divider);border-radius:8px;font-size:13px;color:var(--text);outline:none;cursor:pointer"><option value="normal">Normal</option><option value="high">Hoch</option><option value="low">Niedrig</option></select>
-        <button class="btn-generate" onclick="todoAdd()" style="padding:9px 16px;width:auto">+</button>
-      </div>
-      <div style="display:flex;gap:6px;margin-bottom:12px">
-        <button class="units-cat-btn active" id="todo-filter-all" onclick="todoFilter('all')">Alle</button>
-        <button class="units-cat-btn" id="todo-filter-open" onclick="todoFilter('open')">Offen</button>
-        <button class="units-cat-btn" id="todo-filter-done" onclick="todoFilter('done')">Erledigt</button>
-      </div>
-      <div id="todo-list"></div>
-      <div style="font-size:12px;color:var(--text-3);margin-top:10px" id="todo-stats"></div>
-
-    </div>
+    <div class="lrn-wrap"><div id="todo-root"></div></div>
   </div>
 
   <div class="screen" id="screen-habit">
@@ -1358,15 +1343,7 @@
         <span class="title-text" style="flex:1;text-align:center">Habit Tracker</span>
       </div>
     </div>
-    <div style="padding:20px;max-width:800px;margin:0 auto">
-
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <input type="text" id="habit-input" placeholder="Neue Gewohnheit…" style="flex:1;padding:9px 12px;background:var(--surface);border:0.5px solid var(--divider);border-radius:10px;font-size:14px;color:var(--text);outline:none"/>
-        <button class="btn-generate" onclick="habitAdd()" style="padding:9px 16px;width:auto">+</button>
-      </div>
-      <div id="habit-list"></div>
-
-    </div>
+    <div class="lrn-wrap"><div id="habit-root"></div></div>
   </div>
 
   <div class="screen" id="screen-pwmanager">
@@ -1376,23 +1353,7 @@
         <span class="title-text" style="flex:1;text-align:center">Passwort-Manager</span>
       </div>
     </div>
-    <div style="padding:20px;max-width:800px;margin:0 auto">
-
-      <div id="pwm-lock" style="text-align:center;padding:30px">
-        <div style="font-size:48px;margin-bottom:16px">🔒</div>
-        <input type="password" id="pwm-pin" placeholder="PIN eingeben…" maxlength="8" style="width:200px;padding:12px;background:var(--surface);border:0.5px solid var(--divider);border-radius:10px;font-size:18px;text-align:center;color:var(--text);outline:none" onkeydown="if(event.key==='Enter')pwmLogin()"/>
-        <div style="margin-top:12px"><button class="btn-generate" onclick="pwmLogin()" style="padding:10px 24px;width:auto">Entsperren</button></div>
-        <div style="font-size:12px;color:var(--text-3);margin-top:8px">Kein PIN? Leer lassen &amp; Enter.</div>
-      </div>
-      <div id="pwm-content" style="display:none">
-        <div style="display:flex;gap:8px;margin-bottom:14px">
-          <button class="btn-generate" onclick="pwmAdd()" style="padding:8px 16px;width:auto">+ Neuer Eintrag</button>
-          <button class="timer-btn" onclick="pwmLock()" style="padding:8px 14px">🔒 Sperren</button>
-        </div>
-        <div id="pwm-list"></div>
-      </div>
-
-    </div>
+    <div class="lrn-wrap"><div id="pwm-root"></div></div>
   </div>
 
   <div class="screen" id="screen-lesezeichen">
@@ -1421,19 +1382,7 @@
         <span class="title-text" style="flex:1;text-align:center">Pomodoro</span>
       </div>
     </div>
-    <div style="padding:20px;max-width:800px;margin:0 auto">
-
-      <div style="text-align:center;padding:20px 0">
-        <div style="font-size:72px;font-family:var(--mono);font-weight:700;color:var(--text);margin-bottom:16px" id="pom-display">25:00</div>
-        <div style="font-size:14px;color:var(--accent);margin-bottom:24px" id="pom-phase">Fokus-Zeit</div>
-        <div style="display:flex;gap:12px;justify-content:center">
-          <button class="btn-generate" onclick="pomToggle()" style="padding:12px 32px;width:auto" id="pom-btn">Starten</button>
-          <button class="timer-btn" onclick="pomReset()" style="padding:12px 20px">Reset</button>
-        </div>
-        <div style="margin-top:20px;font-size:13px;color:var(--text-3)">Sessions heute: <strong id="pom-count">0</strong></div>
-      </div>
-
-    </div>
+    <div class="lrn-wrap"><div id="pom-root"></div></div>
   </div>
 
   <div class="screen" id="screen-wetter">
@@ -3505,6 +3454,7 @@ function saveAllSettings(){initAllSettings();}
 
 let _activeScreen='home';
 function goTo(id){
+  if(typeof pwmLockOnLeave==='function')pwmLockOnLeave(id);   // Passwort-Tresor sperrt sich beim Verlassen
   var shell=document.querySelector('.app-shell');
   // Hide all screens  
   document.querySelectorAll('.screen').forEach(function(s){

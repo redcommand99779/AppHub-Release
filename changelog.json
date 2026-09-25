@@ -93,5 +93,27 @@
       "Wetter: Regen und Gewitter machen den Boden rutschig, Nebel sorgt für Atmosphäre, im Sturm schieben dich Böen. Auch im Level-Editor einstellbar.",
       "Behoben: Dauerndes Bildwackeln im Spiel."
     ]
+  },
+  {
+    "id": 9,
+    "date": "25.09.2026",
+    "title": "Lern-Apps überarbeitet",
+    "items": [
+      "Vokabeln komplett neu: eigene Stapel, Lernen nach dem Karteikasten-Prinzip (Wiederholung nach 1, 3, 7, 14 und 30 Tagen), Karteikarte, Tippen oder Auswahl, Import und Export als Text. Es ist kein Stapel mehr vorgegeben, deine alten Karten werden übernommen.",
+      "Mathe-Trainer komplett neu: 9 Themen frei kombinierbar (auch Potenzen, Wurzeln, Prozent, Gleichungen), 3 Schwierigkeitsstufen, 60-Sekunden-Sprint mit Rekord und eine Statistik.",
+      "Für fleißiges Lernen und gute Sprints gibt es AppHub-Coins (begrenzt pro Tag).",
+      "Mind-Map: Jeder Knoten ist jetzt mit einer Linie verbunden, die Karte wird automatisch gespeichert und lässt sich auch per Touch bedienen."
+    ]
+  },
+  {
+    "id": 10,
+    "date": "25.09.2026",
+    "title": "Passwort-Manager, Pomodoro, To-Do und Habit-Tracker neu",
+    "items": [
+      "Passwort-Manager: Die Einträge werden jetzt verschlüsselt (AES-256) und mit einem Master-Passwort geschützt. Alte, unverschlüsselte Einträge werden beim ersten Öffnen übernommen. Dazu Passwort-Generator, Bearbeiten, Suche und automatische Sperre.",
+      "Pomodoro: Ring-Anzeige, Fokus/kurze/lange Pause mit einstellbaren Zeiten, Tagesstatistik, Serie und Coins. Der Timer läuft auch weiter, wenn du die Seite wechselst.",
+      "To-Do: Fälligkeitsdatum, Kategorien, Unteraufgaben, Filter (Heute, Überfällig) und Bearbeiten direkt in der Liste.",
+      "Habit-Tracker: Symbole, Wochenziele, echte Serie (Tage in Folge), Tage nachtragen und Monatsübersicht. Behoben: Nachts wurde der falsche Tag gezählt."
+    ]
   }
 ]
