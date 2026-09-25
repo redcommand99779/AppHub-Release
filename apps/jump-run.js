@@ -600,7 +600,7 @@ function jrSlamLand(st){
     return;                       // Slam läuft weiter durch die zerstörten Blöcke
   }
   p.slam=false;p.vy=0;
-  const fx=jrFx();
+  const fx=jrSlamFx();
   st.shake=10;st.shock={x:p.x+p.w/2,y:p.y+p.h,t:16,rgb:fx.rgb,dbl:fx.double,rainbow:fx.rainbow};
   for(let i=0;i<fx.parts.length;i++)jrBurst(st,p.x+p.w/2,p.y+p.h,fx.parts[i],Math.ceil(fx.n/fx.parts.length));jrDust(st,p.x+p.w/2,p.y+p.h,8,0);
   const cx=p.x+p.w/2,fy=p.y+p.h;
@@ -737,7 +737,7 @@ function jrSaveBest(st){if(st.custom||st.score<=st.best)return;const pf=jrProf()
 const JR_SKIN_DEFAULT={cap:'#ffb300',capTop:'#ffe082',body:'#3f6fe6',strap:'#ffd54f',skin:'#ffdcb8',boots:'#5d4037',trail:null,glow:null,visor:false,mask:false,cape:null};
 /* Slam-Effekt (aus dem Shop): Farbe der Stoßwelle und der Funken */
 const JR_FX_DEFAULT={rgb:[255,255,255],parts:['#d7ccc8'],n:10,double:false,rainbow:false};
-function jrFx(){
+function jrSlamFx(){
   try{
     if(typeof zcEquipped==='function'&&typeof zcItem==='function'){
       const id=zcEquipped('jfx'),it=id&&zcItem('jfx',id);
