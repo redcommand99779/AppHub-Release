@@ -113,6 +113,10 @@ function zcPlusInstall(){
     try{
       if(!ev||!ev.name)return;
       const z=zcp(),k=zcKey(ev.name);
+      if(ev.jump){ // Super Jumper: keine Partie – nur Challenge-Belohnung in Coins umwandeln
+        const d=(z.bonus[k]||0)-before;if(d>0){zcAddCoins(ev.name,d);smSave('zentrale');}
+        return;
+      }
       zcWeekBoard(ev);zcWeekProgress(ev.name,ev);
       if(typeof zcHistPush==='function')zcHistPush(ev);
       const base=(ev.res==='W'?5:ev.res==='D'?2:1)+(ev.res==='W'&&(ev.diff==='hard'||ev.diff==='expert')?3:0)+(ev.cup?2:0);
@@ -132,7 +136,7 @@ function zcPlusInstall(){
   const _show=zcShow;
   zcShow=function(v){
     zcView=v;
-    ['profile','board','chal','cmp','champ','season','replays','week','shop','bonus','stats','groups'].forEach(x=>{
+    ['profile','board','chal','cmp','champ','season','replays','week','shop','bonus','stats','groups','jump'].forEach(x=>{
       document.getElementById('zc-tab-'+x)?.classList.toggle('active',x===v);
       const e=document.getElementById('zc-view-'+x);if(e)e.style.display=x===v?'block':'none';
     });
@@ -141,6 +145,7 @@ function zcPlusInstall(){
     else if(v==='bonus')zcRenderBonus();
     else if(v==='stats')zcRenderStats();
     else if(v==='groups')zcRenderGroups();
+    else if(v==='jump')zcRenderJump();
     else _show(v);
   };
   const _rc=zcRenderChallenges;
@@ -265,3 +270,39 @@ function zcPlusInit(){
 }
 zcPlusInstall();
 document.addEventListener('DOMContentLoaded',zcPlusInit);
+
+
+/* ══════════════════════════════════
+   Super Jumper – Bestenliste aller Konten (Sterne, Level, Rekord, Bestzeiten)
+   Daten: localStorage zf_jump_p (siehe jump-run.js, jrProf)
+══════════════════════════════════ */
+function zcJumpRows(){
+  let all={};try{all=JSON.parse(localStorage.getItem('zf_jump_p')||'{}')||{};}catch(e){}
+  const n=(typeof JR_LEVELS!=='undefined')?JR_LEVELS.length:6;
+  return Object.keys(all).filter(k=>k[0]!=='_'&&all[k]&&typeof all[k]==='object').map(k=>{
+    const p=all[k];let stars=0;for(const i in (p.stars||{})){const v=p.stars[i]|0;stars+=(v&1?1:0)+(v&2?1:0)+(v&4?1:0);}
+    const cleared=[...Array(n).keys()].filter(i=>(p.done||0)&(1<<i)).length,times=p.times||{};
+    const total=cleared===n?[...Array(n).keys()].reduce((a,i)=>a+(times[i]||0),0):0;
+    return{name:p.name||'Gast',stars,cleared,n,best:p.best||0,total,times,bosses:p.bosses||0,coins:p.coins||0};
+  }).filter(r=>r.stars>0||r.best>0||r.cleared>0).sort((a,b)=>b.stars-a.stars||b.cleared-a.cleared||b.best-a.best);
+}
+function zcRenderJump(){
+  const el=document.getElementById('zc-jump');if(!el)return;
+  const rows=zcJumpRows(),me=zcKey((zcState().zc.player||'')),medal=['🥇','🥈','🥉'];
+  const fmt=s=>s?Math.floor(s/60)+':'+String(s%60).padStart(2,'0'):'–';
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;background:linear-gradient(120deg,#ff9800,#f4511e);color:#fff;margin-bottom:12px">
+      <div style="font-size:34px">🏃</div><div style="flex:1"><div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.85">Super Jumper</div>
+      <div style="font-size:18px;font-weight:800;line-height:1.2">Bestenliste</div><div style="font-size:12px;opacity:0.92;margin-top:2px">Sortiert nach Sternen ⭐, dann Levels und Rekord. Pro Level gibt es 3 Sterne.</div></div></div>
+    ${rows.length?rows.map((r,i)=>{
+      const look=typeof zcAccountLook==='function'?zcAccountLook(r.name):null,mine=zcKey(r.name)===me;
+      return`<div style="background:var(--surface);border:0.5px solid ${mine?'var(--accent)':'var(--divider)'};${mine?'box-shadow:0 0 0 2px var(--active-bg);':''}border-radius:14px;padding:11px 14px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:30px;text-align:center;font-size:${i<3?22:14}px;font-weight:800;color:var(--text-2)">${i<3?medal[i]:(i+1)}</div>
+          <div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;background:${look?look.color:'var(--bg)'}">${look?look.avatar:'🏃'}</div>
+          <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(r.name)}</div>
+            <div style="font-size:11px;color:var(--text-3)">Level ${r.cleared}/${r.n} · Rekord ${r.best}${r.total?' · Gesamtzeit '+fmt(r.total):''}</div></div>
+          <div style="font-size:17px;font-weight:800;color:#f59f00;white-space:nowrap">⭐ ${r.stars}<span style="font-size:11px;color:var(--text-3);font-weight:600">/${r.n*3}</span></div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${[...Array(r.n).keys()].map(l=>`<span style="font-size:10px;padding:2px 8px;border-radius:9px;background:var(--bg);color:var(--text-2)">L${l+1} ${fmt(r.times[l])}</span>`).join('')}</div>
+      </div>`;}).join(''):`<div style="text-align:center;color:var(--text-3);padding:30px 10px;font-size:13px">Noch keine Einträge – spiele ein Level in Super Jumper, dann erscheinst du hier. 🏃</div>`}`;
+}

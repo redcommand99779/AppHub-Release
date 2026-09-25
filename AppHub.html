@@ -1824,6 +1824,7 @@
             <button class="units-cat-btn" id="jr-lv-5" onclick="jrPickLevel(5)">Level 5</button>
             <button class="units-cat-btn" id="jr-lv-6" onclick="jrPickLevel(6)">Level 6</button>
             <button class="units-cat-btn" onclick="jrEdOpen()" title="Eigene Level bauen">🛠 Editor</button>
+            <button class="units-cat-btn" onclick="jrGalOpen()" title="Geprüfte Level zum Spielen und als Vorlage">📚 Galerie</button>
           </div>
         </div>
         <div id="jr-editor-bar" style="display:none;margin-bottom:12px"></div>
@@ -2870,6 +2871,7 @@
         <button class="nav-tab" id="zc-tab-bonus" onclick="zcShow('bonus')">🎁 Bonus</button>
         <button class="nav-tab" id="zc-tab-stats" onclick="zcShow('stats')">📊 Statistik</button>
         <button class="nav-tab" id="zc-tab-groups" onclick="zcShow('groups')">👥 Gruppen</button>
+        <button class="nav-tab" id="zc-tab-jump" onclick="zcShow('jump')">🏃 Jumper</button>
       </div>
       <div id="zc-view-profile">
         <input type="text" id="zc-profile-input" list="zc-names" placeholder="Spielername eingeben…" oninput="zcSearch(this.value)" style="width:100%;box-sizing:border-box;padding:10px 12px;background:var(--bg);border:0.5px solid var(--divider);border-radius:10px;color:var(--text);font-size:14px;margin-bottom:12px"/>
@@ -2898,6 +2900,7 @@
       <div id="zc-view-bonus" style="display:none"><div id="zc-bonus"></div></div>
       <div id="zc-view-stats" style="display:none"><div id="zc-stats"></div></div>
       <div id="zc-view-groups" style="display:none"><div id="zc-groups"></div></div>
+      <div id="zc-view-jump" style="display:none"><div id="zc-jump"></div></div>
     </div>
   </div>
 
@@ -4046,6 +4049,7 @@ function initSavedSettings(){
 </script>
 <script src="apps/flappy-bird.js"></script>
 <script src="apps/jump-run.js"></script>
+<script src="apps/jump-gallery.js"></script>
 <script src="apps/jump-editor.js"></script>
 <script>
 </script>

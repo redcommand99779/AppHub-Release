@@ -4,13 +4,15 @@
    Der Editor benutzt die Engine aus jump-run.js (Zeichnen, Level-Bau, Test-Modus).
    Kacheln im Raster (Buchstaben):  . leer · # Boden · B Ziegel · ? Münzblock · a/b/c Power-Block (Schild/Feder/Magnet)
    T Röhre · W/V goldene Röhre (Geheimkammer 1/2) · s Stacheln · o Münze · e Gegner · K Checkpoint · F Ziel · P Start
+   f Fledermaus · y Stachelkäfer · z Kanonenpflanze · C Bröckelplattform · J Feder · M bewegliche Plattform (4 Kacheln hin und her)
 ══════════════════════════════════ */
-const JR_ED_CHARS='.#B?abcTWVsoeKFP';
+const JR_ED_CHARS='.#B?abcTWVsoeKFPfyzCJM';
 const JR_ED_TOOLS=[
   ['.','⬜','Radierer'],['#','🟫','Boden'],['B','🧱','Ziegel'],['?','❓','Münzblock'],
   ['a','🛡️','Power: Schild'],['b','🪶','Power: Doppelsprung'],['c','🧲','Power: Magnet'],
   ['T','🟩','Röhre'],['W','🟨','Goldene Röhre 1'],['V','🟧','Goldene Röhre 2'],
-  ['s','🔺','Stacheln'],['o','🪙','Münze'],['e','👾','Gegner'],['K','🚩','Checkpoint'],['F','🏁','Ziel'],['P','🏃','Start']
+  ['s','🔺','Stacheln'],['o','🪙','Münze'],['e','👾','Gegner'],['K','🚩','Checkpoint'],['F','🏁','Ziel'],['P','🏃','Start'],
+  ['f','🦇','Fledermaus (fliegt)'],['y','🐞','Stachelkäfer (nur per Slam)'],['z','🌵','Kanonenpflanze (schießt)'],['C','🟤','Bröckelplattform'],['J','🔴','Feder'],['M','↔️','Bewegliche Plattform']
 ];
 const JR_ED_MINW=24,JR_ED_MAXW=300;
 const jrEd={open:false,rows:null,w:60,theme:0,name:'Mein Level',time:300,tool:'#',cam:0,undo:[],paint:false,slot:1,hover:null,msg:''};
@@ -33,15 +35,19 @@ function jrLevelFromRows(rows,meta){
   meta=meta||{};
   const h=rows.length,w=rows[0].length;
   if(h!==JR_ROWS)return {error:'Das Level muss genau '+JR_ROWS+' Zeilen haben.'};
-  const g=Array.from({length:JR_ROWS},()=>Array(w).fill('.')),powers={},warps={},enemies=[],kCols=[];
+  const g=Array.from({length:JR_ROWS},()=>Array(w).fill('.')),powers={},warps={},enemies=[],movers=[],kCols=[];
   let start=null,flagCol=-1;
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
     const c=rows[y][x];
     if(c==='.')continue;
-    if(c==='#'||c==='B'||c==='?'||c==='T'||c==='s'||c==='o')g[y][x]=c;
+    if(c==='#'||c==='B'||c==='?'||c==='T'||c==='s'||c==='o'||c==='C'||c==='J')g[y][x]=c;
     else if(c==='a'||c==='b'||c==='c'){g[y][x]='!';powers[x+','+y]={a:'shield',b:'feather',c:'magnet'}[c];}
     else if(c==='W'||c==='V'){g[y][x]='W';warps[x]=c==='W'?0:1;}
-    else if(c==='e')enemies.push([x,y]);
+    else if(c==='e')enemies.push([x,y,'walk']);
+    else if(c==='f')enemies.push([x,y,'fly']);
+    else if(c==='y')enemies.push([x,y,'spiky']);
+    else if(c==='z')enemies.push([x,y,'shoot']);
+    else if(c==='M')movers.push({x:x*JR_T,y:y*JR_T,ox:x*JR_T,oy:y*JR_T,w:96,h:14,range:4*JR_T,speed:1,axis:'x',dir:1,dx:0,dy:0});
     else if(c==='K')kCols.push(x);
     else if(c==='F'){if(flagCol<0)flagCol=x;}
     else if(c==='P'){if(!start)start=[x,y];}
@@ -50,7 +56,7 @@ function jrLevelFromRows(rows,meta){
   if(flagCol<0)return {error:'Es fehlt das Ziel (🏁).'};
   for(let r=2;r<=9;r++)g[r][flagCol]='F';
   kCols.forEach(x=>{g[8][x]='K';g[9][x]='K';});
-  const lv={w,g,enemies:enemies.map(([x,y])=>({x:x*JR_T+3,y:(y+1)*JR_T-24,w:26,h:24,vx:-0.8,dir:-1,alive:true,squash:0})),
+  const lv={w,g,enemies:enemies.map(([x,y,type])=>jrMakeEnemy(x,y,type)),movers,boss:null,gate:-1,bullets:[],
     powers,warps,start:[start[0],Math.max(0,start[1]-1)],theme:meta.theme||0,time:meta.time||300,name:meta.name||'Eigenes Level',custom:true};
   return {level:lv};
 }
@@ -188,7 +194,7 @@ function jrEdKey(e){
 /* ── Zeichnen ── */
 function jrEdDraw(ctx){
   const T=JR_T,cam=jrEd.cam,t=jrFrame;
-  const g=jrEd.rows.map(r=>r.map(c=>({a:'!',b:'!',c:'!',V:'W',e:'.',P:'.'}[c]||c)));
+  const g=jrEd.rows.map(r=>r.map(c=>({a:'!',b:'!',c:'!',V:'W',e:'.',f:'.',y:'.',z:'.',M:'.',P:'.'}[c]||c)));
   const pst={level:{w:jrEd.w,g,theme:jrEd.theme,warps:{}},cam,bumps:{},checkpoint:null};
   jrFrame++;
   jrBackground(ctx,pst);
@@ -199,7 +205,8 @@ function jrEdDraw(ctx){
   for(let y=0;y<=JR_ROWS;y++){ctx.beginPath();ctx.moveTo(0,y*T+0.5);ctx.lineTo(JR_W,y*T+0.5);ctx.stroke();}
   for(let ty=0;ty<JR_ROWS;ty++)for(let tx=c0;tx<=c1;tx++){
     const raw=jrEd.rows[ty][tx],ch=g[ty][tx],x=Math.round(tx*T-cam),y=ty*T;
-    if(raw==='e')jrDrawEnemy(ctx,{x:tx*T+3,y:(ty+1)*T-24,w:26,h:24,alive:true,dir:-1,squash:0},{cam},t);
+    if(raw==='e'||raw==='f'||raw==='y'||raw==='z')jrDrawEnemy(ctx,Object.assign(jrMakeEnemy(tx,ty,{e:'walk',f:'fly',y:'spiky',z:'shoot'}[raw]),{x:tx*T+3}),{cam},t);
+    else if(raw==='M'){ctx.fillStyle='#90a4ae';jrRR(ctx,x,y+8,T*3,14,6);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText('↔',x+T*1.5,y+19);}
     else if(raw==='P'){
       ctx.save();jrDrawPlayer(ctx,{p:{x:tx*T+5,y:(ty+1)*T-34,w:22,h:34,face:1,onGround:true,vx:0,anim:0,duck:false,slam:false,inv:0,shield:false,magnet:0},mode:'play',cam},t,JR_SKIN_DEFAULT);ctx.restore();
       ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('START',x+T/2,y+8);
@@ -237,7 +244,7 @@ function jrEdBuildUi(){
       ${btn('jr-ed-save','💾 Speichern','jrEdDoSave()')}${btn('jr-ed-load','📂 Laden','jrEdDoLoad()')}
     </div>
     <div class="jr-ed-row">
-      ${btn('jr-ed-copy','📋 Code kopieren','jrEdDoCopy()')}${btn('jr-ed-paste','📥 Code einfügen','jrEdDoPaste()')}${btn('jr-ed-exit','⬅ Beenden','jrEdExit()')}
+      ${btn('jr-ed-gal','📚 Galerie','jrGalOpen()')}${btn('jr-ed-copy','📋 Code kopieren','jrEdDoCopy()')}${btn('jr-ed-paste','📥 Code einfügen','jrEdDoPaste()')}${btn('jr-ed-exit','⬅ Beenden','jrEdExit()')}
     </div>
     <div id="jr-ed-msg" class="jr-ed-msg">${jrEd.msg||''}</div>`;
 }
@@ -266,4 +273,48 @@ function jrEdDoPaste(){
   if(!code)return;
   try{jrEdApply(jrEdDecode(code));jrEd.msg='📥 Level geladen.';jrEdBuildUi();}
   catch(e){jrEd.msg='⚠️ '+e.message;jrEdUi();}
+}
+
+/* ── Level-Galerie: mitgelieferte, geprüfte Level per Klick spielen oder im Editor öffnen ── */
+function jrGalEntry(i){return (typeof JR_GALLERY!=='undefined'&&JR_GALLERY[i])||null;}
+function jrGalLoad(i){
+  const e=jrGalEntry(i);if(!e)throw new Error('Level nicht gefunden.');
+  const d=jrEdDecode(e.code),r=jrLevelFromRows(d.rows,{theme:d.theme,time:d.time,name:d.name});
+  if(r.error)throw new Error(r.error);
+  return {entry:e,decoded:d,level:r.level};
+}
+function jrGalClose(){const el=document.getElementById('jr-gal');if(el)el.remove();}
+function jrGalOpen(){
+  if(typeof JR_GALLERY==='undefined'||!JR_GALLERY.length)return;
+  jrGalClose();
+  const done=(typeof jrGalDone==='function')?jrGalDone():[];
+  const el=document.createElement('div');el.id='jr-gal';
+  el.style.cssText='position:fixed;inset:0;z-index:3500;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px';
+  el.onclick=e=>{if(e.target===el)jrGalClose();};
+  const dots=n=>'●'.repeat(n)+'○'.repeat(3-n);
+  el.innerHTML=`<div style="background:var(--bg);color:var(--text);border:0.5px solid var(--divider);border-radius:18px;padding:18px;max-width:520px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><div style="font-size:19px;font-weight:800;flex:1">📚 Level-Galerie</div><button class="set-btn" onclick="jrGalClose()">✕</button></div>
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:12px">Von Hand gebaute und geprüfte Level – alle sind schaffbar. Spielen oder als Vorlage in den Editor laden.</div>
+    ${JR_GALLERY.map((e,i)=>`<div style="background:var(--surface);border:0.5px solid var(--divider);border-radius:14px;padding:12px 14px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:800;flex:1;min-width:0">${done.includes(e.id)?'✅ ':''}${String(e.name).replace(/</g,'&lt;')}</span><span title="Schwierigkeit" style="font-size:12px;color:#f59f00;letter-spacing:1px">${dots(e.diff|0)}</span></div>
+      <div style="font-size:12px;color:var(--text-3);margin:3px 0 8px">${String(e.desc).replace(/</g,'&lt;')} · von ${String(e.author).replace(/</g,'&lt;')}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="set-btn" onclick="jrGalPlay(${i})">▶ Spielen</button><button class="set-btn" onclick="jrGalEdit(${i})">✏️ Im Editor öffnen</button></div>
+    </div>`).join('')}
+  </div>`;
+  document.body.appendChild(el);
+}
+function jrGalPlay(i){
+  try{
+    const g=jrGalLoad(i);jrGalClose();
+    if(jrEd.open)jrEdClose();
+    jrStartCustom(g.level);jrState.gallery=g.entry.id;
+  }catch(e){if(typeof showToast==='function')showToast('⚠️ '+e.message,2500);}
+}
+function jrGalEdit(i){
+  try{
+    const g=jrGalLoad(i);jrGalClose();
+    jrEdApply(g.decoded);jrEd.name=String(g.decoded.name+' (Kopie)').slice(0,30);
+    if(jrEd.open)jrEdBuildUi();else jrEdOpen();
+    jrEd.msg='📚 „'+g.decoded.name+'“ aus der Galerie geladen – jetzt umbauen und testen.';jrEdUi();
+  }catch(e){if(typeof showToast==='function')showToast('⚠️ '+e.message,2500);}
 }

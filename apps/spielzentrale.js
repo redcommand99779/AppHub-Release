@@ -300,7 +300,10 @@ function zcGenerate(dateStr){
     ()=>{const g=pick(games),n=pick([1,2]);return{type:'wingame',game:g.id,target:n,reward:n*8,text:`Gewinne ${n}× in ${g.title}`};},
     ()=>{const n=pick([2,3]);return{type:'streak',target:n,reward:n*7,text:`Erreiche eine Siegesserie von ${n}`};},
     ()=>{const n=pick([2,3]);return{type:'diverse',target:n,reward:n*6,text:`Spiele ${n} verschiedene Spiele`};},
-    ()=>({type:'cup',target:1,reward:10,text:'Spiele eine Cup-Runde'})
+    ()=>({type:'cup',target:1,reward:10,text:'Spiele eine Cup-Runde'}),
+    ()=>{const n=pick([30,50,80]);return{type:'jcoins',target:n,reward:Math.round(n/4),text:`Sammle ${n} Münzen in Super Jumper`};},
+    ()=>{const n=pick([3,5]);return{type:'jslam',target:n,reward:n*3,text:`Besiege ${n} Gegner mit dem Slam (Super Jumper)`};},
+    ()=>{const n=pick([1,2]);return{type:'jclear',target:n,reward:n*8,text:`Schließe ${n} Super-Jumper-Level ab`};}
   ];
   const chosen=[],used=new Set();
   while(chosen.length<3&&used.size<pool.length){const i=Math.floor(rnd()*pool.length);if(used.has(i))continue;used.add(i);chosen.push(pool[i]());}
@@ -323,7 +326,11 @@ function zcEvent(ev){
     z.names[k]=ev.name;if(!z.player)z.player=ev.name;
     z.list.forEach((c,i)=>{
       if(ps.done[i])return;
-      if(c.type==='win'&&ev.res==='W')ps.vals[i]++;
+      if(ev.jump){ // Super Jumper meldet nur seine eigenen Ziele, keine Partie
+        const add={jcoins:ev.jump.coins,jslam:ev.jump.slam,jclear:ev.jump.clear}[c.type];
+        if(add)ps.vals[i]+=add;
+      }
+      else if(c.type==='win'&&ev.res==='W')ps.vals[i]++;
       else if(c.type==='play')ps.vals[i]++;
       else if(c.type==='winhard'&&ev.res==='W'&&(ev.diff==='hard'||ev.diff==='expert'))ps.vals[i]++;
       else if(c.type==='wingame'&&ev.res==='W'&&ev.game===c.game)ps.vals[i]++;
@@ -357,7 +364,7 @@ function zcRenderChallenges(){
   const now=new Date(),midnight=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1),left=midnight-now;
   const hh=Math.floor(left/3600000),mm=Math.floor(left%3600000/60000);
   const doneN=ps.done.filter(Boolean).length,total=z.list.length||3,all=doneN===total;
-  const ICON={win:'🏆',play:'🎮',winhard:'🤖',wingame:'🎯',streak:'🔥',diverse:'🎲',cup:'🏅'};
+  const ICON={win:'🏆',play:'🎮',winhard:'🤖',wingame:'🎯',streak:'🔥',diverse:'🎲',cup:'🏅',jcoins:'🪙',jslam:'💥',jclear:'🏁'};
   const ring=(pct,col,inner)=>`<div style="position:relative;width:64px;height:64px;flex:none;border-radius:50%;background:conic-gradient(${col} ${pct*3.6}deg,rgba(255,255,255,0.28) 0);display:flex;align-items:center;justify-content:center"><div style="width:52px;height:52px;border-radius:50%;background:${all?'#2e7d32':'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff">${inner}</div></div>`;
   const dots=Array.from({length:7},(_,i)=>`<span title="Tag ${i+1}" style="width:9px;height:9px;border-radius:50%;background:${i<Math.min(d.count,7)?'#ffb300':'rgba(255,255,255,0.35)'}"></span>`).join('');
   wrap.innerHTML=`

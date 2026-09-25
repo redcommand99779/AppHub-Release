@@ -68,5 +68,19 @@
       "Held-Skins im Shop (Reiter „Helden“), darunter zwei mythische mit Schweif-Effekt.",
       "Behoben: Abpraller nach einem Gegner-Sprung waren zu klein."
     ]
+  },
+  {
+    "id": 7,
+    "date": "25.09.2026",
+    "title": "Super Jumper: Bosse, Sterne und Level-Galerie",
+    "items": [
+      "Boss-Kämpfe am Ende von Level 3 (Golem) und Level 6 (Drache): draufspringen oder per Slam besiegen, dann öffnet sich das Tor.",
+      "Neue Gegner: Fledermäuse, Stachelkäfer (nur per Slam besiegbar) und Kanonenpflanzen. Dazu Federn, bröckelnde und bewegliche Plattformen – auch im Level-Editor.",
+      "Drei Sterne pro Level (Ziel, 80 % der Münzen, ohne Leben zu verlieren) – sichtbar auf der Weltkarte, mit Coin-Belohnung für neue Sterne.",
+      "Fortschritt, Rekord und Bestzeiten gelten jetzt pro Konto; neuer Reiter „🏃 Jumper“ in der Spielzentrale mit Bestenliste.",
+      "Neue Tages-Challenges für Super Jumper (Münzen sammeln, Slam-Kills, Level abschließen).",
+      "Level-Galerie: geprüfte Level mit einem Klick spielen oder als Vorlage in den Editor laden.",
+      "Shop: 8 weitere Helden-Skins und neuer Reiter „💥 Slam-Effekte“."
+    ]
   }
 ]
