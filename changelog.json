@@ -115,5 +115,16 @@
       "To-Do: Fälligkeitsdatum, Kategorien, Unteraufgaben, Filter (Heute, Überfällig) und Bearbeiten direkt in der Liste.",
       "Habit-Tracker: Symbole, Wochenziele, echte Serie (Tage in Folge), Tage nachtragen und Monatsübersicht. Behoben: Nachts wurde der falsche Tag gezählt."
     ]
+  },
+  {
+    "id": 11,
+    "date": "25.09.2026",
+    "title": "Notizen, Kalender und Ausgaben neu",
+    "items": [
+      "Notizen: Suche, Anpinnen, Ordner, Vorschau mit Markdown (auch anklickbare Checklisten), Wortzähler, Duplizieren und Export als Datei.",
+      "Kalender: Termine mit Uhrzeit, Farbe und Wiederholung (wöchentlich, monatlich, jährlich), deutsche Feiertage, Bearbeiten und eine Übersicht „Als Nächstes“.",
+      "Ausgaben: Einnahmen und Ausgaben pro Monat mit Saldo, Monatsbudget, Ring-Diagramm nach Kategorie, Bearbeiten, Suche und CSV-Export.",
+      "Behoben: Datumsfehler rund um Mitternacht (Datum wurde in UTC gespeichert). Alle bisherigen Einträge bleiben erhalten."
+    ]
   }
 ]

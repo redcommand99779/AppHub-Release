@@ -318,6 +318,23 @@
     .lrn-sprintbar{height:10px;background:var(--divider);border-radius:5px;overflow:hidden}.lrn-sprintbar>div{height:100%;background:linear-gradient(90deg,#ff9500,#ff3b30)}
     .lrn-statrow{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:13px}.lrn-statrow .nm{width:150px;flex:none;color:var(--text)}.lrn-statrow .pc{width:80px;text-align:right;color:var(--text-3);flex:none;font-size:12px}
     @media (max-width:520px){.lrn-choices,.lrn-two{grid-template-columns:1fr}.lrn-question{font-size:34px}.lrn-statrow .nm{width:110px}.lrn-big{font-size:26px}}
+    /* Notizen */
+    .nt-wrap{display:grid;grid-template-columns:250px 1fr;gap:14px;min-height:60vh}
+    .nt-side{min-width:0}
+    .nt-list{display:flex;flex-direction:column;gap:6px;max-height:66vh;overflow:auto}
+    .nt-item{padding:9px 10px;border-radius:11px;border:0.5px solid var(--divider);background:var(--surface);cursor:pointer}
+    .nt-item:hover{border-color:var(--accent)}
+    .nt-item.active{border-color:var(--accent);background:var(--active-bg)}
+    .nt-main{min-width:0}
+    .nt-area{width:100%;min-height:52vh;resize:vertical;font-size:14px;line-height:1.55}
+    .nt-preview{background:var(--surface);border:0.5px solid var(--divider);border-radius:12px;padding:14px 16px;min-height:52vh;font-size:14px;line-height:1.6;overflow:auto}
+    .nt-preview h1{font-size:22px;margin:6px 0}.nt-preview h2{font-size:18px;margin:6px 0}.nt-preview h3{font-size:15px;margin:6px 0}
+    .nt-preview p{margin:4px 0}.nt-preview ul,.nt-preview ol{margin:4px 0;padding-left:22px}.nt-preview ul.nt-check{list-style:none;padding-left:4px}
+    .nt-preview code{background:var(--bg);padding:1px 5px;border-radius:5px;font-family:var(--mono);font-size:13px}.nt-preview pre{background:var(--bg);padding:10px;border-radius:10px;overflow:auto}
+    .nt-preview blockquote{border-left:3px solid var(--accent);margin:6px 0;padding:2px 12px;color:var(--text-2)}.nt-preview hr{border:0;border-top:1px solid var(--divider)}
+    .nt-back{display:none}
+    .lrn-btn.ghost.active{background:var(--active-bg);color:var(--accent);border-color:var(--accent)}
+    @media (max-width:700px){.nt-wrap{grid-template-columns:1fr}.nt-wrap .nt-main{display:none}.nt-wrap.editing .nt-side{display:none}.nt-wrap.editing .nt-main{display:block}.nt-back{display:inline-block}}
     /* Super Jumper – Editor */
     #jr-editor-bar{max-width:640px;margin-left:auto;margin-right:auto}
     .jr-ed-tools{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px}
@@ -1043,33 +1060,9 @@
         <span class="title-text" style="flex:1;text-align:center">Notizen</span>
       </div>
     </div>
-    <div class="notes-body">
-      <div class="notes-list">
-        <div class="notes-list-header">
-          <span>Notizen</span>
-          <button class="btn-icon" onclick="noteNew()" title="Neue Notiz" style="border:none;background:none;color:var(--accent);font-size:20px;cursor:pointer;line-height:1;padding:0">+</button>
-        </div>
-        <div class="notes-list-items" id="notes-list-items"></div>
-      </div>
-      <div class="notes-editor" id="notes-editor">
-        <div class="notes-empty" id="notes-empty">
-          <span style="font-size:32px">📝</span>
-          <span>Wähle eine Notiz oder erstelle eine neue</span>
-        </div>
-        <div id="notes-edit-area" style="display:none;flex-direction:column;flex:1">
-          <div style="display:flex;align-items:center;border-bottom:0.5px solid var(--divider);padding-right:10px">
-            <input class="notes-title-input" id="note-title" placeholder="Titel…" oninput="noteSave()"/>
-            <button class="btn-icon danger" onclick="noteDelete()" title="Löschen" style="flex-shrink:0">
-              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-            </button>
-          </div>
-          <textarea class="notes-textarea" id="note-body" placeholder="Notiz schreiben…" oninput="noteSave()"></textarea>
-        </div>
-      </div>
-    </div>
+    <div class="lrn-wrap" style="max-width:1000px"><div id="notes-root"></div></div>
   </div>
 
-  <!-- ══ TIMER ══ -->
   <div class="screen" id="screen-timer">
     <div class="titlebar">
       <div class="title-wrap">
@@ -1309,21 +1302,7 @@
         <span class="title-text" style="flex:1;text-align:center">Kalender</span>
       </div>
     </div>
-    <div style="padding:20px;max-width:800px;margin:0 auto">
-
-      <div id="kal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <button class="timer-btn" onclick="kalPrev()" style="padding:7px 14px">◀</button>
-        <span style="font-size:16px;font-weight:600;color:var(--text)" id="kal-title"></span>
-        <button class="timer-btn" onclick="kalNext()" style="padding:7px 14px">▶</button>
-      </div>
-      <div id="kal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px;text-align:center"></div>
-      <div id="kal-events" style="display:flex;flex-direction:column;gap:6px"></div>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <input type="text" id="kal-new-event" placeholder="Neues Ereignis…" style="flex:1;padding:8px 12px;background:var(--surface);border:0.5px solid var(--divider);border-radius:8px;font-size:13px;color:var(--text);outline:none"/>
-        <button class="btn-generate" onclick="kalAddEvent()" style="padding:8px 16px;width:auto">+</button>
-      </div>
-
-    </div>
+    <div class="lrn-wrap"><div id="kal-root"></div></div>
   </div>
 
   <div class="screen" id="screen-todo">
@@ -2495,35 +2474,7 @@
         <span class="title-text" style="flex:1;text-align:center">Ausgaben-Tracker</span>
       </div>
     </div>
-    <div style="padding:20px;max-width:860px;margin:0 auto">
-
-      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-        <input type="text" id="exp-desc" placeholder="Beschreibung…" style="flex:2;min-width:120px;padding:8px 12px;background:var(--surface);border:0.5px solid var(--divider);border-radius:8px;font-size:13px;color:var(--text);outline:none" onkeydown="if(event.key==='Enter')expAdd()"/>
-        <input type="number" id="exp-amount" placeholder="Betrag €" step="0.01" min="0" style="flex:1;min-width:80px;padding:8px 12px;background:var(--surface);border:0.5px solid var(--divider);border-radius:8px;font-size:13px;color:var(--text);outline:none"/>
-        <select id="exp-cat" style="flex:1;min-width:100px;padding:8px;background:var(--surface);border:0.5px solid var(--divider);border-radius:8px;font-size:13px;color:var(--text);outline:none;cursor:pointer">
-          <option>🍕 Essen</option><option>🚗 Transport</option><option>🛍 Shopping</option>
-          <option>🏠 Wohnen</option><option>💊 Gesundheit</option><option>🎮 Freizeit</option><option>📦 Sonstiges</option>
-        </select>
-        <button class="btn-generate" onclick="expAdd()" style="padding:8px 16px;width:auto">+</button>
-      </div>
-      <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:120px;padding:10px 14px;background:var(--surface);border:0.5px solid var(--divider);border-radius:10px;text-align:center">
-          <div style="font-size:10px;color:var(--text-3);text-transform:uppercase">Gesamt</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text)" id="exp-total">0,00 €</div>
-        </div>
-        <div style="flex:1;min-width:120px;padding:10px 14px;background:var(--surface);border:0.5px solid var(--divider);border-radius:10px;text-align:center">
-          <div style="font-size:10px;color:var(--text-3);text-transform:uppercase">Diesen Monat</div>
-          <div style="font-size:20px;font-weight:700;color:var(--accent)" id="exp-month">0,00 €</div>
-        </div>
-        <div style="flex:1;min-width:120px;padding:10px 14px;background:var(--surface);border:0.5px solid var(--divider);border-radius:10px;text-align:center">
-          <div style="font-size:10px;color:var(--text-3);text-transform:uppercase">Einträge</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text)" id="exp-count">0</div>
-        </div>
-      </div>
-      <canvas id="exp-chart" height="80" style="width:100%;border-radius:8px;margin-bottom:10px"></canvas>
-      <div id="exp-list" style="display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto"></div>
-
-    </div>
+    <div class="lrn-wrap"><div id="exp-root"></div></div>
   </div>
 
   <div class="screen" id="screen-wordle">
