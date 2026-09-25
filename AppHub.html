@@ -375,6 +375,20 @@
     .td-tbtn.poor{opacity:0.55}
     .td-over{position:absolute;inset:0;border-radius:14px;background:rgba(20,24,36,0.86);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
     @media (max-width:520px){#td-shop{grid-template-columns:repeat(2,1fr)!important}}
+    /* Fabrik-Tycoon */
+    .ft-stage{position:relative;width:100%;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#0e1a33 0%,#2b4a7a 55%,#5c7fb4 100%);box-shadow:0 8px 28px rgba(0,0,0,0.3)}
+    .ft-stage canvas{position:absolute;left:0;top:0;display:block}
+    #ft-lbl{pointer-events:none}
+    #ft-gl{cursor:grab;touch-action:none}
+    #ft-over{position:absolute;inset:0;pointer-events:none}
+    #ft-over .ft-endcard{pointer-events:auto;position:absolute;inset:0;background:rgba(15,20,32,0.82);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+    .ft-cam{position:absolute;right:10px;top:10px;display:flex;gap:6px}
+    .ft-cam .lrn-btn{padding:6px 11px;background:rgba(20,24,36,0.6);color:#fff;border-color:rgba(255,255,255,0.25)}
+    .ft-players{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:10px}
+    .ft-pcard{border:2px solid var(--divider);border-radius:14px;padding:8px 10px;background:var(--surface);opacity:0.85}
+    .ft-pcard.cur{opacity:1;box-shadow:0 0 0 3px var(--active-bg)}
+    .ft-bottom{display:grid;grid-template-columns:1.3fr 1fr;gap:10px;margin-top:10px}
+    @media (max-width:640px){.ft-bottom{grid-template-columns:1fr}}
     /* Super Jumper – Editor */
     #jr-editor-bar{max-width:640px;margin-left:auto;margin-right:auto}
     .jr-ed-tools{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px}
@@ -805,6 +819,11 @@
           <div class="app-icon" style="background:linear-gradient(135deg,#43a047,#00897b)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M6 21V9l-2-2V4h4v2h2V4h4v2h2V4h4v3l-2 2v12"/><path d="M10 21v-5h4v5"/></svg></div>
           <div class="app-tile-name">Turmwacht</div>
           <div class="app-tile-desc">Tower Defense mit 3 Karten</div>
+        </button>
+        <button class="app-tile" type="button" onclick="goTo('ft')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('ft')}" data-appid="ft" data-cat="spiele">
+          <div class="app-icon" style="background:linear-gradient(135deg,#ff9800,#5c6bc0)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M3 20h18"/><path d="M5 20V11l5 3V9l5 3V6h4v14"/></svg></div>
+          <div class="app-tile-name">Fabrik-Tycoon</div>
+          <div class="app-tile-desc">3D-Brettspiel gegen Computer</div>
         </button>
         <button class="app-tile" type="button" onclick="goTo('tictactoe')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('tictactoe')}" data-appid="tictactoe" data-cat="spiele">
           <div class="app-icon" style="background:linear-gradient(135deg,#ff3b30,#ff9f0a)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" width="26" height="26"><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/></svg></div>
@@ -1865,6 +1884,16 @@
       </div>
     </div>
     <div class="lrn-wrap" style="max-width:860px"><div id="td-root"></div></div>
+  </div>
+
+    <div class="screen" id="screen-ft">
+    <div class="titlebar">
+      <div class="title-wrap">
+        <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
+        <span class="title-text" style="flex:1;text-align:center">Fabrik-Tycoon</span>
+      </div>
+    </div>
+    <div class="lrn-wrap" style="max-width:1000px"><div id="ft-root"></div></div>
   </div>
 
     <div class="screen" id="screen-tictactoe">
@@ -3508,6 +3537,7 @@ function goTo(id){
   if(id==='jumprun') jrInit();
   if(id==='idle') bbInit();
   if(id==='td') tdInit();
+  if(id==='ft') ftInit();
   if(id==='tictactoe') tttNew();
   if(id==='viergewinnt') vgNew();
   if(id==='maumau') mmNew();
@@ -4016,6 +4046,7 @@ function initSavedSettings(){
 <script src="apps/jump-editor.js"></script>
 <script src="apps/bahnhof-boss.js"></script>
 <script src="apps/turmwacht.js"></script>
+<script src="apps/fabrik-tycoon.js"></script>
 <script>
 </script>
 <script src="apps/tic-tac-toe.js"></script>

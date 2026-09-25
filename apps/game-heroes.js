@@ -10,6 +10,7 @@ const GAME_HEROES={
   jumprun:['🏁','#e53935','Laufen, springen, Münzen sammeln – bis zur Zielfahne'],
   idle:['🚉','#0a84ff','Baue dein Bahn-Imperium auf – auch wenn du nicht da bist'],
   td:['🏰','#43a047','Baue Türme und halte 20 Wellen durch'],
+  ft:['🏭','#ff9800','Baue Fabriken, liefere Teile und vollende den Weltraum-Aufzug'],
   wordle:['🟩','#43a047','Errate das Wort in sechs Versuchen'],
   breakout:['🧱','#e53935','Zerstöre alle Steine mit dem Ball'],
   puzzle15:['🔲','#00897b','Schiebe die Kacheln in die richtige Reihenfolge'],
