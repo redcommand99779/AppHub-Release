@@ -265,6 +265,14 @@
     .nav-tab:hover{color:var(--text-2)}.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
     #screen-zentrale input[type=text]{transition:border-color .15s,box-shadow .15s}
     #screen-zentrale input[type=text]:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--active-bg)}
+    /* Super Jumper – Editor */
+    #jr-editor-bar{max-width:640px;margin-left:auto;margin-right:auto}
+    .jr-ed-tools{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px}
+    .jr-ed-tool{width:40px;height:40px;border-radius:10px;border:1.5px solid var(--divider);background:var(--surface);font-size:19px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+    .jr-ed-tool.active{border-color:var(--accent);background:var(--active-bg);box-shadow:0 0 0 3px var(--active-bg)}
+    .jr-ed-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin-bottom:8px}
+    .jr-ed-input{padding:7px 10px;border-radius:10px;border:0.5px solid var(--divider);background:var(--bg);color:var(--text);font-size:12px;min-width:0}
+    .jr-ed-msg{min-height:18px;font-size:12px;color:var(--text-2);text-align:center}
     /* Super Jumper */
     #screen-jumprun canvas{border-radius:18px;box-shadow:0 8px 28px rgba(0,0,0,0.25);outline:1px solid var(--divider)}
     #screen-jumprun .units-cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px var(--glow,rgba(0,0,0,0.2))}
@@ -1799,18 +1807,26 @@
     <div style="padding:20px;max-width:860px;margin:0 auto">
 
       <div style="text-align:center">
-        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
-          <span class="game-chip">🪙 <strong id="jr-coins">0</strong></span>
-          <span class="game-chip">⭐ <strong id="jr-score">0</strong></span>
-          <span class="game-chip">❤️ <strong id="jr-lives">3</strong></span>
-          <span class="game-chip">🏁 <strong id="jr-level">1</strong></span>
-          <span class="game-chip">⏱ <strong id="jr-time">300</strong></span>
+        <div id="jr-main-controls">
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
+            <span class="game-chip">🪙 <strong id="jr-coins">0</strong></span>
+            <span class="game-chip">⭐ <strong id="jr-score">0</strong></span>
+            <span class="game-chip">❤️ <strong id="jr-lives">3</strong></span>
+            <span class="game-chip">🏁 <strong id="jr-level">1</strong></span>
+            <span class="game-chip">⏱ <strong id="jr-time">300</strong></span>
+            <button class="units-cat-btn" id="jr-pause" onclick="jrTogglePause()">⏸ Pause</button>
+          </div>
+          <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px">
+            <button class="units-cat-btn" id="jr-lv-1" onclick="jrPickLevel(1)">Level 1</button>
+            <button class="units-cat-btn" id="jr-lv-2" onclick="jrPickLevel(2)">Level 2</button>
+            <button class="units-cat-btn" id="jr-lv-3" onclick="jrPickLevel(3)">Level 3</button>
+            <button class="units-cat-btn" id="jr-lv-4" onclick="jrPickLevel(4)">Level 4</button>
+            <button class="units-cat-btn" id="jr-lv-5" onclick="jrPickLevel(5)">Level 5</button>
+            <button class="units-cat-btn" id="jr-lv-6" onclick="jrPickLevel(6)">Level 6</button>
+            <button class="units-cat-btn" onclick="jrEdOpen()" title="Eigene Level bauen">🛠 Editor</button>
+          </div>
         </div>
-        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px">
-          <button class="units-cat-btn" id="jr-lv-1" onclick="jrPickLevel(1)">Level 1</button>
-          <button class="units-cat-btn" id="jr-lv-2" onclick="jrPickLevel(2)">Level 2</button>
-          <button class="units-cat-btn" id="jr-lv-3" onclick="jrPickLevel(3)">Level 3</button>
-        </div>
+        <div id="jr-editor-bar" style="display:none;margin-bottom:12px"></div>
         <canvas id="jr-canvas" width="640" height="384" style="display:block;margin:0 auto;max-width:100%;height:auto;cursor:pointer;touch-action:none"></canvas>
         <div id="jr-touch" style="display:none;justify-content:space-between;align-items:center;gap:10px;max-width:640px;margin:14px auto 0;padding:0 4px">
           <div style="display:flex;gap:10px">
@@ -1822,7 +1838,7 @@
             <button class="jr-pad jr-pad-jump" onpointerdown="jrTouch('jump',true)" onpointerup="jrTouch('jump',false)" onpointerleave="jrTouch('jump',false)" oncontextmenu="return false">⬆</button>
           </div>
         </div>
-        <div style="font-size:12px;color:var(--text-3);margin-top:12px">⌨️ ←/→ oder A/D laufen · Leertaste, ↑ oder W springen (länger halten = höher) · ↓ oder S ducken, in der Luft = <b>Slam</b> (zerstört Blöcke, besiegt Gegner in der Nähe) · Gegnern auf den Kopf springen! · 🚩 Checkpoints · 🏆 Rekord: <strong id="jr-best">0</strong></div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:12px;line-height:1.5">⌨️ ←/→ oder A/D laufen · Leertaste, ↑ oder W springen (länger halten = höher) · ↓ oder S ducken, in der Luft = <b>Slam</b> (zerstört Blöcke, besiegt Gegner in der Nähe) · <b>P</b> = Pause<br>🟨 Auf goldenen Röhren ↓ halten: Geheimkammer · 🟪 <b>!</b>-Blöcke geben Power-ups (🛡️ Schild, 🪶 Doppelsprung, 🧲 Magnet) · 🚩 Checkpoints · 🏆 Rekord: <strong id="jr-best">0</strong></div>
       </div>
 
     </div>
@@ -4030,6 +4046,7 @@ function initSavedSettings(){
 </script>
 <script src="apps/flappy-bird.js"></script>
 <script src="apps/jump-run.js"></script>
+<script src="apps/jump-editor.js"></script>
 <script>
 </script>
 <script src="apps/tic-tac-toe.js"></script>

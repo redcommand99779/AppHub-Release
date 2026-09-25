@@ -54,5 +54,19 @@
       "Slam-Attacke: In der Luft ↓ oder S drücken – du stürzt mit Wucht nach unten, zerstörst Ziegel und ?-Blöcke unter dir und besiegst Gegner in der Nähe.",
       "Behoben: Die Laufgeschwindigkeit stieg vorher immer weiter an – jetzt bleibt sie konstant."
     ]
+  },
+  {
+    "id": 6,
+    "date": "25.09.2026",
+    "title": "Super Jumper: Riesen-Update",
+    "items": [
+      "Weltkarte mit 6 Leveln: neu sind Kristallhöhle, Schneegipfel und Vulkan-Festung.",
+      "Geheimkammern: Auf goldenen Röhren ↓ halten – drinnen warten Münzen.",
+      "Power-ups aus den lila !-Blöcken: 🛡️ Schild, 🪶 Doppelsprung und 🧲 Münz-Magnet.",
+      "Pause mit P oder Esc (auch automatisch, wenn du das Fenster wechselst), eigene Sounds und Staub-Effekte.",
+      "Level-Editor: eigene Level bauen, testen, in 5 Plätzen speichern und als Code an Freunde schicken.",
+      "Held-Skins im Shop (Reiter „Helden“), darunter zwei mythische mit Schweif-Effekt.",
+      "Behoben: Abpraller nach einem Gegner-Sprung waren zu klein."
+    ]
   }
 ]

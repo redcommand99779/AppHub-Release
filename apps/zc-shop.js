@@ -119,8 +119,36 @@ const ZC_BOARDS={
 const ZC_BACKGROUNDS={
   starfield:{icon:'🌌',name:'Sternenfeld',price:560,rarity:'mythic',anim:'stars',desc:'Ein dezent funkelndes Sternenfeld hinter der ganzen App'}
 };
-const ZC_COLL={skin:ZC_SKINS,title:ZC_TITLES,conf:ZC_CONFETTI,pack:ZC_PACKS,frame:ZC_FRAMES,banner:ZC_BANNERS,bg:ZC_BACKGROUNDS,bchess:ZC_BOARDS.chess,bvg:ZC_BOARDS.vg,bdice:ZC_BOARDS.dice,bmem:ZC_BOARDS.mem};
-const ZC_TABS=[['home','🎡 Rotation'],['bundle','🎁 Sets'],['skin','🎨 Themes'],['frame','🖼️ Rahmen'],['banner','🏳️ Banner'],['bg','🌌 Hintergrund'],['title','🏷️ Titel'],['conf','🎊 Konfetti'],['pack','🔊 Sound'],['board','🎲 Spielbretter'],['set','⚙️ Sonstiges']];
+/* Helden-Skins für das Jump-and-Run „Super Jumper“ (Farben und Effekte des Helden; werden in jump-run.js gezeichnet) */
+const ZC_JSKINS={
+  wald:{icon:'🌲',name:'Waldläufer',price:60,hero:{cap:'#2e7d32',capTop:'#a5d6a7',body:'#5d4037',strap:'#ffd54f'}},
+  rosa:{icon:'💗',name:'Rosa Blitz',price:60,hero:{cap:'#ec407a',capTop:'#f8bbd0',body:'#8e24aa',strap:'#ffeb3b'}},
+  feuer:{icon:'🔥',name:'Feuerläufer',price:100,hero:{cap:'#e53935',capTop:'#ffab91',body:'#b71c1c',strap:'#ffca28',boots:'#3e2723'}},
+  eis:{icon:'🧊',name:'Eisprinz',price:100,hero:{cap:'#4fc3f7',capTop:'#e1f5fe',body:'#0277bd',strap:'#e1f5fe',boots:'#01579b'}},
+  goldkappe:{icon:'👑',name:'Goldkappe',price:120,hero:{cap:'#ffd600',capTop:'#fff59d',body:'#37474f',strap:'#ffd600'}},
+  schatten:{icon:'🌑',name:'Schattenläufer',price:150,hero:{cap:'#311b92',capTop:'#7c4dff',body:'#212121',strap:'#7c4dff',skin:'#d1c4e9',boots:'#000000',glow:'rgba(124,77,255,0.7)'}},
+  neon:{icon:'💠',name:'Neon-Held',price:180,hero:{cap:'#00e5ff',capTop:'#b2ebf2',body:'#0d0221',strap:'#ff2fd0',skin:'#e0f7fa',boots:'#00e5ff',glow:'rgba(0,229,255,0.8)'}},
+  ninja:{icon:'🥷',name:'Ninja',price:280,hero:{cap:'#212121',capTop:'#616161',body:'#263238',strap:'#e53935',boots:'#111111',mask:true,cape:'#e53935'}},
+  astronaut:{icon:'🧑‍🚀',name:'Astronaut',price:300,hero:{cap:'#eceff1',capTop:'#ffffff',body:'#cfd8dc',strap:'#ff7043',skin:'#eceff1',boots:'#90a4ae',visor:true}},
+  regenbogen:{icon:'🌈',name:'Regenbogen-Läufer',price:540,rarity:'mythic',desc:'Hinterlässt beim Laufen und Springen einen Regenbogen-Schweif',hero:{cap:'#ff2fd0',capTop:'#ffffff',body:'#7c4dff',strap:'#ffea00',boots:'#00e5ff',trail:'rainbow',glow:'rgba(255,47,208,0.6)'}},
+  golden:{icon:'✨',name:'Goldener Held',price:580,rarity:'mythic',desc:'Golden glänzend mit funkelndem Schweif',hero:{cap:'#ffd54f',capTop:'#fff8e1',body:'#ffb300',strap:'#fff8e1',skin:'#ffe0b2',boots:'#bf8a00',trail:'gold',glow:'rgba(255,213,79,0.8)'}}
+};
+/* Kleines Bild des Helden (für Vorschau im Shop) */
+function zcHeroSvg(h,size){
+  const d={cap:'#ffb300',capTop:'#ffe082',body:'#3f6fe6',strap:'#ffd54f',skin:'#ffdcb8',boots:'#5d4037'};
+  const c=Object.assign({},d,h||{}),w=size||32,ht=Math.round(w*1.25);
+  return`<svg viewBox="0 0 32 40" width="${w}" height="${ht}" style="display:block;${c.glow?`filter:drop-shadow(0 0 4px ${c.glow})`:''}">
+    ${c.cape?`<path d="M9 19 L1 26 L9 33 Z" fill="${c.cape}"/>`:''}
+    <rect x="8" y="33" width="7" height="5" rx="2" fill="${c.boots}"/><rect x="17" y="33" width="7" height="5" rx="2" fill="${c.boots}"/>
+    <rect x="8" y="20" width="16" height="14" rx="5" fill="${c.body}"/><circle cx="13" cy="25" r="1.7" fill="${c.strap}"/><circle cx="19" cy="25" r="1.7" fill="${c.strap}"/>
+    <circle cx="16" cy="13" r="8.5" fill="${c.skin}"/>
+    <path d="M7.5 12 A8.5 8.5 0 0 1 24.5 12 Z" fill="${c.cap}"/><rect x="15" y="9" width="11" height="3.5" fill="${c.cap}"/><circle cx="13" cy="6.5" r="1.8" fill="${c.capTop}"/>
+    ${c.mask?`<rect x="7.5" y="11.5" width="17" height="5" fill="rgba(20,20,30,0.9)"/>`:''}
+    ${c.visor?`<rect x="14" y="8.5" width="11" height="8" rx="3.5" fill="rgba(120,200,255,0.85)"/>`:`<circle cx="19.5" cy="13" r="2.4" fill="#fff"/><circle cx="20.3" cy="13" r="1.2" fill="#222"/>`}
+  </svg>`;
+}
+const ZC_COLL={jskin:ZC_JSKINS,skin:ZC_SKINS,title:ZC_TITLES,conf:ZC_CONFETTI,pack:ZC_PACKS,frame:ZC_FRAMES,banner:ZC_BANNERS,bg:ZC_BACKGROUNDS,bchess:ZC_BOARDS.chess,bvg:ZC_BOARDS.vg,bdice:ZC_BOARDS.dice,bmem:ZC_BOARDS.mem};
+const ZC_TABS=[['home','🎡 Rotation'],['bundle','🎁 Sets'],['skin','🎨 Themes'],['frame','🖼️ Rahmen'],['banner','🏳️ Banner'],['bg','🌌 Hintergrund'],['jskin','🏃 Helden'],['title','🏷️ Titel'],['conf','🎊 Konfetti'],['pack','🔊 Sound'],['board','🎲 Spielbretter'],['set','⚙️ Sonstiges']];
 const ZC_BOARD_KINDS=[['bchess','♟️ Schach'],['bvg','🔴 Vier gewinnt'],['bdice','🎲 Kniffel-Würfel'],['bmem','🃏 Memory-Rücken']];
 let zcShopTab='home';
 
@@ -415,6 +443,7 @@ function zcPassItems(){
   if(zcPassItemsSeason===sn&&zcPassItemsCache)return zcPassItemsCache;
   const pool=[];
   Object.keys(ZC_COLL).forEach(kind=>Object.entries(ZC_COLL[kind]).forEach(([id,it])=>{
+    if(kind==='jskin')return;   // Helden-Skins gehören nicht in den Saison-Pass (Belohnungen bleiben stabil)
     if(it.req||it.limited||it.custom||it.price<=0)return;
     const rk=zcRarityKey(it);if(rk==='mythic'||rk==='admin')return;
     pool.push({kind,id,price:it.price});
@@ -544,6 +573,7 @@ function zcItemPreviewBig(kind,it){
   if(kind==='bmem')return`<span style="display:inline-flex;width:64px;height:88px;border-radius:8px;align-items:center;justify-content:center;font-size:34px;background:${it.bg}${it.glowAnim?`;animation:zcGlowPulse 1.8s ease-in-out infinite;--myth-glow:${it.glowColor||'#ff2fd0'}`:''}">${it.back}</span>`;
   if(kind==='title'&&it.anim)return`<span style="font-size:22px;font-weight:800;background:linear-gradient(90deg,#ff2fd0,#7c4dff,#00e5ff,#00e676,#ffea00,#ff2fd0);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:zcGradShift 3s linear infinite">${it.icon} ${it.name}</span>`;
   if(kind==='title')return`<span style="font-size:22px;font-weight:800;color:var(--accent)">${it.icon} ${it.name}</span>`;
+  if(kind==='jskin')return`<div style="display:flex;justify-content:center;padding:6px 0">${zcHeroSvg(it.hero,84)}</div>`;
   if(kind==='bg')return`<div style="width:100%;height:90px;border-radius:12px;position:relative;overflow:hidden;background:#0a0a1a;box-shadow:inset 0 0 20px rgba(0,0,0,0.4)"><div style="position:absolute;inset:0;opacity:0.8;background-image:radial-gradient(1.4px 1.4px at 15% 25%,#fff,transparent),radial-gradient(1.4px 1.4px at 75% 20%,#fff,transparent),radial-gradient(1px 1px at 45% 60%,#fff,transparent),radial-gradient(1.4px 1.4px at 85% 70%,#fff,transparent),radial-gradient(1px 1px at 25% 80%,#fff,transparent),radial-gradient(1px 1px at 60% 40%,#fff,transparent);animation:zcTwinkle 3s ease-in-out infinite alternate"></div></div>`;
   return'';
 }
@@ -664,6 +694,7 @@ function zcItemPreview(kind,id,it,name){
   if(kind==='bchess')return box('',`background:conic-gradient(${it.l} 25%,${it.d} 0 50%,${it.l} 0 75%,${it.d} 0)`);
   if(kind==='bvg')return box('',`background:#1565c0`).replace('></span>',`><span style="width:22px;height:22px;border-radius:50%;${it.disc('#e53935',true)}"></span></span>`);
   if(kind==='bmem')return box(it.back,`background:${it.bg}`);
+  if(kind==='jskin')return box(zcHeroSvg(it.hero,26),'background:var(--bg)');
   return box(it.icon,'background:var(--bg)');
 }
 function zcShopBody(name,k,coins){
