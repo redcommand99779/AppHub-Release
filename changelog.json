@@ -82,5 +82,16 @@
       "Level-Galerie: geprüfte Level mit einem Klick spielen oder als Vorlage in den Editor laden.",
       "Shop: 8 weitere Helden-Skins und neuer Reiter „💥 Slam-Effekte“."
     ]
+  },
+  {
+    "id": 8,
+    "date": "25.09.2026",
+    "title": "Super Jumper: Mini-Bosse, neue Power-ups und Wetter",
+    "items": [
+      "Mini-Bosse in Level 2 (Wichtel wirft Steine) und Level 5 (Yeti lässt Eiszapfen fallen).",
+      "Neue Power-ups: 🔥 Feuerball (mit X oder F schießen), 🍄 Riese (zerschlägt Ziegel und besiegt Gegner, fängt einen Treffer ab) und ⭐ Stern (8 Sekunden unverwundbar).",
+      "Wetter: Regen und Gewitter machen den Boden rutschig, Nebel sorgt für Atmosphäre, im Sturm schieben dich Böen. Auch im Level-Editor einstellbar.",
+      "Behoben: Dauerndes Bildwackeln im Spiel."
+    ]
   }
 ]

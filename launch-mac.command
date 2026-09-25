@@ -41,6 +41,11 @@ fi
 
 URL="file://$HERE/AppHub.html"
 
+CHROME_BIN="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+CHROME_BIN_USER="$HOME/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+EDGE_BIN="/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
+EDGE_BIN_USER="$HOME/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
+
 # Lokalen Server starten (speichert alle Daten in appdata.json im App-Ordner).
 PORT=8080
 # Perl ist auf jedem Mac vorinstalliert (Python nicht unbedingt) - deshalb laeuft der Server in Perl.
@@ -53,17 +58,20 @@ if [ -n "$PERL" ] && [ -f "$HERE/server.pl" ]; then
   fi
   if ping_ok; then
     [ -n "$PULL_PID" ] && wait $PULL_PID 2>/dev/null
-    if [ -f "$HERE/appdata.migrated" ]; then URL="http://localhost:$PORT/AppHub.html"; else URL="$URL?migrate=1"; fi
+    if [ -f "$HERE/appdata.migrated" ]; then URL="http://localhost:$PORT/AppHub.html"
+    elif [ -x "$CHROME_BIN" ] || [ -x "$CHROME_BIN_USER" ] || [ -x "$EDGE_BIN" ] || [ -x "$EDGE_BIN_USER" ]; then URL="$URL?migrate=1"
+    else
+      # Safari & Co. erlauben der Datei-Seite (file://) keinen Zugriff auf den lokalen Server: dort nie ueber file:// starten,
+      # sonst gibt es weder Updates-Hinweis noch "Neu in AppHub" noch Speichern im App-Ordner. Neuinstallation -> direkt http.
+      curl -s -m 3 -X POST -H "Content-Type: application/json" -d '{"v":1,"t":0,"data":{}}' "http://127.0.0.1:$PORT/api/data?migrate=1" >/dev/null 2>&1
+      URL="http://localhost:$PORT/AppHub.html"
+    fi
   fi
 fi
 
 # Wichtig: Chrome/Edge direkt als Programm starten (nicht ueber "open -a").
 # "open -a ... --args" wird ignoriert, wenn der Browser schon im Hintergrund
 # laeuft - dann oeffnet sich nur ein normaler Tab statt eines App-Fensters.
-CHROME_BIN="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-CHROME_BIN_USER="$HOME/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-EDGE_BIN="/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
-EDGE_BIN_USER="$HOME/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
 
 if [ -x "$CHROME_BIN" ]; then
   "$CHROME_BIN" --app="$URL" &

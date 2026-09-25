@@ -4,18 +4,20 @@
    Der Editor benutzt die Engine aus jump-run.js (Zeichnen, Level-Bau, Test-Modus).
    Kacheln im Raster (Buchstaben):  . leer · # Boden · B Ziegel · ? Münzblock · a/b/c Power-Block (Schild/Feder/Magnet)
    T Röhre · W/V goldene Röhre (Geheimkammer 1/2) · s Stacheln · o Münze · e Gegner · K Checkpoint · F Ziel · P Start
+   g Feuerball · h Riese · i Stern (Power-Blöcke) · Wetter: Klar, Regen, Gewitter, Nebel, Sturm
    f Fledermaus · y Stachelkäfer · z Kanonenpflanze · C Bröckelplattform · J Feder · M bewegliche Plattform (4 Kacheln hin und her)
 ══════════════════════════════════ */
-const JR_ED_CHARS='.#B?abcTWVsoeKFPfyzCJM';
+const JR_ED_CHARS='.#B?abcghiTWVsoeKFPfyzCJM';
+const JR_ED_WEATHER=[['','☀️ Klar'],['rain','🌧️ Regen (rutschig)'],['storm','⛈️ Gewitter (rutschig)'],['fog','🌫️ Nebel'],['wind','💨 Sturm (Böen)']];
 const JR_ED_TOOLS=[
   ['.','⬜','Radierer'],['#','🟫','Boden'],['B','🧱','Ziegel'],['?','❓','Münzblock'],
-  ['a','🛡️','Power: Schild'],['b','🪶','Power: Doppelsprung'],['c','🧲','Power: Magnet'],
+  ['a','🛡️','Power: Schild'],['b','🪶','Power: Doppelsprung'],['c','🧲','Power: Magnet'],['g','🔥','Power: Feuerball'],['h','🍄','Power: Riese'],['i','⭐','Power: Stern'],
   ['T','🟩','Röhre'],['W','🟨','Goldene Röhre 1'],['V','🟧','Goldene Röhre 2'],
   ['s','🔺','Stacheln'],['o','🪙','Münze'],['e','👾','Gegner'],['K','🚩','Checkpoint'],['F','🏁','Ziel'],['P','🏃','Start'],
   ['f','🦇','Fledermaus (fliegt)'],['y','🐞','Stachelkäfer (nur per Slam)'],['z','🌵','Kanonenpflanze (schießt)'],['C','🟤','Bröckelplattform'],['J','🔴','Feder'],['M','↔️','Bewegliche Plattform']
 ];
 const JR_ED_MINW=24,JR_ED_MAXW=300;
-const jrEd={open:false,rows:null,w:60,theme:0,name:'Mein Level',time:300,tool:'#',cam:0,undo:[],paint:false,slot:1,hover:null,msg:''};
+const jrEd={open:false,rows:null,w:60,theme:0,weather:'',name:'Mein Level',time:300,tool:'#',cam:0,undo:[],paint:false,slot:1,hover:null,msg:''};
 
 /* ── Raster ── */
 function jrEdNewRows(w){
@@ -41,7 +43,7 @@ function jrLevelFromRows(rows,meta){
     const c=rows[y][x];
     if(c==='.')continue;
     if(c==='#'||c==='B'||c==='?'||c==='T'||c==='s'||c==='o'||c==='C'||c==='J')g[y][x]=c;
-    else if(c==='a'||c==='b'||c==='c'){g[y][x]='!';powers[x+','+y]={a:'shield',b:'feather',c:'magnet'}[c];}
+    else if('abcghi'.includes(c)){g[y][x]='!';powers[x+','+y]={a:'shield',b:'feather',c:'magnet',g:'fire',h:'giant',i:'star'}[c];}
     else if(c==='W'||c==='V'){g[y][x]='W';warps[x]=c==='W'?0:1;}
     else if(c==='e')enemies.push([x,y,'walk']);
     else if(c==='f')enemies.push([x,y,'fly']);
@@ -57,7 +59,7 @@ function jrLevelFromRows(rows,meta){
   for(let r=2;r<=9;r++)g[r][flagCol]='F';
   kCols.forEach(x=>{g[8][x]='K';g[9][x]='K';});
   const lv={w,g,enemies:enemies.map(([x,y,type])=>jrMakeEnemy(x,y,type)),movers,boss:null,gate:-1,bullets:[],
-    powers,warps,start:[start[0],Math.max(0,start[1]-1)],theme:meta.theme||0,time:meta.time||300,name:meta.name||'Eigenes Level',custom:true};
+    powers,warps,start:[start[0],Math.max(0,start[1]-1)],theme:meta.theme||0,time:meta.time||300,name:meta.name||'Eigenes Level',weather:meta.weather||'',custom:true};
   return {level:lv};
 }
 
@@ -70,6 +72,7 @@ function jrEdUnrle(str){
 }
 function jrEdEncode(ed){
   const payload={n:ed.name,t:ed.theme,tm:ed.time,r:ed.rows.map(jrEdRle)};
+  if(ed.weather)payload.wx=ed.weather;
   const json=JSON.stringify(payload);
   let b64;
   try{b64=btoa(unescape(encodeURIComponent(json)));}catch(e){b64=Buffer.from(json,'utf8').toString('base64');}
@@ -86,7 +89,7 @@ function jrEdDecode(code){
   const w=rows[0].length;
   if(w<JR_ED_MINW||w>JR_ED_MAXW||rows.some(r=>r.length!==w))throw new Error('Der Code hat falsche Maße.');
   if(rows.some(r=>r.some(c=>!JR_ED_CHARS.includes(c))))throw new Error('Der Code enthält unbekannte Kacheln.');
-  return {rows,w,theme:Math.max(0,Math.min(5,p.t|0)),time:Math.max(30,Math.min(999,p.tm|0||300)),name:String(p.n||'Eigenes Level').slice(0,30)};
+  return {rows,w,weather:JR_ED_WEATHER.some(x=>x[0]===p.wx)?p.wx:'',theme:Math.max(0,Math.min(5,p.t|0)),time:Math.max(30,Math.min(999,p.tm|0||300)),name:String(p.n||'Eigenes Level').slice(0,30)};
 }
 
 /* ── Speicherplätze ── */
@@ -100,7 +103,7 @@ function jrEdLoadSlot(n){
   const s=jrEdSlots()[n-1];if(!s)throw new Error('Platz '+n+' ist leer.');
   jrEdApply(jrEdDecode(s.code));
 }
-function jrEdApply(d){jrEd.rows=d.rows;jrEd.w=d.w;jrEd.theme=d.theme;jrEd.time=d.time;jrEd.name=d.name;jrEd.cam=0;jrEd.undo=[];}
+function jrEdApply(d){jrEd.rows=d.rows;jrEd.w=d.w;jrEd.theme=d.theme;jrEd.weather=d.weather||'';jrEd.time=d.time;jrEd.name=d.name;jrEd.cam=0;jrEd.undo=[];}
 
 /* ── Rückgängig ── */
 function jrEdSnap(){jrEd.undo.push(JSON.stringify(jrEd.rows));if(jrEd.undo.length>40)jrEd.undo.shift();}
@@ -139,7 +142,7 @@ function jrEdClose(){
 }
 function jrEdExit(){jrEdClose();if(typeof jrToMenu==='function')jrToMenu();}
 function jrEdTest(){
-  const r=jrLevelFromRows(jrEd.rows,{theme:jrEd.theme,time:jrEd.time,name:jrEd.name});
+  const r=jrLevelFromRows(jrEd.rows,{theme:jrEd.theme,time:jrEd.time,name:jrEd.name,weather:jrEd.weather});
   if(r.error){jrEd.msg='⚠️ '+r.error;jrEdUi();return;}
   jrEd.open=false;
   const bar=document.getElementById('jr-editor-bar');if(bar)bar.style.display='none';
@@ -194,7 +197,7 @@ function jrEdKey(e){
 /* ── Zeichnen ── */
 function jrEdDraw(ctx){
   const T=JR_T,cam=jrEd.cam,t=jrFrame;
-  const g=jrEd.rows.map(r=>r.map(c=>({a:'!',b:'!',c:'!',V:'W',e:'.',f:'.',y:'.',z:'.',M:'.',P:'.'}[c]||c)));
+  const g=jrEd.rows.map(r=>r.map(c=>({a:'!',b:'!',c:'!',V:'W',g:'!',h:'!',i:'!',e:'.',f:'.',y:'.',z:'.',M:'.',P:'.'}[c]||c)));
   const pst={level:{w:jrEd.w,g,theme:jrEd.theme,warps:{}},cam,bumps:{},checkpoint:null};
   jrFrame++;
   jrBackground(ctx,pst);
@@ -212,7 +215,7 @@ function jrEdDraw(ctx){
       ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('START',x+T/2,y+8);
     }
     else if(ch!=='.')jrDrawTile(ctx,pst,ch,tx,ty,x,y,t);
-    if(raw==='a'||raw==='b'||raw==='c'){ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText({a:'🛡️',b:'🪶',c:'🧲'}[raw],x+T/2,y+T-8);}
+    if('abcghi'.includes(raw)){ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText({a:'🛡️',b:'🪶',c:'🧲',g:'🔥',h:'🍄',i:'⭐'}[raw],x+T/2,y+T-8);}
     if(raw==='V'){ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('2',x+T/2,y+T/2+4);}
     if(raw==='W'){ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('1',x+T/2,y+T/2+4);}
   }
@@ -236,6 +239,7 @@ function jrEdBuildUi(){
     <div class="jr-ed-row">
       <input id="jr-ed-name" class="jr-ed-input" maxlength="30" value="${jrEd.name.replace(/"/g,'&quot;')}" oninput="jrEd.name=this.value" placeholder="Name des Levels"/>
       <select id="jr-ed-theme" class="jr-ed-input" onchange="jrEd.theme=+this.value">${['🌞 Wiese','🌇 Abend','🌙 Nacht','💎 Höhle','❄️ Schnee','🌋 Vulkan'].map((n,i)=>`<option value="${i}" ${jrEd.theme===i?'selected':''}>${n}</option>`).join('')}</select>
+      <select id="jr-ed-weather" class="jr-ed-input" title="Wetter" onchange="jrEd.weather=this.value">${JR_ED_WEATHER.map(([v,n])=>`<option value="${v}" ${jrEd.weather===v?'selected':''}>${n}</option>`).join('')}</select>
       ${btn('jr-ed-wm','− Breite','jrEdResize(jrEd.w-10)')}${btn('jr-ed-wp','+ Breite','jrEdResize(jrEd.w+10)')}
     </div>
     <div class="jr-ed-row">
@@ -279,7 +283,7 @@ function jrEdDoPaste(){
 function jrGalEntry(i){return (typeof JR_GALLERY!=='undefined'&&JR_GALLERY[i])||null;}
 function jrGalLoad(i){
   const e=jrGalEntry(i);if(!e)throw new Error('Level nicht gefunden.');
-  const d=jrEdDecode(e.code),r=jrLevelFromRows(d.rows,{theme:d.theme,time:d.time,name:d.name});
+  const d=jrEdDecode(e.code),r=jrLevelFromRows(d.rows,{theme:d.theme,time:d.time,name:d.name,weather:d.weather});
   if(r.error)throw new Error(r.error);
   return {entry:e,decoded:d,level:r.level};
 }

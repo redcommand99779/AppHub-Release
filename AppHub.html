@@ -265,6 +265,59 @@
     .nav-tab:hover{color:var(--text-2)}.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
     #screen-zentrale input[type=text]{transition:border-color .15s,box-shadow .15s}
     #screen-zentrale input[type=text]:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 0 3px var(--active-bg)}
+    /* Lern-Apps (Vokabeln, Mathe-Trainer, …) */
+    .lrn-wrap{padding:16px;max-width:760px;margin:0 auto}
+    .lrn-tabs{display:flex;gap:4px;background:var(--surface);border:0.5px solid var(--divider);border-radius:13px;padding:4px;margin-bottom:14px}
+    .lrn-tab{flex:1;padding:9px 8px;border:0;border-radius:10px;background:transparent;color:var(--text-2);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s,color .15s}
+    .lrn-tab:hover{background:var(--bg)}
+    .lrn-tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+    .lrn-card{background:var(--surface);border:0.5px solid var(--divider);border-radius:16px;padding:16px}
+    .lrn-deck.cur{border-color:var(--accent);box-shadow:0 0 0 2px var(--active-bg)}
+    .lrn-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px}
+    .lrn-chips{display:flex;flex-wrap:wrap;gap:7px}
+    .lrn-chip{padding:7px 13px;border-radius:18px;border:1.5px solid var(--divider);background:var(--bg);color:var(--text-2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s}
+    .lrn-chip:hover{border-color:var(--accent)}
+    .lrn-chip.active{background:var(--active-bg);border-color:var(--accent);color:var(--accent)}
+    .lrn-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px;margin-bottom:12px}
+    .lrn-tile{background:var(--bg);border:0.5px solid var(--divider);border-radius:12px;padding:10px 6px;text-align:center}
+    .lrn-tile b{display:block;font-size:20px;font-weight:800;color:var(--text)}
+    .lrn-tile span{font-size:11px;color:var(--text-3)}
+    .lrn-bar{height:8px;background:var(--divider);border-radius:4px;overflow:hidden;margin:2px 0}
+    .lrn-bar>div{height:100%;background:linear-gradient(90deg,var(--accent),#7c4dff);border-radius:4px;transition:width .3s}
+    .lrn-btn{padding:10px 18px;border:0;border-radius:11px;background:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:transform .1s,opacity .15s}
+    .lrn-btn:hover{opacity:.92}.lrn-btn:active{transform:scale(.98)}
+    .lrn-btn:disabled{opacity:.45;cursor:default}
+    .lrn-btn.ghost{background:var(--surface);color:var(--text-2);border:0.5px solid var(--divider);padding:8px 12px;font-weight:600}
+    .lrn-btn.good{background:#34c759}.lrn-btn.bad{background:#ff3b30}
+    .lrn-btn small{opacity:.75;font-weight:500}
+    .lrn-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .lrn-input{padding:10px 12px;background:var(--bg);border:0.5px solid var(--divider);border-radius:10px;font-size:14px;color:var(--text);outline:none;font-family:inherit;box-sizing:border-box}
+    .lrn-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--active-bg)}
+    .lrn-flash{background:var(--surface);border:0.5px solid var(--divider);border-radius:20px;padding:30px 20px;text-align:center;margin-bottom:12px;cursor:pointer;min-height:150px;box-shadow:0 4px 18px rgba(0,0,0,0.06);display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .lrn-big{font-size:30px;font-weight:800;line-height:1.2;word-break:break-word}
+    .lrn-sep{width:60%;height:1px;background:var(--divider);margin:16px 0 12px}
+    .lrn-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .lrn-choice{padding:14px 12px;border-radius:13px;border:1.5px solid var(--divider);background:var(--surface);color:var(--text);font-size:15px;font-weight:600;cursor:pointer;text-align:left;font-family:inherit;display:flex;align-items:center;gap:10px}
+    .lrn-choice span{width:22px;height:22px;border-radius:7px;background:var(--bg);font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--text-3);flex:none}
+    .lrn-choice:not(:disabled):hover{border-color:var(--accent)}
+    .lrn-choice.right{border-color:#34c759;background:rgba(52,199,89,0.13)}
+    .lrn-choice.wrong{border-color:#ff3b30;background:rgba(255,59,48,0.12)}
+    .lrn-result{padding:12px 14px;border-radius:12px;font-size:14px}
+    .lrn-result.good{background:rgba(52,199,89,0.14);color:#1e8e3e}.lrn-result.bad{background:rgba(255,59,48,0.12);color:#d93025}
+    .lrn-row{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:0.5px solid var(--divider);font-size:14px}
+    .lrn-row b{font-weight:700}.lrn-row span:not(.lrn-dots){color:var(--text-3);margin-left:10px}
+    .lrn-row.card{background:var(--surface);border:0.5px solid var(--divider);border-radius:12px;padding:8px 12px;margin-bottom:6px}
+    .lrn-dots{display:flex;gap:3px}.lrn-dots i{width:7px;height:7px;border-radius:50%;background:var(--divider)}.lrn-dots i.on{background:var(--accent)}
+    .lrn-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:9px;background:var(--active-bg);color:var(--accent);vertical-align:middle}
+    .lrn-msg{background:var(--active-bg);color:var(--accent);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:13px;font-weight:600}
+    .lrn-qbox{background:var(--surface);border:0.5px solid var(--divider);border-radius:20px;padding:26px 16px 18px;text-align:center;box-shadow:0 4px 18px rgba(0,0,0,0.06)}
+    .lrn-question{font-size:42px;font-weight:800;font-family:var(--mono);color:var(--text);margin-bottom:16px;line-height:1.15;word-break:break-word}
+    .lrn-answer{width:200px;max-width:100%;font-size:26px;text-align:center;font-family:var(--mono);font-weight:700}
+    .lrn-feedback{min-height:26px;margin-top:12px;font-size:16px;font-weight:700}
+    .lrn-feedback.good{color:#34c759}.lrn-feedback.bad{color:#ff3b30}.lrn-feedback.warn{color:var(--text-3)}.lrn-feedback.flash{font-size:20px}
+    .lrn-sprintbar{height:10px;background:var(--divider);border-radius:5px;overflow:hidden}.lrn-sprintbar>div{height:100%;background:linear-gradient(90deg,#ff9500,#ff3b30)}
+    .lrn-statrow{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:13px}.lrn-statrow .nm{width:150px;flex:none;color:var(--text)}.lrn-statrow .pc{width:80px;text-align:right;color:var(--text-3);flex:none;font-size:12px}
+    @media (max-width:520px){.lrn-choices,.lrn-two{grid-template-columns:1fr}.lrn-question{font-size:34px}.lrn-statrow .nm{width:110px}.lrn-big{font-size:26px}}
     /* Super Jumper – Editor */
     #jr-editor-bar{max-width:640px;margin-left:auto;margin-right:auto}
     .jr-ed-tools{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px}
@@ -1835,11 +1888,12 @@
             <button class="jr-pad" onpointerdown="jrTouch('right',true)" onpointerup="jrTouch('right',false)" onpointerleave="jrTouch('right',false)" oncontextmenu="return false">▶</button>
           </div>
           <div style="display:flex;gap:10px">
+            <button class="jr-pad" onpointerdown="jrTouch('fire',true)" oncontextmenu="return false" title="Feuerball (mit Feuer-Power-up)">🔥</button>
             <button class="jr-pad" onpointerdown="jrTouch('down',true)" onpointerup="jrTouch('down',false)" onpointerleave="jrTouch('down',false)" oncontextmenu="return false" title="Ducken / in der Luft: Slam">⬇</button>
             <button class="jr-pad jr-pad-jump" onpointerdown="jrTouch('jump',true)" onpointerup="jrTouch('jump',false)" onpointerleave="jrTouch('jump',false)" oncontextmenu="return false">⬆</button>
           </div>
         </div>
-        <div style="font-size:12px;color:var(--text-3);margin-top:12px;line-height:1.5">⌨️ ←/→ oder A/D laufen · Leertaste, ↑ oder W springen (länger halten = höher) · ↓ oder S ducken, in der Luft = <b>Slam</b> (zerstört Blöcke, besiegt Gegner in der Nähe) · <b>P</b> = Pause<br>🟨 Auf goldenen Röhren ↓ halten: Geheimkammer · 🟪 <b>!</b>-Blöcke geben Power-ups (🛡️ Schild, 🪶 Doppelsprung, 🧲 Magnet) · 🚩 Checkpoints · 🏆 Rekord: <strong id="jr-best">0</strong></div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:12px;line-height:1.5">⌨️ ←/→ oder A/D laufen · Leertaste, ↑ oder W springen (länger halten = höher) · ↓ oder S ducken, in der Luft = <b>Slam</b> (zerstört Blöcke, besiegt Gegner in der Nähe) · <b>X</b> oder <b>F</b> = Feuerball · <b>P</b> = Pause<br>🟨 Auf goldenen Röhren ↓ halten: Geheimkammer · 🟪 <b>!</b>-Blöcke geben Power-ups (🛡️ Schild, 🪶 Doppelsprung, 🧲 Magnet) · 🚩 Checkpoints · 🏆 Rekord: <strong id="jr-best">0</strong></div>
       </div>
 
     </div>
@@ -1969,19 +2023,7 @@
         <span class="title-text" style="flex:1;text-align:center">Vokabeln</span>
       </div>
     </div>
-    <div style="padding:20px;max-width:800px;margin:0 auto">
-
-      <div style="text-align:center;padding:10px 0">
-        <div id="vok-card" style="background:var(--surface);border:0.5px solid var(--divider);border-radius:16px;padding:40px;margin-bottom:20px;min-height:120px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:600;color:var(--text)" onclick="vokFlip()">Klicken zum Starten</div>
-        <div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px">
-          <button class="timer-btn" onclick="vokWrong()" style="padding:10px 24px;background:rgba(255,59,48,0.1);border-color:rgba(255,59,48,0.3);color:#ff3b30">✗ Falsch</button>
-          <button class="btn-generate" onclick="vokCorrect()" style="padding:10px 24px;width:auto">✓ Richtig</button>
-        </div>
-        <div style="font-size:13px;color:var(--text-3)" id="vok-stats">0 gelernt · 0 noch offen</div>
-        <button class="timer-btn" onclick="vokAdd()" style="padding:7px 16px;margin-top:12px">+ Neue Vokabel</button>
-      </div>
-
-    </div>
+    <div class="lrn-wrap"><div id="vok-root"></div></div>
   </div>
 
   <div class="screen" id="screen-mathe">
@@ -1991,29 +2033,7 @@
         <span class="title-text" style="flex:1;text-align:center">Mathe-Trainer</span>
       </div>
     </div>
-    <div style="padding:20px;max-width:800px;margin:0 auto">
-
-      <div style="text-align:center;padding:10px 0">
-        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px;flex-wrap:wrap">
-          <select id="math-level" onchange="mathNew()" style="padding:7px 10px;background:var(--surface);border:0.5px solid var(--divider);border-radius:8px;font-size:13px;color:var(--text);outline:none;cursor:pointer">
-            <option value="1">Leicht (1-10)</option><option value="2" selected>Mittel (1-50)</option><option value="3">Schwer (1-100)</option><option value="4">Höhere Mathematik</option>
-          </select>
-          <div style="display:flex;gap:6px">
-            <button class="units-cat-btn active" id="math-op-all" onclick="mathSetOp('all')">±×÷</button>
-            <button class="units-cat-btn" id="math-op-+" onclick="mathSetOp('+')">+</button>
-            <button class="units-cat-btn" id="math-op--" onclick="mathSetOp('-')">−</button>
-            <button class="units-cat-btn" id="math-op-×" onclick="mathSetOp('×')">×</button>
-            <button class="units-cat-btn" id="math-op-÷" onclick="mathSetOp('÷')">÷</button>
-          </div>
-        </div>
-        <div style="font-size:40px;font-weight:700;font-family:var(--mono);margin-bottom:20px;color:var(--text)" id="math-question">Bereit?</div>
-        <input type="number" id="math-answer" placeholder="Antwort…" style="width:160px;padding:12px;background:var(--surface);border:0.5px solid var(--divider);border-radius:10px;font-size:20px;text-align:center;color:var(--text);outline:none;font-family:var(--mono)" onkeydown="if(event.key==='Enter')mathCheck()"/>
-        <div style="margin-top:12px"><button class="btn-generate" onclick="mathCheck()" style="padding:10px 24px;width:auto">Prüfen</button></div>
-        <div style="margin-top:10px;font-size:16px;font-weight:600;min-height:24px" id="math-feedback"></div>
-        <div style="margin-top:8px;font-size:13px;color:var(--text-3)">Richtig: <strong id="math-correct">0</strong> | Falsch: <strong id="math-wrong">0</strong></div>
-      </div>
-
-    </div>
+    <div class="lrn-wrap"><div id="math-root"></div></div>
   </div>
 
   <div class="screen" id="screen-typing">
@@ -3549,7 +3569,7 @@ function goTo(id){
   if(id==='viergewinnt') vgNew();
   if(id==='maumau') mmNew();
   if(id==='vokabeln') vokInit();
-  if(id==='mathe') mathNew();
+  if(id==='mathe') mathInit();
   if(id==='typing') typingNew();
   if(id==='laenderquiz') lqInit();
   if(id==='flaggenquiz') fqInit();

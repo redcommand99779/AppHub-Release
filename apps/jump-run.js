@@ -11,6 +11,7 @@ const JR_T=32,JR_W=640,JR_H=384,JR_ROWS=12;
 const JR_GRAV=0.5,JR_JUMP=11.2,JR_MAXFALL=12,JR_MAXV=3.4,JR_SLAM=14;
 const JR_H_STAND=34,JR_H_DUCK=20;
 const JR_SPRING=15.5;
+const JR_STAR_FRAMES=480;    // Stern: 8 Sekunden unverwundbar
 const JR_POWER_FRAMES=1800;   // Feder und Magnet halten 30 Sekunden
 
 /* ── Eigene Klänge (werden beim ersten Start beim Sound-System angemeldet) ── */
@@ -52,10 +53,11 @@ function jrMakeEnemy(x,y,type){
   if(type==='spiky')return {type,sp:0.5,x:x*T+3,y:(y+1)*T-24,w:26,h:24,vx:-0.5,dir:-1,alive:true,squash:0};
   return {type:'walk',x:x*T+3,y:(y+1)*T-24,w:26,h:24,vx:-0.8,dir:-1,alive:true,squash:0};
 }
-/* Bosse: golem (Sprung-Angriff, 3 Leben) und drake (schießt Feuerbälle und stürmt, 5 Leben) */
+/* Bosse: imp (Mini-Boss: wirft Steine, 2 Leben), golem (Sprung-Angriff, 3), yeti (Sprünge + Eiszapfen, 3), drake (Feuerbälle + Ansturm, 5) */
+const JR_BOSS_DIMS={golem:[56,56,3],drake:[64,44,5],imp:[44,44,2],yeti:[54,58,3]};
 function jrMakeBoss(type,col){
-  const T=JR_T,drake=type==='drake',w=drake?64:56,h=drake?44:56,hp=drake?5:3;
-  return {type:drake?'drake':'golem',x:col*T,y:10*T-h,sx:col*T,sy:10*T-h,w,h,hp,maxhp:hp,vx:0,vy:0,dir:-1,inv:0,alive:true,cd:120,mode:'walk',t:0};
+  const T=JR_T,[w,h,hp]=JR_BOSS_DIMS[type]||JR_BOSS_DIMS.golem;type=JR_BOSS_DIMS[type]?type:'golem';
+  return {type,x:col*T,y:10*T-h,sx:col*T,sy:10*T-h,w,h,hp,maxhp:hp,vx:0,vy:0,dir:-1,inv:0,alive:true,cd:120,mode:'walk',t:0};
 }
 function jrBuild(spec){
   const w=spec.w,g=Array.from({length:JR_ROWS},()=>Array(w).fill('.'));
@@ -85,7 +87,7 @@ function jrBuild(spec){
     boss.minX=l*JR_T;boss.maxX=(spec.gate!=null?spec.gate:w)*JR_T-boss.w;
   }
   return {w,g,enemies,movers,boss,gate:spec.gate!=null?spec.gate:-1,
-    powers,warps,start:spec.start||[2,8],theme:spec.theme||0,time:spec.time||300,name:spec.name};
+    powers,warps,start:spec.start||[2,8],theme:spec.theme||0,time:spec.time||300,name:spec.name,weather:spec.weather||''};
 }
 const JR_SPECS=[
   {name:'Grüne Wiesen',theme:0,w:112,flag:106,time:300,
@@ -101,20 +103,20 @@ const JR_SPECS=[
    coins:[[25,7],[26,6],[54,7],[55,6],[81,7],[82,6]],
    enemies:[[16,9],[32,9],[42,9],[62,9],[74,9],[90,9],[98,9]],
    stairs:[[100,4]]},
-  {name:'Abendrot-Schlucht',theme:1,w:136,flag:130,time:300,
-   ground:[[0,17],[21,38],[42,58],[62,80],[84,100],[104,122],[125,135]],
-   checkpoint:[64],
+  {name:'Abendrot-Schlucht',theme:1,w:160,flag:157,time:300,weather:'rain',
+   ground:[[0,17],[21,38],[42,58],[62,80],[84,100],[104,122],[125,135],[138,159]],
+   checkpoint:[64,140],
+   boss:{type:'imp',x:147},gate:154,
    tunnels:[[43,3]],
-   platforms:[[8,7,4,'B'],[26,7,5,'B'],[48,7,4,'B'],[68,7,4,'B'],[90,7,5,'B'],[110,7,4,'B']],
+   platforms:[[8,7,4,'B'],[26,7,5,'B'],[48,7,4,'B'],[68,7,4,'B'],[90,7,5,'B'],[110,7,4,'B'],[127,7,4,'B']],
    blocks:[[9,7],[28,7],[49,7],[92,7],[112,7]],
-   power:[[70,7,'feather']],
+   power:[[70,7,'feather'],[129,7,'fire']],
    pipes:[[14,2],[54,2],[76,3],[96,2],[116,3]],
    warps:[[34,3,1]],
-   coinRows:[[8,6,4],[26,6,5],[48,6,4],[68,6,4],[90,6,5],[110,6,4]],
+   coinRows:[[8,6,4],[26,6,5],[48,6,4],[68,6,4],[90,6,5],[110,6,4],[127,6,4],[143,7,6]],
    coins:[[19,5],[40,5],[59,5],[81,5],[101,5],[123,5]],
-   enemies:[[10,9],[24,9],[30,9],[46,9],[52,9],[66,9],[72,9],[88,9],[94,9],[108,9],[114,9]],
-   stairs:[[126,4]]},
-  {name:'Mitternachts-Burg',theme:2,w:170,flag:164,time:260,
+   enemies:[[10,9],[24,9],[30,9],[46,9],[52,9],[66,9],[72,9],[88,9],[94,9],[108,9],[114,9]]},
+  {name:'Mitternachts-Burg',theme:2,weather:'storm',w:170,flag:164,time:260,
    ground:[[0,14],[18,32],[36,50],[54,68],[72,86],[90,104],[108,122],[126,140],[144,168]],
    checkpoint:[75,145],
    boss:{type:'golem',x:152},gate:160,
@@ -133,7 +135,7 @@ const JR_SPECS=[
 /* Generator für die Level 4–6: gleichmäßige Abschnitte (je 15 Kacheln) mit einem Merkmal pro Abschnitt.
    Regeln, damit alles schaffbar bleibt: Landezone am Anfang frei, Stacheln nie unter Plattformen,
    keine Gegner in Stachel-Abschnitten, Löcher höchstens 3 Kacheln breit. */
-function jrGenSpec(name,theme,time,plan,gaps){
+function jrGenSpec(name,theme,time,plan,gaps,weather){
   const L=15,ground=[],platforms=[],blocks=[],power=[],pipes=[],warps=[],spikes=[],coinRows=[],coins=[],enemies=[],stairs=[],tunnels=[],checkpoint=[],movers=[],springs=[];
   let x=0,flag=0,boss=null,gate=null;
   plan.forEach((kind,i)=>{
@@ -163,12 +165,12 @@ function jrGenSpec(name,theme,time,plan,gaps){
     x=b+1+gaps[i%gaps.length];
   });
   const w=x-gaps[(plan.length-1)%gaps.length]+0;
-  return {name,theme,time,w:Math.max(w,flag+3),flag,ground,platforms,blocks,power,pipes,warps,spikes,coinRows,coins,enemies,stairs,tunnels,checkpoint,movers,springs,boss,gate};
+  return {name,theme,time,weather:weather||'',w:Math.max(w,flag+3),flag,ground,platforms,blocks,power,pipes,warps,spikes,coinRows,coins,enemies,stairs,tunnels,checkpoint,movers,springs,boss,gate};
 }
 JR_SPECS.push(
-  jrGenSpec('Kristallhöhle',3,300,['start','plain','pipe','crumble','spikes','fly','tunnel','checkpoint','warp:1','stairs','spring:feather','spikes','mover','plain','finish'],[2,3,3,3,3,3,3]),
-  jrGenSpec('Schneegipfel',4,290,['start','plain','pipe:3','spikes','spiky','stairs','power:magnet','tunnel','checkpoint','spikes:3','plain','warp:0','shoot','pipe:3','fly','spikes','finish'],[3,3,3,3,3,3,3]),
-  jrGenSpec('Vulkan-Festung',5,280,['start','enemies','spikes:3','pipe:3','power:shield','spiky','spikes','tunnel','checkpoint','stairs','spikes:3','warp:1','spring:magnet','shoot','pipe:3','spikes:3','crumble','plain','arena:drake'],[3,3,3,3,3,3,3])
+  jrGenSpec('Kristallhöhle',3,300,['start','power:giant','pipe','crumble','spikes','fly','tunnel','checkpoint','warp:1','stairs','spring:feather','spikes','mover','plain','finish'],[2,3,3,3,3,3,3],'fog'),
+  jrGenSpec('Schneegipfel',4,290,['start','plain','pipe:3','spikes','spiky','stairs','power:magnet','tunnel','checkpoint','spikes:3','power:fire','warp:0','shoot','pipe:3','fly','spikes','arena:yeti'],[3,3,3,3,3,3,3],'wind'),
+  jrGenSpec('Vulkan-Festung',5,280,['start','enemies','spikes:3','pipe:3','power:shield','spiky','spikes','tunnel','checkpoint','stairs','spikes:3','warp:1','spring:magnet','shoot','pipe:3','spikes:3','crumble','power:star','arena:drake'],[3,3,3,3,3,3,3])
 );
 
 /* Geheimkammern (Bonusräume): über goldene Röhren erreichbar, Ausgang = Röhre rechts */
@@ -189,7 +191,7 @@ JR_BONUS.forEach(L=>{L.bonus=true;});
 
 /* ── Zustand ── */
 let jrState=null,jrRaf=null,jrLast=0,jrAcc=0,jrFrame=0;
-const jrIn={left:false,right:false,jump:false,jumpHeld:false,down:false,downPress:false};
+const jrIn={left:false,right:false,jump:false,jumpHeld:false,down:false,downPress:false,fire:false};
 function jrLoad(k,d){try{const v=localStorage.getItem(k);return v===null?d:parseInt(v,10)||d;}catch(e){return d;}}
 function jrSave(k,v){try{localStorage.setItem(k,String(v));}catch(e){}}
 
@@ -222,7 +224,7 @@ function jrGalDone(){return jrProf().gal||[];}
 function jrCountCoins(L){let n=0;for(const r of L.g)for(const c of r)if(c==='o')n++;return n;}
 
 function jrCloneFrom(L,idx){
-  return {idx,w:L.w,g:L.g.map(r=>r.slice()),theme:L.theme,name:L.name,bonus:!!L.bonus,custom:!!L.custom,
+  return {idx,w:L.w,g:L.g.map(r=>r.slice()),theme:L.theme,name:L.name,weather:L.weather||'',bonus:!!L.bonus,custom:!!L.custom,
     enemies:L.enemies.map(e=>({...e})),start:L.start.slice(),time:L.time,
     powers:Object.assign({},L.powers||{}),warps:Object.assign({},L.warps||{}),
     movers:(L.movers||[]).map(m=>({...m})),boss:L.boss?{...L.boss}:null,gate:L.gate!=null?L.gate:-1,bullets:[]};
@@ -230,19 +232,19 @@ function jrCloneFrom(L,idx){
 function jrCloneLevel(idx){return jrCloneFrom(JR_LEVELS[idx],idx);}
 function jrPlayerAt(level){
   return {x:level.start[0]*JR_T+5,y:level.start[1]*JR_T,w:22,h:JR_H_STAND,vx:0,vy:0,onGround:false,face:1,coyote:0,jbuf:0,anim:0,
-    duck:false,slam:false,nocut:false,riding:null,inv:0,shield:false,feather:0,magnet:0,dj:false,sg:0,warpT:0};
+    duck:false,slam:false,nocut:false,riding:null,inv:0,shield:false,feather:0,magnet:0,dj:false,sg:0,warpT:0,fire:0,star:0,giant:false};
 }
 /* Neues Spiel (idx = Startlevel) */
 function jrNewState(idx){
   const n=JR_LEVELS.length,lvl=jrCloneLevel(Math.max(0,Math.min(n-1,idx||0)));
   return {mode:'menu',level:lvl,p:jrPlayerAt(lvl),cam:0,coins:0,score:0,lives:3,timeLeft:lvl.time,frames:0,paused:false,fade:0,
-    popups:[],fx:[],shake:0,shock:null,checkpoint:null,stack:[],crumbs:{},regrow:[],custom:false,customSrc:null,timer:0,bumps:{},sel:Math.max(0,Math.min(n-1,idx||0)),
+    popups:[],fx:[],fireballs:[],shake:0,shock:null,checkpoint:null,stack:[],crumbs:{},regrow:[],custom:false,customSrc:null,timer:0,bumps:{},sel:Math.max(0,Math.min(n-1,idx||0)),
     best:jrProf().best,unlocked:Math.max(1,Math.min(n,jrProf().unlocked)),done:jrProf().done,stars:jrProf().stars,times:jrProf().times,msg:'',lvDeaths:0,coinInit:jrCountCoins(lvl),clearInfo:null};
 }
 /* Level (neu) laden, Fortschritt (Münzen, Punkte, Leben) bleibt */
 function jrLoadLevel(st,idx){
   st.level=st.customSrc?jrCloneFrom(st.customSrc,-1):jrCloneLevel(idx);
-  st.p=jrPlayerAt(st.level);st.cam=0;st.timeLeft=st.level.time;st.frames=0;st.lvDeaths=0;st.coinInit=jrCountCoins(st.level);st.clearInfo=null;st.popups=[];st.bumps={};st.fx=[];st.shake=0;st.shock=null;st.checkpoint=null;st.stack=[];st.crumbs={};st.regrow=[];
+  st.p=jrPlayerAt(st.level);st.cam=0;st.timeLeft=st.level.time;st.frames=0;st.lvDeaths=0;st.coinInit=jrCountCoins(st.level);st.clearInfo=null;st.popups=[];st.bumps={};st.fx=[];st.shake=0;st.shock=null;st.checkpoint=null;st.stack=[];st.crumbs={};st.regrow=[];st.fireballs=[];
 }
 function jrStart(idx){
   const keep=jrState;
@@ -328,6 +330,8 @@ function jrStep(st,inp){
   if(p.sg>0)p.sg--;
   if(p.feather>0)p.feather--;
   if(p.magnet>0)p.magnet--;
+  if(p.fire>0)p.fire--;
+  if(p.star>0)p.star--;
   jrUpdateMovers(st);
   if(p.riding){const m=p.riding;if(p.x+p.w>m.x&&p.x<m.x+m.w&&Math.abs(p.y+p.h-m.y)<5){p.x+=m.dx;p.y+=m.dy;}else p.riding=null;}
   // Ducken (nur am Boden). Aufstehen nur, wenn über dem Kopf Platz ist.
@@ -340,8 +344,11 @@ function jrStep(st,inp){
   }
   // Slam-Attacke: in der Luft ↓ drücken -> mit Wucht senkrecht nach unten
   if(inp.downPress){inp.downPress=false;if(!p.onGround&&!p.slam&&!p.duck){p.slam=true;p.vx=0;p.jbuf=0;jrSfx('jrSlam');}}
+  // Feuerball (Power-up)
+  if(inp.fire){inp.fire=false;if(p.fire>0&&st.fireballs.length<3){st.fireballs.push({x:p.x+p.w/2+p.face*12,y:p.y+p.h*0.45,vx:p.face*5.5,vy:0,t:130});jrSfx('jrShoot');}}
   // Eingabe -> Bewegung
-  const dir=(inp.right?1:0)-(inp.left?1:0),maxV=p.duck?1.3:JR_MAXV,acc=p.onGround?0.6:0.4;
+  const slip=st.level.weather==='rain'||st.level.weather==='storm';   // Regen: rutschiger Boden
+  const dir=(inp.right?1:0)-(inp.left?1:0),maxV=(p.duck?1.3:JR_MAXV)*(p.star>0?1.2:1),acc=p.onGround?(slip?0.4:0.6):0.4;
   if(p.slam)p.vx=0;
   else{
     if(dir){
@@ -350,8 +357,9 @@ function jrStep(st,inp){
       if(Math.abs(nv)>maxV)nv=Math.sign(nv)*Math.max(maxV,Math.abs(p.vx)-0.5);   // am Limit: nie schneller werden
       p.vx=nv;
     }
-    else p.vx*=p.onGround?0.78:0.96;
-    if(Math.abs(p.vx)<0.08)p.vx=0;
+    else p.vx*=p.onGround?(slip?0.92:0.78):0.96;
+    if(st.level.weather==='wind')p.vx+=Math.sin(st.frames/140)*0.06;   // Sturm: Böen schieben dich
+    if(Math.abs(p.vx)<0.08&&st.level.weather!=='wind')p.vx=0;
   }
   // Sprung: normal (mit Coyote-Zeit und Puffer) oder Doppelsprung mit der Feder
   const jumpPressed=!!inp.jump;
@@ -394,6 +402,7 @@ function jrStep(st,inp){
     }else if(c==='!'){
       st.level.g[ty][tx]='U';st.bumps[tx+','+ty]=10;
       jrGrantPower(st,st.level.powers[tx+','+ty]||'shield',tx*T+T/2,ty*T);
+    }else if(p.giant&&c==='B'){st.level.g[ty][tx]='.';st.score+=10;jrBurst(st,tx*T+T/2,ty*T+T/2,'#c8642a',8);jrSfx('jrBreak');
     }else{st.bumps[tx+','+ty]=8;jrSfx('jrBump');}
   });
   // Münzen (und Magnet), Stacheln, Checkpoint, Fahne
@@ -442,7 +451,8 @@ function jrStep(st,inp){
     // Berührung mit dem Spieler
     if(p.x<e.x+e.w&&p.x+p.w>e.x&&p.y<e.y+e.h&&p.y+p.h>e.y){
       const fromAbove=p.vy>0&&(p.y+p.h)-e.y<18;
-      if(e.type==='spiky'&&!(p.slam&&fromAbove)){if(p.inv<=0&&jrHurt(st,false))return;}
+      if(p.star>0||p.giant){jrKillEnemy(st,e,false);jrSfx('jrStomp');}
+      else if(e.type==='spiky'&&!(p.slam&&fromAbove)){if(p.inv<=0&&jrHurt(st,false))return;}
       else if(fromAbove){
         jrKillEnemy(st,e,p.slam);
         if(!p.slam){p.vy=inp.jumpHeld?-10.5:-8;p.onGround=false;p.nocut=true;}
@@ -451,6 +461,7 @@ function jrStep(st,inp){
     }
   }
   if(jrBulletsStep(st))return;
+  jrFireballsStep(st);
   if(jrBossStep(st,inp))return;
   // Popups / Wackeln
   st.popups.forEach(o=>{o.t--;o.y-=0.8;});st.popups=st.popups.filter(o=>o.t>0);
@@ -520,10 +531,29 @@ function jrShootStep(st,e){
     }else e.cd=30;
   }
 }
+/* Feuerbälle des Spielers: hüpfen über den Boden, besiegen Gegner und verletzen Bosse */
+function jrFireballsStep(st){
+  const T=JR_T;
+  for(const f of st.fireballs){
+    f.t--;f.vy+=0.35;
+    const nx=f.x+f.vx;
+    if(jrSolid(st,Math.floor(nx/T),Math.floor(f.y/T))){f.t=0;continue;}
+    f.x=nx;f.y+=f.vy;
+    const ty=Math.floor((f.y+5)/T);
+    if(f.vy>0&&jrSolid(st,Math.floor(f.x/T),ty)){f.y=ty*T-5;f.vy=-4.5;}
+    if(f.y>JR_ROWS*T)f.t=0;
+    for(const e of st.level.enemies){
+      if(e.alive&&f.x>e.x-4&&f.x<e.x+e.w+4&&f.y>e.y-4&&f.y<e.y+e.h+4){jrKillEnemy(st,e,false);f.t=0;jrBurst(st,f.x,f.y,'#ff9800',6);break;}
+    }
+    const b=st.level.boss;
+    if(f.t>0&&b&&b.alive&&b.inv<=0&&f.x>b.x&&f.x<b.x+b.w&&f.y>b.y&&f.y<b.y+b.h){jrBossHurt(st);f.t=0;jrBurst(st,f.x,f.y,'#ff9800',8);}
+  }
+  st.fireballs=st.fireballs.filter(f=>f.t>0);
+}
 function jrBulletsStep(st){
   const p=st.p,T=JR_T;
   for(const b of st.level.bullets){
-    b.x+=b.vx;b.y+=b.vy||0;b.t--;
+    b.x+=b.vx;b.y+=b.vy||0;if(b.g)b.vy+=b.g;b.t--;
     if(jrSolid(st,Math.floor(b.x/T),Math.floor(b.y/T)))b.t=0;
     else if(!b.hit&&b.x+b.r>p.x&&b.x-b.r<p.x+p.w&&b.y+b.r>p.y&&b.y-b.r<p.y+p.h&&p.inv<=0){b.hit=true;b.t=0;if(jrHurt(st,false))return true;}
   }
@@ -543,6 +573,15 @@ function jrBossStep(st,inp){
     if(b.onGround)b.dir=dirTo;
     b.vx=b.dir*(0.9*rage);
     if(--b.cd<=0&&b.onGround){b.vy=-11.5;b.cd=Math.max(70,150-(b.maxhp-b.hp)*25);b.vx=dirTo*3.2;jrSfx('jrSlam');}
+  }else if(b.type==='imp'){
+    b.t++;
+    if(b.onGround)b.dir=dirTo;
+    if(b.mode==='walk'){b.vx=b.dir*0.9*rage;if(b.t>110){b.mode='throw';b.t=0;}}
+    else{b.vx=0;if(b.t===22){st.level.bullets.push({x:b.x+b.w/2+b.dir*18,y:b.y+4,vx:b.dir*2.6,vy:-5.5,g:0.28,t:240,r:8,rock:true});jrSfx('jrShoot');}if(b.t>50){b.mode='walk';b.t=0;}}
+  }else if(b.type==='yeti'){
+    if(b.onGround)b.dir=dirTo;
+    b.vx=b.dir*(1.0*rage);
+    if(--b.cd<=0&&b.onGround){b.vy=-10.5;b.cd=Math.max(90,170-(b.maxhp-b.hp)*30);b.vx=dirTo*2.6;b.air=true;jrSfx('jrSlam');}
   }else{
     b.t++;
     if(b.mode==='walk'){b.dir=dirTo;b.vx=b.dir*1.1*rage;if(b.t>90){b.mode='shoot';b.t=0;}}
@@ -554,11 +593,16 @@ function jrBossStep(st,inp){
   const o=b,before=b.x;
   const rr=jrMove(st,{get x(){return o.x;},set x(v){o.x=v;},get y(){return o.y;},set y(v){o.y=v;},get vx(){return o.vx;},set vx(v){o.vx=v;},get vy(){return o.vy;},set vy(v){o.vy=v;},w:o.w,h:o.h});
   b.onGround=rr.ground;
+  if(b.type==='yeti'&&b.air&&rr.ground){ // Landung: Eiszapfen fallen von der Decke
+    b.air=false;st.shake=8;jrSfx('jrBoom');
+    [0,70*dirTo].forEach(o=>st.level.bullets.push({x:p.x+p.w/2+o,y:-10,vx:0,vy:1.5,g:0.1,t:220,r:7,icicle:true}));
+  }
   if(b.x<b.minX){b.x=b.minX;b.dir=1;}else if(b.x>b.maxX){b.x=b.maxX;b.dir=-1;}
   if(rr.hitX&&b.type==='drake'&&b.mode==='charge'){b.mode='rest';b.t=0;}
   // Kontakt mit dem Spieler
   if(p.x<b.x+b.w&&p.x+p.w>b.x&&p.y<b.y+b.h&&p.y+p.h>b.y){
     const above=p.vy>0&&(p.y+p.h)-b.y<26;
+    if(p.star>0&&b.inv<=0){jrBossHurt(st);return false;}
     if(above&&b.inv<=0){jrBossHurt(st);if(!p.slam){p.vy=-11;p.nocut=true;p.onGround=false;}return !b.alive?false:false;}
     else if(!above&&p.inv<=0){if(jrHurt(st,false))return true;}
   }
@@ -619,8 +663,11 @@ function jrCollectCoin(st,tx,ty){
   jrCheckLife(st);jrSfx('jrCoin');
 }
 function jrGrantPower(st,type,x,y){
-  const p=st.p,names={shield:'🛡️ Schild!',feather:'🪶 Doppelsprung!',magnet:'🧲 Münz-Magnet!'};
+  const p=st.p,names={shield:'🛡️ Schild!',feather:'🪶 Doppelsprung!',magnet:'🧲 Münz-Magnet!',fire:'🔥 Feuerball! (X oder F)',giant:'🍄 Riese!',star:'⭐ Unverwundbar!'};
   if(type==='shield')p.shield=true;
+  else if(type==='fire')p.fire=JR_POWER_FRAMES;
+  else if(type==='giant')p.giant=true;
+  else if(type==='star')p.star=JR_STAR_FRAMES;
   else if(type==='feather')p.feather=JR_POWER_FRAMES;
   else if(type==='magnet')p.magnet=JR_POWER_FRAMES;
   st.popups.push({x,y:y-4,t:70,txt:names[type]||'Power-up!'});
@@ -630,6 +677,13 @@ function jrGrantPower(st,type,x,y){
 /* Schaden: Schild fängt einen Treffer ab, sonst Tod. Gibt true zurück, wenn der Spieler gestorben ist. */
 function jrHurt(st,fromSpike){
   const p=st.p;
+  if(p.star>0)return false;   // Stern: nichts kann dich verletzen
+  if(p.giant){
+    p.giant=false;p.inv=90;p.sg=10;p.vy=-8;p.onGround=false;p.slam=false;p.nocut=true;
+    st.popups.push({x:p.x+p.w/2,y:p.y-6,t:40,txt:'Riese schrumpft!'});
+    jrBurst(st,p.x+p.w/2,p.y+p.h/2,'#ffb74d',12);jrSfx('jrShield');
+    return false;
+  }
   if(p.shield){
     p.shield=false;p.inv=90;p.sg=10;p.vy=-8;p.onGround=false;p.slam=false;p.nocut=true;
     st.popups.push({x:p.x+p.w/2,y:p.y-6,t:40,txt:'Schild weg!'});
@@ -692,7 +746,7 @@ function jrRespawn(st){
   st.cam=Math.max(0,Math.min(st.level.w*JR_T-JR_W,cp.x-JR_W/2));
   st.timeLeft=Math.max(st.timeLeft,120);st.fx=[];st.shake=0;st.shock=null;
   // Bröckelplattformen zurück, Kugeln weg, Boss zurück an den Start (seine Leben bleiben)
-  st.regrow.forEach(g=>{st.level.g[g.ty][g.tx]='C';});st.regrow=[];st.crumbs={};st.level.bullets=[];
+  st.regrow.forEach(g=>{st.level.g[g.ty][g.tx]='C';});st.regrow=[];st.crumbs={};st.level.bullets=[];st.fireballs=[];
   const bs=st.level.boss;if(bs&&bs.alive){bs.x=bs.sx;bs.y=bs.sy;bs.vx=0;bs.vy=0;bs.inv=0;bs.mode='walk';bs.t=0;bs.cd=120;}
 }
 function jrClear(st){
@@ -862,7 +916,9 @@ function jrDrawPlayer(ctx,st,t,sk){
   if(p.inv>0&&Math.floor(p.inv/4)%2===0)ctx.globalAlpha=0.35;
   // Füße bleiben am Boden: beim Ducken zusammengedrückt, beim Slam gestreckt
   ctx.translate(x+p.w/2,y+p.h);
+  if(p.giant)ctx.scale(1.35,1.35);
   if(sk.glow){ctx.shadowColor=sk.glow;ctx.shadowBlur=14;}
+  if(p.star>0){ctx.shadowColor='hsl('+((t*12)%360)+',100%,60%)';ctx.shadowBlur=20;}
   if(st.mode==='dying')ctx.rotate(0.3);
   if(p.duck)ctx.scale(1,0.62);
   if(p.slam){ctx.scale(0.86,1.22);ctx.fillStyle='rgba(255,255,255,0.55)';for(let i=0;i<3;i++)ctx.fillRect(-8+i*8,-46-i*4,3,22);}
@@ -931,6 +987,27 @@ function jrDrawEnemy(ctx,e,st,t){
   ctx.fillStyle='#111';ctx.beginPath();ctx.arc(x+8+e.dir*1.5,y+10,1.8,0,Math.PI*2);ctx.arc(x+18+e.dir*1.5,y+10,1.8,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle='#111';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+4,y+4);ctx.lineTo(x+11,y+7);ctx.moveTo(x+22,y+4);ctx.lineTo(x+15,y+7);ctx.stroke();
 }
+/* Wetter: Regen, Gewitter (mit Blitzen), Nebel, Sturm. Nur Optik – Regen macht den Boden rutschig, Sturm schiebt dich. */
+function jrDrawWeather(ctx,st,t){
+  const w=st.level.weather;if(!w)return;
+  ctx.save();
+  if(w==='rain'||w==='storm'){
+    ctx.fillStyle=w==='storm'?'rgba(8,12,32,0.28)':'rgba(20,30,60,0.14)';ctx.fillRect(0,0,JR_W,JR_H);
+    ctx.strokeStyle='rgba(200,225,255,0.55)';ctx.lineWidth=1.3;ctx.beginPath();
+    const n=w==='storm'?90:60;
+    for(let i=0;i<n;i++){const x=((i*53+t*(2+(i%3)))%(JR_W+60))-30,y=((i*97+t*(9+(i%4)))%(JR_H+40))-20;ctx.moveTo(x,y);ctx.lineTo(x-4,y+12);}
+    ctx.stroke();
+    if(w==='storm'){const k=t%380;if(k<5||(k>12&&k<16)){ctx.fillStyle='rgba(255,255,255,'+(k<5?0.5-k*0.08:0.3)+')';ctx.fillRect(0,0,JR_W,JR_H);}}
+  }else if(w==='fog'){
+    for(let i=0;i<3;i++){const y=JR_H*0.35+i*70+Math.sin(t*0.01+i)*10;const g=ctx.createLinearGradient(0,y-50,0,y+50);g.addColorStop(0,'rgba(200,220,255,0)');g.addColorStop(0.5,'rgba(200,220,255,0.17)');g.addColorStop(1,'rgba(200,220,255,0)');ctx.fillStyle=g;ctx.fillRect(0,y-50,JR_W,100);}
+  }else if(w==='wind'){
+    const gust=Math.sin(st.frames/140);
+    ctx.strokeStyle='rgba(255,255,255,'+(0.25+Math.abs(gust)*0.4)+')';ctx.lineWidth=1.5;ctx.beginPath();
+    for(let i=0;i<24;i++){const x=(((i*71+t*(4+(i%3)*2)*(gust>=0?1:-1))%JR_W)+JR_W)%JR_W,y=(i*53)%JR_H;ctx.moveTo(x,y);ctx.lineTo(x+(gust>=0?1:-1)*(16+Math.abs(gust)*26),y);}
+    ctx.stroke();
+  }
+  ctx.restore();
+}
 /* Boss zeichnen samt Lebensanzeige */
 function jrDrawBoss(ctx,st,t){
   const b=st.level.boss,x=Math.round(b.x-st.cam),y=Math.round(b.y);
@@ -944,6 +1021,22 @@ function jrDrawBoss(ctx,st,t){
     ctx.fillStyle='#ff5252';ctx.beginPath();ctx.arc(x+b.w/2-9+b.dir*3,y+12,4,0,Math.PI*2);ctx.arc(x+b.w/2+9+b.dir*3,y+12,4,0,Math.PI*2);ctx.fill();
     ctx.strokeStyle='#3e2723';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+b.w/2-14,y+5);ctx.lineTo(x+b.w/2-4,y+9);ctx.moveTo(x+b.w/2+14,y+5);ctx.lineTo(x+b.w/2+4,y+9);ctx.stroke();
     ctx.strokeStyle='rgba(255,183,77,0.7)';ctx.beginPath();ctx.moveTo(x+14,y+34);ctx.lineTo(x+22,y+40);ctx.lineTo(x+18,y+48);ctx.moveTo(x+40,y+30);ctx.lineTo(x+36,y+40);ctx.stroke();
+  }else if(b.type==='imp'){ // Wichtel
+    const f=b.dir;ctx.translate(x+b.w/2,y+b.h/2);ctx.scale(f,1);
+    ctx.fillStyle='#6a1b9a';jrRR(ctx,-18,-6,36,28,12);ctx.fill();
+    ctx.fillStyle='#8e24aa';ctx.beginPath();ctx.arc(0,-12,16,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#4a148c';ctx.beginPath();ctx.moveTo(-14,-22);ctx.lineTo(-8,-36);ctx.lineTo(-3,-24);ctx.moveTo(14,-22);ctx.lineTo(8,-36);ctx.lineTo(3,-24);ctx.fill();
+    ctx.fillStyle='#ffee58';ctx.beginPath();ctx.arc(-6,-13,4,0,Math.PI*2);ctx.arc(7,-13,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#111';ctx.beginPath();ctx.arc(-5,-13,2,0,Math.PI*2);ctx.arc(8,-13,2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#3e2723';ctx.fillRect(-14,20,10,5);ctx.fillRect(4,20,10,5);
+    if(b.mode==='throw'){ctx.fillStyle='#8d6e63';ctx.beginPath();ctx.arc(16,-22-Math.min(10,b.t/2),8,0,Math.PI*2);ctx.fill();}
+  }else if(b.type==='yeti'){
+    ctx.fillStyle='#eceff1';jrRR(ctx,x,y+14,b.w,b.h-14,14);ctx.fill();
+    ctx.fillStyle='#cfd8dc';jrRR(ctx,x+7,y,b.w-14,28,12);ctx.fill();
+    ctx.fillStyle='#90a4ae';ctx.fillRect(x+8,y+b.h-8,14,8);ctx.fillRect(x+b.w-22,y+b.h-8,14,8);
+    ctx.fillStyle='#37474f';jrRR(ctx,x+14,y+8,b.w-28,12,6);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+b.w/2-7+b.dir*2,y+14,3.5,0,Math.PI*2);ctx.arc(x+b.w/2+7+b.dir*2,y+14,3.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#e53935';ctx.beginPath();ctx.arc(x+b.w/2-7+b.dir*3,y+14,1.6,0,Math.PI*2);ctx.arc(x+b.w/2+7+b.dir*3,y+14,1.6,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#b3e5fc';[10,24,38].forEach(o=>{ctx.beginPath();ctx.moveTo(x+o,y+34);ctx.lineTo(x+o+4,y+46);ctx.lineTo(x+o+8,y+34);ctx.fill();});
   }else{
     const f=b.dir;ctx.translate(x+b.w/2,y+b.h/2);ctx.scale(f,1);
     if(b.mode==='windup'||b.mode==='charge')ctx.translate(Math.sin(t*1.6)*1.5,0);
@@ -974,6 +1067,9 @@ function jrDrawPowers(ctx,st){
   if(p.shield)items.push(['🛡️','']);
   if(p.feather>0)items.push(['🪶',Math.ceil(p.feather/60)+'s']);
   if(p.magnet>0)items.push(['🧲',Math.ceil(p.magnet/60)+'s']);
+  if(p.fire>0)items.push(['🔥',Math.ceil(p.fire/60)+'s']);
+  if(p.star>0)items.push(['⭐',Math.ceil(p.star/60)+'s']);
+  if(p.giant)items.push(['🍄','']);
   items.forEach((it,i)=>{
     ctx.fillStyle='rgba(20,24,36,0.65)';jrRR(ctx,8,8+i*30,it[1]?58:36,26,13);ctx.fill();
     ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='15px sans-serif';ctx.fillText(it[0],14,27+i*30);
@@ -996,8 +1092,12 @@ function jrDraw(ctx,st){
   });
   st.level.enemies.forEach(e=>jrDrawEnemy(ctx,e,st,t));
   if(st.level.boss&&st.level.boss.alive)jrDrawBoss(ctx,st,t);
+  (st.fireballs||[]).forEach(f=>{const fx=f.x-cam;ctx.fillStyle='rgba(255,152,0,0.35)';ctx.beginPath();ctx.arc(fx-f.vx*1.5,f.y,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff6d00';ctx.beginPath();ctx.arc(fx,f.y,5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffee58';ctx.beginPath();ctx.arc(fx,f.y,2.5,0,Math.PI*2);ctx.fill();});
   (st.level.bullets||[]).forEach(b=>{
-    const bx=b.x-cam;ctx.fillStyle='rgba(255,152,0,0.35)';ctx.beginPath();ctx.arc(bx-b.vx*3,b.y,b.r*1.2,0,Math.PI*2);ctx.fill();
+    const bx=b.x-cam;
+    if(b.rock){ctx.fillStyle='#8d6e63';ctx.beginPath();ctx.arc(bx,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5d4037';ctx.beginPath();ctx.arc(bx-2,b.y-2,b.r*0.4,0,Math.PI*2);ctx.fill();return;}
+    if(b.icicle){ctx.fillStyle='#b3e5fc';ctx.beginPath();ctx.moveTo(bx-b.r,b.y-b.r*1.6);ctx.lineTo(bx+b.r,b.y-b.r*1.6);ctx.lineTo(bx,b.y+b.r*1.6);ctx.fill();ctx.strokeStyle='#4fc3f7';ctx.lineWidth=1.5;ctx.stroke();return;}
+    ctx.fillStyle='rgba(255,152,0,0.35)';ctx.beginPath();ctx.arc(bx-b.vx*3,b.y,b.r*1.2,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#ff6d00';ctx.beginPath();ctx.arc(bx,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffee58';ctx.beginPath();ctx.arc(bx,b.y,b.r*0.5,0,Math.PI*2);ctx.fill();
   });
   const sk=jrSkin();
@@ -1015,6 +1115,7 @@ function jrDraw(ctx,st){
     ctx.strokeStyle=col;ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(sh.x-cam,sh.y-2,10+k*70,3+k*9,0,0,Math.PI*2);ctx.stroke();
     if(sh.dbl){ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(sh.x-cam,sh.y-2,6+k*104,2+k*14,0,0,Math.PI*2);ctx.stroke();}
   }
+  jrDrawWeather(ctx,st,t);
   ctx.textAlign='center';ctx.font='bold 15px sans-serif';
   st.popups.forEach(o=>{ctx.globalAlpha=Math.min(1,o.t/15);ctx.fillStyle='#fff';ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=3;ctx.strokeText(o.txt,o.x-cam,o.y);ctx.fillText(o.txt,o.x-cam,o.y);ctx.globalAlpha=1;});
   ctx.restore();
@@ -1108,6 +1209,7 @@ function jrKeyState(e,down){
   else if(k==='ArrowRight'||k==='d'||k==='D')jrIn.right=down;
   else if(k===' '||k==='ArrowUp'||k==='w'||k==='W'){if(down&&!jrIn.jumpHeld)jrIn.jump=true;jrIn.jumpHeld=down;}
   else if(k==='ArrowDown'||k==='s'||k==='S'){if(down&&!jrIn.down)jrIn.downPress=true;jrIn.down=down;}
+  else if(k==='x'||k==='X'||k==='f'||k==='F'){if(down&&!e.repeat)jrIn.fire=true;}
   else return false;
   return true;
 }
@@ -1135,6 +1237,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&jrState&&j
 function jrTouch(k,down){
   if(k==='jump'){if(down&&!jrIn.jumpHeld)jrIn.jump=true;jrIn.jumpHeld=down;}
   else if(k==='down'){if(down&&!jrIn.down)jrIn.downPress=true;jrIn.down=down;}
+  else if(k==='fire'){if(down)jrIn.fire=true;}
   else jrIn[k]=down;
 }
 function jrToMenu(){
