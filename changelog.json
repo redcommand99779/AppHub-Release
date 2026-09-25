@@ -136,5 +136,15 @@
       "Sudoku: Jedes Rätsel hat jetzt genau eine Lösung. Dazu Notizen (Bleistift), Tipp, Rückgängig, Fehlermarkierung, Zahlenfeld für Handy und Tastatur-Steuerung.",
       "Sudoku speichert dein laufendes Spiel, führt Bestzeiten pro Konto und gibt für Rätsel ohne Tipp AppHub-Coins."
     ]
+  },
+  {
+    "id": 13,
+    "date": "25.09.2026",
+    "title": "Zwei neue Spiele: Bahnhof-Boss und Turmwacht",
+    "items": [
+      "Bahnhof-Boss (Idle-Spiel): Verkaufe Tickets, kaufe Automaten, Kioske, Züge und mehr – sie verdienen auch, wenn du nicht da bist (bis zu 8 Stunden, zur Hälfte). Mit Meilensteinen, Upgrades, goldenen Tickets, Erfolgen und dem „Neuen Fahrplan“ für dauerhaft mehr Einkommen.",
+      "Turmwacht (Tower Defense): Baue Pfeiltürme, Kanonen, Frosttürme und Scharfschützen, verbessere sie und halte 20 Wellen durch – mit Fliegern und Bossen. 3 Karten mit Sternen, die nächste Karte wird freigeschaltet.",
+      "Beide Spiele speichern deinen Stand pro Konto und belohnen dich mit AppHub-Coins."
+    ]
   }
 ]

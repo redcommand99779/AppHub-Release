@@ -353,6 +353,28 @@
     .sd-num small{display:block;font-size:9px;color:var(--text-3);min-height:11px;font-weight:500}
     .sd-num.done{opacity:0.35}
     .sd-win{position:absolute;inset:0;background:rgba(20,24,36,0.88);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+    /* Bahnhof-Boss */
+    .bb-hero{background:linear-gradient(135deg,var(--surface),var(--active-bg));padding:18px 16px}
+    .bb-ticket{padding:16px 30px;border:0;border-radius:18px;background:linear-gradient(135deg,#0a84ff,#7c4dff);color:#fff;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 6px 18px rgba(10,132,255,0.35);font-family:inherit;transition:transform .06s;user-select:none;-webkit-user-select:none}
+    .bb-ticket:active{transform:scale(0.96)}
+    .bb-ticket small{display:block;font-size:12px;opacity:0.85;font-weight:600}
+    .bb-float{position:absolute;top:0;font-weight:800;color:#34c759;pointer-events:none;animation:bbFloat .9s ease-out forwards}
+    @keyframes bbFloat{from{transform:translateY(0);opacity:1}to{transform:translateY(-60px);opacity:0}}
+    .bb-gold{position:absolute;font-size:34px;border:0;background:none;cursor:pointer;animation:bbPulse 1s infinite;filter:drop-shadow(0 0 8px gold);z-index:3;transform:translate(-50%,-50%)}
+    @keyframes bbPulse{50%{transform:translate(-50%,-50%) scale(1.2) rotate(8deg)}}
+    .bb-gen{display:flex;align-items:center;gap:12px;margin-bottom:8px;padding:12px 14px}
+    .bb-icon{width:46px;height:46px;border-radius:13px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:26px;flex:none}
+    .bb-buybtn{min-width:110px;line-height:1.25;padding:8px 12px}
+    .bb-buybtn small{font-weight:600;opacity:0.9}
+    .lrn-btn.poor{background:var(--divider);color:var(--text-3)}
+    /* Turmwacht */
+    .td-tbtn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:12px;border:1.5px solid var(--divider);background:var(--surface);color:var(--text);cursor:pointer;font-family:inherit;font-size:11px;transition:all .12s}
+    .td-tbtn b{font-size:12px}.td-tbtn small{color:var(--text-3);font-size:10px}
+    .td-tbtn:hover{border-color:var(--accent)}
+    .td-tbtn.active{border-color:var(--accent);background:var(--active-bg);box-shadow:0 0 0 3px var(--active-bg)}
+    .td-tbtn.poor{opacity:0.55}
+    .td-over{position:absolute;inset:0;border-radius:14px;background:rgba(20,24,36,0.86);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+    @media (max-width:520px){#td-shop{grid-template-columns:repeat(2,1fr)!important}}
     /* Super Jumper – Editor */
     #jr-editor-bar{max-width:640px;margin-left:auto;margin-right:auto}
     .jr-ed-tools{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px}
@@ -773,6 +795,16 @@
           <div class="app-icon" style="background:linear-gradient(135deg,#ffb300,#e53935)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M5 21V4"/><path d="M5 4l12 4-12 5"/><path d="M3 21h18"/></svg></div>
           <div class="app-tile-name">Super Jumper</div>
           <div class="app-tile-desc">Jump-and-Run mit 3 Leveln</div>
+        </button>
+        <button class="app-tile" type="button" onclick="goTo('idle')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('idle')}" data-appid="idle" data-cat="spiele">
+          <div class="app-icon" style="background:linear-gradient(135deg,#0a84ff,#7c4dff)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="4" y="4" width="16" height="12" rx="3"/><path d="M4 11h16"/><circle cx="8.5" cy="13.5" r="0.6"/><circle cx="15.5" cy="13.5" r="0.6"/><path d="M8 20l2-4"/><path d="M16 20l-2-4"/></svg></div>
+          <div class="app-tile-name">Bahnhof-Boss</div>
+          <div class="app-tile-desc">Idle-Spiel: Bahn-Imperium</div>
+        </button>
+        <button class="app-tile" type="button" onclick="goTo('td')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('td')}" data-appid="td" data-cat="spiele">
+          <div class="app-icon" style="background:linear-gradient(135deg,#43a047,#00897b)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M6 21V9l-2-2V4h4v2h2V4h4v2h2V4h4v3l-2 2v12"/><path d="M10 21v-5h4v5"/></svg></div>
+          <div class="app-tile-name">Turmwacht</div>
+          <div class="app-tile-desc">Tower Defense mit 3 Karten</div>
         </button>
         <button class="app-tile" type="button" onclick="goTo('tictactoe')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('tictactoe')}" data-appid="tictactoe" data-cat="spiele">
           <div class="app-icon" style="background:linear-gradient(135deg,#ff3b30,#ff9f0a)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" width="26" height="26"><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/></svg></div>
@@ -1815,7 +1847,27 @@
     </div>
   </div>
 
-  <div class="screen" id="screen-tictactoe">
+  <div class="screen" id="screen-idle">
+    <div class="titlebar">
+      <div class="title-wrap">
+        <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
+        <span class="title-text" style="flex:1;text-align:center">Bahnhof-Boss</span>
+      </div>
+    </div>
+    <div class="lrn-wrap"><div id="bb-root"></div></div>
+  </div>
+
+    <div class="screen" id="screen-td">
+    <div class="titlebar">
+      <div class="title-wrap">
+        <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
+        <span class="title-text" style="flex:1;text-align:center">Turmwacht</span>
+      </div>
+    </div>
+    <div class="lrn-wrap" style="max-width:860px"><div id="td-root"></div></div>
+  </div>
+
+    <div class="screen" id="screen-tictactoe">
     <div class="titlebar">
       <div class="title-wrap">
         <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
@@ -3454,6 +3506,8 @@ function goTo(id){
   if(id==='pacman') pacInit();
   if(id==='flappy'){flappyBest2=parseInt(localStorage.getItem('flappy_best')||'0');flappyInit();}
   if(id==='jumprun') jrInit();
+  if(id==='idle') bbInit();
+  if(id==='td') tdInit();
   if(id==='tictactoe') tttNew();
   if(id==='viergewinnt') vgNew();
   if(id==='maumau') mmNew();
@@ -3960,6 +4014,8 @@ function initSavedSettings(){
 <script src="apps/jump-run.js"></script>
 <script src="apps/jump-gallery.js"></script>
 <script src="apps/jump-editor.js"></script>
+<script src="apps/bahnhof-boss.js"></script>
+<script src="apps/turmwacht.js"></script>
 <script>
 </script>
 <script src="apps/tic-tac-toe.js"></script>
