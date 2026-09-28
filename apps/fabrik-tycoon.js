@@ -4,9 +4,8 @@
    geliefert hat, gewinnt. Gegner: 1–3 Computer-Spieler. Die Regeln (ft…) laufen ohne Oberfläche und sind getestet.
 ══════════════════════════════════ */
 const FT_N=32;                                   // Felder im Kreis
-const FT_START_MONEY=500,FT_PASS_START=100,FT_MAX_ROUNDS=60;
+const FT_START_MONEY=500,FT_PASS_START=100,FT_MAX_ROUNDS=130;
 const FT_RES={iron:{name:'Eisenerz',icon:'⛏️',color:'#8fa3b8',price:60},wood:{name:'Holz',icon:'🪵',color:'#6da55a',price:60},copper:{name:'Kupfer',icon:'🟠',color:'#e08a4a',price:80},coal:{name:'Kohle',icon:'⚫',color:'#4a4a55',price:80},oil:{name:'Öl',icon:'🛢️',color:'#8e5ab8',price:100}};
-const FT_RES_ORDER=['iron','wood','copper','coal','oil','iron','copper','wood','coal','iron','copper','wood','oil','coal','iron','copper','wood','coal','oil','iron','copper','wood','coal','oil'];
 const FT_CORNERS={0:'start',8:'workshop',16:'market',24:'delivery'};
 const FT_EVENT_TILES=[4,12,20,28];
 const FT_RECIPES={plate:{name:'Stahlplatte',icon:'🔩',need:{iron:2,coal:1}},cable:{name:'Kabelbündel',icon:'🔌',need:{copper:2,oil:1}},frame:{name:'Rahmen',icon:'🏗️',need:{wood:3,iron:1}}};
@@ -16,23 +15,30 @@ const FT_SELL_PRICE=15;
 const FT_COLORS=['#ff5252','#448aff','#69f0ae','#ffd740'];
 const FT_NAMES=['Du','Robo','Zahnrad','Turbo'];
 
-/* ── Brett ── */
-function ftTiles(){
-  const tiles=[];let r=0;
+/* ── Brett: jede Rohstoffart kommt genau so oft vor wie Spieler mitspielen (gleichmäßig über den Ring verteilt,
+   der Rest der freien Felder bleibt leer) ── */
+function ftTiles(nPlayers){
+  nPlayers=Math.max(2,Math.min(4,nPlayers|0||2));
+  const kinds=Object.keys(FT_RES),order=[];
+  for(let k=0;k<nPlayers;k++)kinds.forEach(kind=>order.push(kind));
+  const resCount=order.length,slotCount=FT_N-Object.keys(FT_CORNERS).length-FT_EVENT_TILES.length;
+  const tiles=[];let idx=0,acc=0;
   for(let i=0;i<FT_N;i++){
-    if(FT_CORNERS[i])tiles.push({i,type:FT_CORNERS[i],owner:-1,lvl:0});
-    else if(FT_EVENT_TILES.includes(i))tiles.push({i,type:'event',owner:-1,lvl:0});
-    else{const res=FT_RES_ORDER[r++];tiles.push({i,type:'res',res,price:FT_RES[res].price,owner:-1,lvl:0});}
+    if(FT_CORNERS[i]){tiles.push({i,type:FT_CORNERS[i],owner:-1,lvl:0});continue;}
+    if(FT_EVENT_TILES.includes(i)){tiles.push({i,type:'event',owner:-1,lvl:0});continue;}
+    acc+=resCount;
+    if(acc>=slotCount&&idx<resCount){acc-=slotCount;const res=order[idx++];tiles.push({i,type:'res',res,price:FT_RES[res].price,owner:-1,lvl:0});}
+    else tiles.push({i,type:'empty',owner:-1,lvl:0});
   }
   return tiles;
 }
 function ftRng(seed){let s=(seed==null?Date.now():seed)>>>0;return()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296;};}
 
 /* ── Spielzustand ── */
-function ftNew(nPlayers,seed,humans){
+function ftNew(nPlayers,seed,humans,setup){
   const rng=ftRng(seed);nPlayers=Math.max(2,Math.min(4,nPlayers|0||2));humans=humans==null?1:humans;
-  const players=[];for(let i=0;i<nPlayers;i++)players.push({id:i,name:FT_NAMES[i],color:FT_COLORS[i],bot:i>=humans,money:FT_START_MONEY+i*30,inv:{iron:0,wood:0,copper:0,coal:0,oil:0},parts:{plate:0,cable:0,frame:0},delivered:{plate:0,cable:0,frame:0},pos:0,laps:0});
-  return {rng,players,tiles:ftTiles(),cur:0,round:1,phase:'roll',dice:[0,0],flags:{},pending:null,log:[],winner:-1,over:false,lastEvent:null};
+  const players=[];for(let i=0;i<nPlayers;i++){const s=setup&&setup[i];players.push({id:i,name:(s&&s.name)||FT_NAMES[i],color:FT_COLORS[i],bot:s?!!s.bot:i>=humans,money:FT_START_MONEY+i*30,inv:{iron:0,wood:0,copper:0,coal:0,oil:0},parts:{plate:0,cable:0,frame:0},delivered:{plate:0,cable:0,frame:0},pos:0,laps:0});}
+  return {rng,players,tiles:ftTiles(nPlayers),cur:0,round:1,phase:'roll',dice:[0,0],pending:null,log:[],winner:-1,over:false,lastEvent:null};
 }
 function ftLog(st,msg){st.log.unshift(msg);if(st.log.length>40)st.log.pop();}
 function ftCur(st){return st.players[st.cur];}
@@ -42,22 +48,28 @@ function ftCanWin(p){return ['plate','cable','frame'].every(k=>p.delivered[k]>=F
 function ftRoll(st,forced){
   if(st.phase!=='roll'||st.over)return null;
   const d1=forced?forced[0]:1+Math.floor(st.rng()*6),d2=forced?forced[1]:1+Math.floor(st.rng()*6),steps=d1+d2,p=ftCur(st);
-  st.dice=[d1,d2];st.flags={};
+  st.dice=[d1,d2];
   const path=[];
   for(let k=1;k<=steps;k++){
     const pos=(p.pos+k)%FT_N;path.push(pos);
     if(pos===0){p.money+=FT_PASS_START;p.laps++;ftLog(st,`${p.name} kommt am Start vorbei: +${FT_PASS_START} 🪙`);}
-    if(FT_CORNERS[pos]&&pos!==0)st.flags[FT_CORNERS[pos]]=true;   // Werkstatt, Markt, Rampe: beim Vorbeikommen oder Landen benutzbar
   }
   p.pos=path[path.length-1];st.phase='land';
   return path;
 }
 /* Auf dem Feld angekommen */
+/* Von jeder Rohstoffart darf ein Spieler höchstens ein Feld besitzen (es gibt genau so viele wie Spieler) */
+function ftOwnCapReached(st,p,res){
+  return st.tiles.some(x=>x.type==='res'&&x.res===res&&x.owner===p.id);
+}
 function ftLand(st){
   if(st.phase!=='land')return;
   const p=ftCur(st),t=st.tiles[p.pos];st.phase='act';st.pending=null;
   if(t.type==='res'){
-    if(t.owner<0){st.pending={kind:'buy',tile:t.i};st.phase='buy';}
+    if(t.owner<0){
+      if(ftOwnCapReached(st,p,t.res))ftLog(st,`${p.name} besitzt schon ein ${FT_RES[t.res].name}-Feld – dieses bleibt für andere frei.`);
+      else{st.pending={kind:'buy',tile:t.i};st.phase='buy';}
+    }
     else if(t.owner!==p.id){
       const rent=15*t.lvl,pay=Math.min(p.money,rent);p.money-=pay;st.players[t.owner].money+=pay;
       ftLog(st,`${p.name} zahlt ${pay} 🪙 Nutzungsgebühr an ${st.players[t.owner].name}.`);
@@ -65,7 +77,7 @@ function ftLand(st){
   }else if(t.type==='event')ftEvent(st,p);
   else ftLog(st,`${p.name} steht auf ${ftTileName(t)}.`);
 }
-function ftTileName(t){return t.type==='res'?FT_RES[t.res].name+'-Feld':({start:'Start',workshop:'Werkstatt',market:'Markt',delivery:'Lieferrampe',event:'Ereignis'}[t.type]||t.type);}
+function ftTileName(t){return t.type==='res'?FT_RES[t.res].name+'-Feld':({start:'Start',workshop:'Werkstatt',market:'Markt',delivery:'Lieferrampe',event:'Ereignis',empty:'freies Feld'}[t.type]||t.type);}
 function ftEvent(st,p){
   const roll=Math.floor(st.rng()*6);
   const keys=Object.keys(FT_RES),k=keys[Math.floor(st.rng()*keys.length)];
@@ -81,7 +93,7 @@ function ftEvent(st,p){
 /* Aktionen */
 function ftBuy(st){
   const p=ftCur(st);if(st.phase!=='buy'||!st.pending)return false;
-  const t=st.tiles[st.pending.tile];if(p.money<t.price)return false;
+  const t=st.tiles[st.pending.tile];if(p.money<t.price||ftOwnCapReached(st,p,t.res))return false;
   p.money-=t.price;t.owner=p.id;t.lvl=1;ftLog(st,`${p.name} kauft ${ftTileName(t)} für ${t.price} 🪙.`);st.pending=null;st.phase='act';return true;
 }
 function ftSkipBuy(st){if(st.phase==='buy'){st.pending=null;st.phase='act';return true;}return false;}
@@ -94,26 +106,26 @@ function ftUpgrade(st,tileIdx){
 }
 function ftCanCraft(p,key){const r=FT_RECIPES[key];return Object.keys(r.need).every(k=>p.inv[k]>=r.need[k]);}
 function ftCraft(st,key){
-  const p=ftCur(st);if(!st.flags.workshop&&!(st.tiles[p.pos].type==='workshop'))return false;
+  const p=ftCur(st);if(st.tiles[p.pos].type!=='workshop')return false;
   if(!FT_RECIPES[key]||!ftCanCraft(p,key))return false;
   Object.keys(FT_RECIPES[key].need).forEach(k=>{p.inv[k]-=FT_RECIPES[key].need[k];});p.parts[key]++;
   ftLog(st,`${p.name} stellt ${FT_RECIPES[key].name} her.`);return true;
 }
 function ftDeliver(st){
-  const p=ftCur(st);if(!st.flags.delivery&&st.tiles[p.pos].type!=='delivery')return 0;
+  const p=ftCur(st);if(st.tiles[p.pos].type!=='delivery')return 0;
   let n=0;['plate','cable','frame'].forEach(k=>{while(p.parts[k]>0&&p.delivered[k]<FT_GOAL){p.parts[k]--;p.delivered[k]++;n++;}});
   if(n){ftLog(st,`${p.name} liefert ${n} Bauteil${n===1?'':'e'} an die Rampe (${ftDeliveredCount(p)}/${FT_GOAL*3}).`);if(ftCanWin(p)){st.winner=p.id;st.over=true;st.phase='over';ftLog(st,`🏆 ${p.name} vollendet den Weltraum-Aufzug!`);}}
   return n;
 }
 function ftDeliveredCount(p){return p.delivered.plate+p.delivered.cable+p.delivered.frame;}
 function ftSell(st,res,n){
-  const p=ftCur(st);if(!st.flags.market&&st.tiles[p.pos].type!=='market')return 0;
+  const p=ftCur(st);if(st.tiles[p.pos].type!=='market')return 0;
   n=Math.min(n||1,p.inv[res]||0);if(n<=0)return 0;p.inv[res]-=n;p.money+=n*FT_SELL_PRICE;ftLog(st,`${p.name} verkauft ${n} ${FT_RES[res].name} für ${n*FT_SELL_PRICE} 🪙.`);return n;
 }
 /* Ende des Zuges; nach der letzten Runde produzieren alle Felder */
 function ftEndTurn(st){
   if(st.over)return;
-  st.phase='roll';st.flags={};st.pending=null;
+  st.phase='roll';st.pending=null;
   st.cur=(st.cur+1)%st.players.length;
   if(st.cur===0){
     st.tiles.forEach(t=>{if(t.type==='res'&&t.owner>=0)st.players[t.owner].inv[t.res]+=t.lvl;});
@@ -141,15 +153,15 @@ function ftBotActions(st){
     if(mine.length&&p.money>=ftUpgradeCost(mine[0])+120)ftUpgrade(st,mine[0].i);else break;
   }
   // Herstellen
-  if(st.flags.workshop||st.tiles[p.pos].type==='workshop'){
+  if(st.tiles[p.pos].type==='workshop'){
     for(let g=0;g<12;g++){
       const need=ftNeeded(p),opts=Object.keys(FT_RECIPES).filter(k=>need[k]>0&&ftCanCraft(p,k)).sort((a,b)=>need[b]-need[a]);
       if(!opts.length)break;ftCraft(st,opts[0]);
     }
   }
-  if(st.flags.delivery||st.tiles[p.pos].type==='delivery')ftDeliver(st);
+  if(st.tiles[p.pos].type==='delivery')ftDeliver(st);
   // Verkaufen, wenn knapp bei Kasse
-  if((st.flags.market||st.tiles[p.pos].type==='market')&&p.money<120){
+  if(st.tiles[p.pos].type==='market'&&p.money<120){
     const spare=Object.keys(FT_RES).filter(k=>!ftWantedRes(p)[k]&&p.inv[k]>0);
     spare.forEach(k=>ftSell(st,k,p.inv[k]));
   }
@@ -232,7 +244,7 @@ const FT_VS_D='attribute vec3 aP;uniform mat4 uLVP;uniform mat4 uM;varying float
 const FT_FS_D='precision highp float;varying float vD;vec4 pack(float d){vec4 enc=vec4(1.0,255.0,65025.0,16581375.0)*d;enc=fract(enc);enc-=enc.yzww*vec4(1.0/255.0,1.0/255.0,1.0/255.0,0.0);return enc;}void main(){gl_FragColor=pack(clamp(vD,0.0,0.99999));}';
 let ftBeam=null,ftPrevDel=0,ftLastCounts={};
 let ftGen=0;   // zählt Spiele hoch: alte Zeitgeber eines beendeten oder neu gestarteten Spiels tun nichts mehr
-let ft=null,ftG=null,ftRaf=null,ftLast=0,ftA=null,ftBusy=false,ftView='setup',ftMsg='',ftNBots=1,ftCam={yaw:0.55,pitch:0.85,dist:19},ftDrag=null,ftTokens=[],ftDiceShow=null,ftDiceT=0;
+let ft=null,ftG=null,ftRaf=null,ftLast=0,ftA=null,ftBusy=false,ftView='setup',ftMsg='',ftPlayersSetup=null,ftCam={yaw:0.55,pitch:0.85,dist:19},ftDrag=null,ftTokens=[],ftDiceShow=null,ftDiceT=0;
 
 M4.ortho=function(l,r,b,t,n,f){const o=new Float32Array(16);o[0]=2/(r-l);o[5]=2/(t-b);o[10]=-2/(f-n);o[12]=-(r+l)/(r-l);o[13]=-(t+b)/(t-b);o[14]=-(f+n)/(f-n);o[15]=1;return o;};
 
@@ -281,11 +293,32 @@ function ftEye(){
   return [Math.sin(c.yaw)*cp*c.dist,sp*c.dist,Math.cos(c.yaw)*cp*c.dist];
 }
 function ftWindows(g,x,y,z,w,h,d,n){for(let i=0;i<n;i++)ftBox(g,x-w/2+w*(i+0.5)/n,y,z+d/2+0.005,w/n*0.45,h,0.02,'#ffe9a0',0,0.9);}
+/* Weicher Kontaktschatten: dunkler, flacher Fleck direkt auf der Feldoberfläche (billige Ambient Occlusion) */
+function ftShadowBlob(g,x,z,r){ftBox(g,x,0.21,z,r,0.004,r,'#0a1018',0,0,0.32,0);}
 function ftBuilding(g,t,x,z,time){
-  const col=FT_COLORS[t.owner],dark=ftShade(col,0.7),res=FT_RES[t.res].color,y0=0.19;
-  if(t.lvl>=1){ftBox(g,x-0.25,y0+0.18,z+0.15,0.42,0.36,0.42,col);ftBox(g,x-0.25,y0+0.39,z+0.15,0.5,0.06,0.5,dark);ftCyl(g,x-0.25,y0+0.5,z+0.15,0.14,0.16,0.14,'#8a8f99');}
-  if(t.lvl>=2){ftBox(g,x+0.22,y0+0.3,z-0.15,0.4,0.6,0.4,ftShade(col,1.12));ftCyl(g,x+0.22,y0+0.72,z-0.15,0.16,0.3,0.16,'#9aa3b0');ftWindows(g,x+0.22,y0+0.32,z-0.15,0.3,0.1,0.4,3);}
-  if(t.lvl>=3){ftBox(g,x-0.05,y0+0.55,z-0.32,0.7,0.5,0.28,dark);ftCyl(g,x-0.28,y0+0.95,z-0.32,0.13,0.5,0.13,'#c5ccd6',0.05);ftWindows(g,x-0.05,y0+0.55,z-0.32,0.55,0.12,0.28,4);ftBox(g,x+0.3,y0+0.9,z+0.3,0.14,0.14,0.14,res,0.25,0.3);}
+  const col=FT_COLORS[t.owner],dark=ftShade(col,0.7),roof=ftShade(col,0.5),res=FT_RES[t.res].color,y0=0.19;
+  ftShadowBlob(g,x,z,0.42);
+  if(t.lvl>=1){
+    ftBox(g,x-0.25,y0+0.18,z+0.15,0.42,0.36,0.42,col);
+    ftBox(g,x-0.25,y0+0.37,z+0.15,0.5,0.05,0.5,roof,0,0,1,0.15);      // Dachkante
+    ftCyl(g,x-0.25,y0+0.52,z+0.15,0.12,0.2,0.12,'#8a8f99');
+    ftCyl(g,x-0.25,y0+0.63,z+0.15,0.15,0.03,0.15,'#5c6570');          // Schornstein-Kappe
+  }
+  if(t.lvl>=2){
+    ftBox(g,x+0.22,y0+0.3,z-0.15,0.4,0.6,0.4,ftShade(col,1.12));
+    ftBox(g,x+0.22,y0+0.61,z-0.15,0.46,0.05,0.46,roof,0,0,1,0.15);
+    ftCyl(g,x+0.22,y0+0.75,z-0.15,0.16,0.28,0.16,'#9aa3b0');
+    ftCyl(g,x+0.22,y0+0.9,z-0.15,0.18,0.03,0.18,'#7a828e');           // Tankdeckel
+    ftWindows(g,x+0.22,y0+0.32,z-0.15,0.3,0.1,0.4,3);
+  }
+  if(t.lvl>=3){
+    ftBox(g,x-0.05,y0+0.55,z-0.32,0.7,0.5,0.28,dark);
+    ftBox(g,x-0.05,y0+0.81,z-0.32,0.76,0.05,0.34,roof,0,0,1,0.15);
+    ftCyl(g,x-0.28,y0+0.96,z-0.32,0.12,0.48,0.12,'#c5ccd6',0.05);
+    ftCyl(g,x-0.28,y0+1.21,z-0.32,0.14,0.03,0.14,'#a7afba',0.05);     // Schornstein-Kappe
+    ftWindows(g,x-0.05,y0+0.55,z-0.32,0.55,0.12,0.28,4);
+    ftBox(g,x+0.3,y0+0.9,z+0.3,0.14,0.14,0.14,res,0.25,0.3);
+  }
   else ftBox(g,x+0.32,y0+0.09,z+0.32,0.18,0.18,0.18,res);
 }
 /* Rauch: weiche, aufsteigende Kugeln über Schornsteinen (durchsichtig, ohne Schatten) */
@@ -313,9 +346,26 @@ function ftTrucks(g,time){
     const q=ftTruckPos(time*0.035+k/3),x=q[0],z=q[1],ry=-q[2];
     const cy=Math.cos(ry),sy=Math.sin(ry);
     ftDrawMesh(g,g.cube,M4.model(x,0.16,z,0.5,0.18,0.24,ry),cols[k],1,0,0.3);                                 // Ladefläche
+    ftDrawMesh(g,g.cube,M4.model(x,0.26,z,0.44,0.03,0.2,ry),ftShade(cols[k],0.85),1,0,0.15);                  // Kante der Ladefläche
     ftDrawMesh(g,g.cube,M4.model(x+cy*0.3,0.2,z-sy*0.3,0.2,0.24,0.24,ry),'#455a64',1,0,0.4);                   // Fahrerhaus
+    ftDrawMesh(g,g.cube,M4.model(x+cy*0.3,0.31,z-sy*0.3,0.17,0.02,0.2,ry),'#37424a',1,0,0.15);                 // Kabinendach
     ftDrawMesh(g,g.cube,M4.model(x+cy*0.42,0.2,z-sy*0.42,0.02,0.08,0.18,ry),'#ffe9a0',1,0.9,0);                // Scheinwerfer
+    [[-0.16,-0.13],[-0.16,0.13],[0.16,-0.13],[0.16,0.13]].forEach(([dx,dz])=>{                                 // Räder
+      const wx=x+dx*cy+dz*sy,wz=z-dx*sy+dz*cy;
+      ftDrawMesh(g,g.cyl,M4.model(wx,0.08,wz,0.09,0.06,0.09,ry,0,Math.PI/2),'#20262c',1,0,0.2);
+    });
   });
+}
+/* Wolken: langsam driftende, flache Kugelgruppen hoch am Himmel (durchsichtig, ohne Schatten) */
+function ftClouds(g,time){
+  const gl=g.gl;if(g.pass==='depth')return;
+  gl.depthMask(false);
+  const set=[[-3,-8],[4,-6],[8,-9],[-8,-7],[0,-10],[-5,-9]];
+  set.forEach(([bx,bz],i)=>{
+    const span=36,t=((time*0.009+i*0.41)%1),x=bx-span/2+span*t,z=bz,y=8.6+((i%3)*0.5);
+    [0,1,2].forEach(k=>{const sx=0.85+((i+k)%3)*0.3;ftDrawMesh(g,g.sph,M4.model(x+k*0.75-0.75,y,z,sx,sx*0.55,sx,0),'#ffffff',0.5,0,0);});
+  });
+  gl.depthMask(true);
 }
 function ftBeamDraw(g,time){
   if(!ftBeam)return;const k=(time-ftBeam.t0)/1.6;if(k>=1){ftBeam=null;return;}
@@ -330,7 +380,13 @@ function ftSceneObjects(g,time){
   ftBox(g,0,-0.02,0,FT_SP*10.9,0.05,FT_SP*10.9,'#485c78',0,0,1,0.05);
   ftBox(g,0,0.02,0,FT_SP*7.2,0.1,FT_SP*7.2,'#3f7658',0,0,1,0.02);
   // kleine Bäume und Steine auf der Insel
-  [[-2.4,1.2],[2.6,1.8],[-2.9,-1.1],[1.9,-2.6],[-1.4,2.7],[3.1,-0.4]].forEach((p,i)=>{const x=p[0]*1.0,z=p[1]*1.0;ftCyl(g,x,0.22,z,0.1,0.34,0.1,'#6b4f3a',0,0.05);ftDrawMesh(g,g.sph,M4.model(x,0.55,z,0.5+((i*3)%3)*0.08,0.5,0.5+((i*3)%3)*0.08,0),'#3f9a5a',1,0,0.05);});
+  [[-2.4,1.2],[2.6,1.8],[-2.9,-1.1],[1.9,-2.6],[-1.4,2.7],[3.1,-0.4]].forEach((p,i)=>{
+    const x=p[0]*1.0,z=p[1]*1.0,sc=0.5+((i*3)%3)*0.08;
+    ftBox(g,x,0.074,z,sc*1.3,0.004,sc*1.3,'#16212f',0,0,0.32,0);                                                    // weicher Schattenfleck
+    ftCyl(g,x,0.22,z,0.1,0.34,0.1,'#6b4f3a',0,0.05);
+    ftDrawMesh(g,g.sph,M4.model(x,0.5,z,sc*1.05,sc*0.95,sc*1.05,0),'#2f7a45',1,0,0.04);                              // dunklere Unterkrone
+    ftDrawMesh(g,g.sph,M4.model(x-sc*0.15,0.58,z+sc*0.15,sc*0.8,sc*0.8,sc*0.8,0),'#4fb06a',1,0,0.05);                // helle Oberkrone
+  });
   // Felder
   ft.tiles.forEach(t=>{
     const [x,z]=ftTilePos(t.i);let c='#c9c3b0',sz=1.12;
@@ -340,25 +396,31 @@ function ftSceneObjects(g,time){
     ftBox(g,x,0.19,z,sz-0.12,0.03,sz-0.12,ftShade(c,1.12),0,0,1,0.18);           // helle Deckplatte = abgeschrägte Kante
     if(t.type==='res'&&t.owner>=0)ftBuilding(g,t,x,z,time);
     if(t.type==='start'){ftCyl(g,x-0.4,0.65,z-0.4,0.06,1,0.06,'#eeeeee');ftBox(g,x-0.14,1.0,z-0.4,0.5,0.3,0.05,'#ff5252',0,0.1);}
-    if(t.type==='workshop'){ftBox(g,x,0.55,z,0.8,0.7,0.8,'#5f7fb0');ftBox(g,x,0.93,z,0.9,0.06,0.9,'#3f5578');ftCyl(g,x+0.25,1.0,z+0.25,0.2,0.4,0.2,'#c9d3e2',0.05);ftBox(g,x-0.2,1.0,z-0.2,0.25,0.15,0.25,'#f0c040');ftWindows(g,x,0.6,z,0.6,0.16,0.8,3);}
-    if(t.type==='market'){ftBox(g,x,0.4,z,0.9,0.4,0.7,'#b05f92');ftBox(g,x,0.7,z,1.05,0.1,0.85,'#ffd5ef',0,0.05);ftBox(g,x-0.32,0.34,z+0.36,0.06,0.3,0.06,'#6b3f58');ftBox(g,x+0.32,0.34,z+0.36,0.06,0.3,0.06,'#6b3f58');}
-    if(t.type==='delivery'){ftBox(g,x,0.35,z,0.9,0.3,0.9,'#b0b8c4');ftCyl(g,x,0.95,z,0.35,1,0.35,'#eaeef5',0.02,0.6);ftCyl(g,x,1.55,z,0.2,0.3,0.2,'#ff5252',0.1);}
+    if(t.type==='workshop'){ftShadowBlob(g,x,z,0.5);ftBox(g,x,0.55,z,0.8,0.7,0.8,'#5f7fb0');ftBox(g,x,0.93,z,0.9,0.06,0.9,'#3f5578');ftBox(g,x,0.98,z,0.5,0.05,0.5,'#324364');ftCyl(g,x+0.25,1.02,z+0.25,0.2,0.4,0.2,'#c9d3e2',0.05);ftCyl(g,x+0.25,1.24,z+0.25,0.22,0.03,0.22,'#a3aebd',0.05);ftBox(g,x-0.2,1.0,z-0.2,0.25,0.15,0.25,'#f0c040');ftWindows(g,x,0.6,z,0.6,0.16,0.8,3);}
+    if(t.type==='market'){ftShadowBlob(g,x,z,0.5);ftBox(g,x,0.4,z,0.9,0.4,0.7,'#b05f92');ftBox(g,x,0.7,z,1.05,0.1,0.85,'#ffd5ef',0,0.05);ftBox(g,x,0.77,z,0.6,0.04,0.5,'#d94f96',0,0.1);ftBox(g,x-0.32,0.34,z+0.36,0.06,0.3,0.06,'#6b3f58');ftBox(g,x+0.32,0.34,z+0.36,0.06,0.3,0.06,'#6b3f58');}
+    if(t.type==='delivery'){ftShadowBlob(g,x,z,0.5);ftBox(g,x,0.35,z,0.9,0.3,0.9,'#b0b8c4');ftCyl(g,x,0.95,z,0.35,1,0.35,'#eaeef5',0.02,0.6);ftCyl(g,x,1.48,z,0.24,0.16,0.24,'#dfe4ec',0.05,0.5);ftCyl(g,x,1.62,z,0.12,0.18,0.12,'#ff5252',0.1);}
     if(t.type==='event'){ftBox(g,x,0.45,z,0.35,0.4,0.35,'#ffd54f',time,0.2,1,0.6);}
   });
   // Weltraum-Aufzug in der Mitte: wächst mit jedem gelieferten Teil
   ftBox(g,0,0.22,0,2.6,0.3,2.6,'#5b6b80');ftBox(g,0,0.4,0,2.2,0.06,2.2,'#7c8ea6',0,0,1,0.2);
-  ftBox(g,-1.3,0.65,1.1,0.9,0.7,0.9,'#7a8ba3');ftBox(g,-1.3,1.02,1.1,1.0,0.06,1.0,'#55647a');ftWindows(g,-1.3,0.7,1.1,0.7,0.14,0.9,3);
-  ftCyl(g,1.2,0.95,-0.9,0.5,1.2,0.5,'#8797ab',0,0.5);ftCyl(g,1.2,1.75,-0.9,0.25,0.5,0.25,'#c5ccd6',0.05,0.6);
+  ftCyl(g,0,0.46,0,1.05,0.08,1.05,'#3c4a5e',0,0,1,0.1);                                                       // Ring-Fundament
+  ftBox(g,-1.3,0.65,1.1,0.9,0.7,0.9,'#7a8ba3');ftBox(g,-1.3,1.03,1.1,1.02,0.06,1.02,'#55647a',0,0,1,0.15);ftBox(g,-1.3,1.08,1.1,0.7,0.05,0.7,'#3f4c60');ftWindows(g,-1.3,0.7,1.1,0.7,0.14,0.9,3);
+  ftCyl(g,1.2,0.95,-0.9,0.45,1.2,0.45,'#8797ab',0,0.5);ftCyl(g,1.2,1.58,-0.9,0.5,0.06,0.5,'#5c6a7e',0,0,1,0.15);ftCyl(g,1.2,1.78,-0.9,0.22,0.42,0.22,'#c5ccd6',0.05,0.6);
   let seg=0;ft.players.forEach(p=>{['plate','cable','frame'].forEach(k=>{for(let n=0;n<p.delivered[k];n++){ftBox(g,0,0.6+seg*0.32,0,0.5-seg*0.01,0.3,0.5-seg*0.01,FT_COLORS[p.id],0,0.1,1,0.3);seg++;}});});
   ftCyl(g,0,0.6+seg*0.32+0.15,0,0.06,0.4,0.06,'#f4f4f4',0,0.8);
   ftBox(g,0,0.75+seg*0.32,0,0.14,0.14,0.14,'#ffffff',time,0.8);
   ftTrucks(g,time);
-  // Figuren
+  // Figuren: kleine Arbeiter mit Helm, statt reiner Spielsteine
   ftTokens.forEach(tk=>{
-    const col=FT_COLORS[tk.id],off=[[-0.25,-0.25],[0.25,-0.25],[-0.25,0.25],[0.25,0.25]][tk.id],y=0.22+tk.y;
-    ftCyl(g,tk.x+off[0],y+0.08,tk.z+off[1],0.36,0.16,0.36,ftShade(col,0.75),0,0.6);
-    ftCyl(g,tk.x+off[0],y+0.3,tk.z+off[1],0.22,0.32,0.22,col,0.05,0.7);
-    ftDrawMesh(g,g.sph,M4.model(tk.x+off[0],y+0.56,tk.z+off[1],0.32,0.32,0.32,0),col,1,0.1,0.9);
+    const col=FT_COLORS[tk.id],dark=ftShade(col,0.75),off=[[-0.25,-0.25],[0.25,-0.25],[-0.25,0.25],[0.25,0.25]][tk.id],px=tk.x+off[0],pz=tk.z+off[1],y=0.22+tk.y;
+    ftCyl(g,px,y+0.03,pz,0.24,0.03,0.24,'#0a1018',0,0,0.3,0);                          // Kontaktschatten
+    ftCyl(g,px,y+0.1,pz,0.2,0.14,0.2,dark,0,0.5);                                      // Füße/Sockel
+    ftCyl(g,px,y+0.32,pz,0.15,0.3,0.15,col,0.05,0.7);                                  // Körper
+    ftBox(g,px-0.15,y+0.3,pz,0.06,0.2,0.06,dark,0,0,1,0.5);                            // Arm links
+    ftBox(g,px+0.15,y+0.3,pz,0.06,0.2,0.06,dark,0,0,1,0.5);                            // Arm rechts
+    ftDrawMesh(g,g.sph,M4.model(px,y+0.56,pz,0.2,0.2,0.2,0),'#ffcf9e',1,0.05,0.85);     // Kopf
+    ftCyl(g,px,y+0.64,pz,0.23,0.04,0.23,col,0.05,0.6);                                 // Helmrand
+    ftDrawMesh(g,g.sph,M4.model(px,y+0.69,pz,0.16,0.11,0.16,0),col,1,0.1,0.65);         // Helmkuppel
   });
   // Würfel
   if(ftDiceShow){[0,1].forEach(k=>{const t=ftDiceT,rx=t*7+k*2,rz=t*6+k,fall=Math.max(0,1-t*1.4),y=0.95+fall*3+Math.abs(Math.sin(t*9+k))*0.5*fall,xx=-0.6+k*1.2;
@@ -388,6 +450,7 @@ function ftDrawScene(g,time){
   // Markierung des aktuellen Feldes (leuchtend, durchsichtig)
   if(!ft.over){const [cx,cz]=ftTilePos(ftCur(ft).pos);const ph=0.45+0.2*Math.sin(time*4);ftBox(g,cx,0.25,cz,1.35,0.03,1.35,FT_COLORS[ft.cur],0,ph,0.85,0);}
   ftSmoke(g,time);
+  ftClouds(g,time);
   ftBeamDraw(g,time);
 }
 
@@ -401,6 +464,7 @@ function ftDrawLabels(g,ctx,time){
   const cv=ctx.canvas,dpr=cv.width/cv.clientWidth;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,cv.clientWidth,cv.clientHeight);
   ctx.textAlign='center';ctx.textBaseline='middle';
   ft.tiles.forEach(t=>{
+    if(t.type==='empty')return;
     const [x,z]=ftTilePos(t.i);
     let label=null,sub=null;
     if(t.type==='res'){label=FT_RES[t.res].icon;sub=t.owner>=0?'★'.repeat(t.lvl):t.price;}
@@ -426,11 +490,49 @@ function ftSaveProf(p){const all=ftProfAll();all[ftAccount().toLowerCase()||'_ga
 
 function ftInit(){
   if(ftRaf){cancelAnimationFrame(ftRaf);ftRaf=null;}
+  ftEnsureSetup();
   ftGen++;ft=null;ftView='setup';ftMsg='';ftBusy=false;ftA=null;ftRenderView();
 }
+/* ── Sitzplan (Mensch/Computer je Sitz, für lokales Spiel gegen Freunde) ── */
+function ftEnsureSetup(){
+  if(ftPlayersSetup&&ftPlayersSetup.length>=2)return;
+  const me=(typeof zcp==='function'&&(zcp().player||'').trim())||(typeof zcGuestName==='function'?zcGuestName([]):'Gast');
+  ftPlayersSetup=[{name:me,bot:false},{name:'Robo',bot:true}];
+}
+function ftAddPlayer(){ftEnsureSetup();if(ftPlayersSetup.length>=4)return;const i=ftPlayersSetup.length;ftPlayersSetup.push({name:FT_NAMES[i]||('Computer '+(i+1)),bot:true});ftRenderView();}
+function ftRemovePlayer(){ftEnsureSetup();if(ftPlayersSetup.length<=2)return;ftPlayersSetup.pop();ftRenderView();}
+function ftToggleBot(i){
+  ftEnsureSetup();const p=ftPlayersSetup[i];if(!p)return;p.bot=!p.bot;
+  if(p.bot)p.name=FT_NAMES[i]||('Computer '+(i+1));
+  else{
+    const taken=ftPlayersSetup.filter((q,j)=>j!==i).map(q=>q.name);
+    const me=(typeof zcp==='function'&&(zcp().player||'').trim())||'';
+    p.name=(me&&!taken.some(t=>t.toLowerCase()===me.toLowerCase()))?me:(typeof zcGuestName==='function'?zcGuestName(taken):'Gast');
+  }
+  ftRenderView();
+}
+function ftSetupName(i,v){
+  ftEnsureSetup();
+  if(v==='__new'&&typeof zcWhoCreate==='function'){zcWhoCreate(n=>ftSetupName(i,n));return;}
+  const p=ftPlayersSetup[i];if(!p)return;
+  p.name=(v||'').trim()||p.name;ftRenderView();
+}
+function ftSetupRow(p,i){
+  const nameField=p.bot
+    ?`<span style="flex:1;padding:8px 10px;font-size:13px;color:var(--text-2)">🤖 ${ftEsc(p.name)}</span>`
+    :(typeof zcAccountSelect==='function'
+      ?zcAccountSelect(p.name,ftPlayersSetup.filter((q,j)=>j!==i&&!q.bot).map(q=>q.name),`ftSetupName(${i},this.value)`,{style:'flex:1;min-width:120px;padding:8px 10px;background:var(--bg);border:0.5px solid var(--divider);border-radius:8px;color:var(--text);font-size:13px'})
+      :`<input type="text" value="${ftEsc(p.name)}" onchange="ftSetupName(${i},this.value)" style="flex:1;padding:8px 10px;background:var(--bg);border:0.5px solid var(--divider);border-radius:8px;color:var(--text);font-size:13px"/>`);
+  return `<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+    <i style="width:14px;height:14px;border-radius:50%;background:${FT_COLORS[i]};flex-shrink:0;display:inline-block"></i>
+    ${nameField}
+    <button onclick="ftToggleBot(${i})" title="${p.bot?'Computer – klicken für Mensch':'Mensch – klicken für Computer'}" style="padding:7px 10px;font-size:12px;border-radius:8px;border:0.5px solid var(--divider);background:${p.bot?'var(--accent)':'var(--bg)'};color:${p.bot?'#fff':'var(--text)'};cursor:pointer;flex-shrink:0">${p.bot?'🤖 KI':'🧑 Mensch'}</button>
+  </div>`;
+}
 function ftStartGame(){
-  ftGen++;
-  ft=ftNew(ftNBots+1,null,1);ftPrevDel=0;ftLastCounts={};ftBeam=null;ftView='game';ftBusy=false;ftA=null;ftDiceShow=null;
+  ftEnsureSetup();ftGen++;
+  const setup=ftPlayersSetup.map(p=>({name:(p.name||'').trim()||(p.bot?'Computer':'Spieler'),bot:!!p.bot}));
+  ft=ftNew(setup.length,null,0,setup);ftPrevDel=0;ftLastCounts={};ftBeam=null;ftView='game';ftBusy=false;ftA=null;ftDiceShow=null;
   ftTokens=ft.players.map(p=>({id:p.id,pos:0,x:ftTilePos(0)[0],z:ftTilePos(0)[1],y:0}));
   ftRenderView();
   ftLast=0;ftRaf=requestAnimationFrame(ftLoop);
@@ -445,8 +547,12 @@ function ftRenderView(){
       <div style="font-size:44px">🏭</div><div style="font-size:22px;font-weight:800;margin:6px 0">Fabrik-Tycoon</div>
       <div style="font-size:13px;color:var(--text-3);max-width:520px;margin:0 auto 16px;line-height:1.6">Würfle um das 3D-Brett, kaufe Rohstoff-Felder und baue sie aus. Stelle in der <b>Werkstatt</b> Bauteile her und liefere sie an der <b>Rampe</b> ab.
         Wer zuerst <b>je 3 Stahlplatten, Kabelbündel und Rahmen</b> geliefert hat, vollendet den Weltraum-Aufzug in der Mitte und gewinnt.</div>
-      <div class="lrn-label">Gegner</div>
-      <div class="lrn-chips" style="justify-content:center;margin-bottom:16px">${[1,2,3].map(n=>`<button class="lrn-chip${ftNBots===n?' active':''}" onclick="ftSetBots(${n})">${n} Computer-Spieler</button>`).join('')}</div>
+      <div class="lrn-label">Spieler (2–4, auch mehrere Menschen im Wechsel am selben Gerät)</div>
+      <div style="max-width:440px;margin:0 auto 8px;text-align:left">${ftPlayersSetup.map(ftSetupRow).join('')}</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px">
+        <button class="lrn-btn ghost" ${ftPlayersSetup.length<=2?'disabled':''} onclick="ftRemovePlayer()">− Spieler</button>
+        <button class="lrn-btn ghost" ${ftPlayersSetup.length>=4?'disabled':''} onclick="ftAddPlayer()">+ Spieler</button>
+      </div>
       <button class="lrn-btn" style="padding:12px 28px;font-size:16px" onclick="ftStartGame()">▶ Spiel starten</button>
       <div style="font-size:12px;color:var(--text-3);margin-top:14px">Bisher: ${p.wins} Siege in ${p.games} Spielen · 🪙 10 AppHub-Coins pro Sieg (höchstens 30 pro Tag)</div></div>`;
     return;
@@ -455,7 +561,7 @@ function ftRenderView(){
       <div class="ft-cam"><button class="lrn-btn ghost" onclick="ftCamTurn(-0.4)" title="Links drehen">⟲</button><button class="lrn-btn ghost" onclick="ftCamTurn(0.4)" title="Rechts drehen">⟳</button><button class="lrn-btn ghost" onclick="ftCamZoom(-2)" title="Näher">＋</button><button class="lrn-btn ghost" onclick="ftCamZoom(2)" title="Weiter weg">－</button></div></div>
     <div id="ft-players" class="ft-players"></div>
     <div class="ft-bottom"><div id="ft-actions" class="lrn-card"></div><div id="ft-log" class="lrn-card"></div></div>
-    <div style="font-size:11px;color:var(--text-3);text-align:center;margin-top:8px">Ziehen = Kamera drehen · Mausrad = Zoom · Werkstatt, Markt und Rampe kannst du beim Vorbeikommen oder Landen benutzen</div>`;
+    <div style="font-size:11px;color:var(--text-3);text-align:center;margin-top:8px">Ziehen = Kamera drehen · Mausrad = Zoom · Werkstatt, Markt und Rampe kannst du nur benutzen, wenn du genau dort landest</div>`;
   const cv=document.getElementById('ft-gl');
   try{ftG=ftInitGL(cv);}catch(e){ftG=null;ftMsg='3D konnte nicht gestartet werden: '+e.message;}
   if(!ftG){document.querySelector('.ft-stage').innerHTML=`<div class="lrn-card" style="text-align:center;padding:30px">⚠️ ${ftEsc(ftMsg||'Dein Browser unterstützt WebGL nicht.')}</div>`;return;}
@@ -466,7 +572,6 @@ function ftRenderView(){
   cv.onwheel=e=>{e.preventDefault();ftCamZoom(e.deltaY>0?1.2:-1.2);};
   ftUpdatePanels();
 }
-function ftSetBots(n){ftNBots=n;ftRenderView();}
 function ftCamTurn(d){ftCam.yaw+=d;}
 function ftCamZoom(d){ftCam.dist=Math.max(9,Math.min(30,ftCam.dist+d));}
 function ftResize(){
@@ -550,16 +655,16 @@ function ftUpdatePanels(){
   if(lg)lg.innerHTML=`<div class="lrn-label">Verlauf · Runde ${Math.min(ft.round,FT_MAX_ROUNDS)}/${FT_MAX_ROUNDS}</div>`+ft.log.slice(0,8).map(l=>`<div style="font-size:12px;color:var(--text-2);margin-bottom:3px">${ftEsc(l)}</div>`).join('');
   if(!ac)return;
   const p=ftCur(ft),human=!p.bot&&!ft.over&&!ftBusy;
-  let html=`<div class="lrn-label">${ft.over?'Spiel beendet':(p.bot?ftEsc(p.name)+' ist dran …':'Du bist dran')}</div>`;
+  let html=`<div class="lrn-label">${ft.over?'Spiel beendet':(p.bot?'🤖 '+ftEsc(p.name)+' ist dran …':'🧑 '+ftEsc(p.name)+' ist dran')}</div>`;
   if(human){
     if(ft.phase==='roll')html+=`<button class="lrn-btn" style="width:100%;padding:14px;font-size:16px" onclick="ftBtnRoll()">🎲 Würfeln</button>`;
     else if(ft.phase==='buy'){const t=ft.tiles[ft.pending.tile];html+=`<div style="font-size:13px;margin-bottom:8px"><b>${FT_RES[t.res].icon} ${FT_RES[t.res].name}-Feld</b> ist frei: liefert jede Runde 1 ${FT_RES[t.res].name} (später mehr).</div><div class="lrn-two" style="margin-top:0"><button class="lrn-btn ghost" onclick="ftBtnSkip()">Nicht kaufen</button><button class="lrn-btn ${p.money<t.price?'poor':''}" ${p.money<t.price?'disabled':''} onclick="ftBtnBuy()">Kaufen ${t.price} 🪙</button></div>`;}
     else if(ft.phase==='act'){
       const here=ft.tiles[p.pos],btns=[];
       if(here.type==='res'&&here.owner===p.id&&here.lvl<3){const c=ftUpgradeCost(here);btns.push(`<button class="lrn-btn ${p.money<c?'poor':''}" ${p.money<c?'disabled':''} onclick="ftBtnUpgrade(${here.i})">🔧 Ausbauen (Stufe ${here.lvl+1}) ${c} 🪙</button>`);}
-      if(ft.flags.workshop||here.type==='workshop')Object.keys(FT_RECIPES).forEach(k=>{const r=FT_RECIPES[k],ok=ftCanCraft(p,k),need=Object.keys(r.need).map(x=>r.need[x]+FT_RES[x].icon).join(' ');btns.push(`<button class="lrn-btn ${ok?'':'poor'}" ${ok?'':'disabled'} onclick="ftBtnCraft('${k}')">${r.icon} ${r.name} <small>${need}</small></button>`);});
-      if(ft.flags.delivery||here.type==='delivery'){const n=['plate','cable','frame'].reduce((a,k)=>a+Math.min(p.parts[k],FT_GOAL-p.delivered[k]),0);btns.push(`<button class="lrn-btn ${n?'':'poor'}" ${n?'':'disabled'} onclick="ftBtnDeliver()">🚀 ${n} Teil${n===1?'':'e'} abliefern</button>`);}
-      if(ft.flags.market||here.type==='market'){Object.keys(FT_RES).filter(k=>p.inv[k]>0).forEach(k=>btns.push(`<button class="lrn-btn ghost" onclick="ftBtnSell('${k}')">${FT_RES[k].icon} ${p.inv[k]} verkaufen +${p.inv[k]*FT_SELL_PRICE} 🪙</button>`));}
+      if(here.type==='workshop')Object.keys(FT_RECIPES).forEach(k=>{const r=FT_RECIPES[k],ok=ftCanCraft(p,k),need=Object.keys(r.need).map(x=>r.need[x]+FT_RES[x].icon).join(' ');btns.push(`<button class="lrn-btn ${ok?'':'poor'}" ${ok?'':'disabled'} onclick="ftBtnCraft('${k}')">${r.icon} ${r.name} <small>${need}</small></button>`);});
+      if(here.type==='delivery'){const n=['plate','cable','frame'].reduce((a,k)=>a+Math.min(p.parts[k],FT_GOAL-p.delivered[k]),0);btns.push(`<button class="lrn-btn ${n?'':'poor'}" ${n?'':'disabled'} onclick="ftBtnDeliver()">🚀 ${n} Teil${n===1?'':'e'} abliefern</button>`);}
+      if(here.type==='market'){Object.keys(FT_RES).filter(k=>p.inv[k]>0).forEach(k=>btns.push(`<button class="lrn-btn ghost" onclick="ftBtnSell('${k}')">${FT_RES[k].icon} ${p.inv[k]} verkaufen +${p.inv[k]*FT_SELL_PRICE} 🪙</button>`));}
       html+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">${btns.join('')||'<span style="font-size:13px;color:var(--text-3)">Hier gibt es nichts zu tun.</span>'}</div><button class="lrn-btn" style="width:100%" onclick="ftBtnEnd()">Zug beenden ➜</button>`;
     }
   }else if(!ft.over)html+=`<div style="font-size:13px;color:var(--text-3)">${p.bot?'Der Computer überlegt …':'…'}</div>`;
@@ -567,15 +672,15 @@ function ftUpdatePanels(){
 }
 function ftShowEnd(){
   const over=document.getElementById('ft-over');if(!over||over.innerHTML)return;
-  const w=ft.players[ft.winner],human=!w.bot;
+  const w=ft.players[ft.winner],humans=ft.players.filter(x=>!x.bot);
   let coins=0;
-  if(human&&ftCanWin(w)||human){
+  if(!w.bot&&humans.length===1){
     const pf=ftProf(),today=new Date().toDateString();if(pf.date!==today){pf.date=today;pf.coinsDay=0;}
     pf.wins++;coins=Math.min(10,30-pf.coinsDay);pf.coinsDay+=Math.max(0,coins);
     try{const name=ftAccount();if(coins>0&&name&&typeof zcAddCoins==='function'){zcAddCoins(name,coins);if(typeof smSave==='function')smSave('zentrale');}else coins=0;}catch(e){coins=0;}
     pf.games++;ftSaveProf(pf);
   }else{const pf=ftProf();pf.games++;ftSaveProf(pf);}
-  over.innerHTML=`<div class="ft-endcard"><div style="font-size:46px">${human?'🏆':'🤖'}</div><div style="font-size:22px;font-weight:800">${human?'Du hast gewonnen!':ftEsc(w.name)+' gewinnt'}</div>
+  over.innerHTML=`<div class="ft-endcard"><div style="font-size:46px">${w.bot?'🤖':'🏆'}</div><div style="font-size:22px;font-weight:800">${ftEsc(w.name)+(w.bot?' gewinnt':' hat gewonnen!')}</div>
     <div style="font-size:13px;margin:6px 0 12px;opacity:.9">${ftCanWin(w)?'Der Weltraum-Aufzug ist fertig.':'Zeitlimit erreicht – die meisten gelieferten Teile zählen.'}${coins?'<br>🪙 +'+coins+' AppHub-Coins':''}</div>
     <div style="display:flex;gap:8px;justify-content:center"><button class="lrn-btn" onclick="ftStartGame()">Nochmal</button><button class="lrn-btn ghost" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" onclick="ftRestart()">Menü</button></div></div>`;
 }
