@@ -156,5 +156,14 @@
       "Stelle in der Werkstatt Stahlplatten, Kabelbündel und Rahmen her und liefere sie an der Rampe ab. Wer zuerst alles geliefert hat, vollendet den Weltraum-Aufzug in der Mitte des Bretts.",
       "Spiele gegen 1 bis 3 Computer-Spieler. Die Kamera lässt sich drehen und zoomen. Siege bringen AppHub-Coins."
     ]
+  },
+  {
+    "id": 15,
+    "date": "28.09.2026",
+    "title": "Fabrik-Tycoon: Lieferwagen und Bahnhof-Boss-Fehler behoben",
+    "items": [
+      "Fabrik-Tycoon: Drei Lieferwagen fahren jetzt auf dem inneren Ring um die Fabrik. Wird ein Bauteil abgeliefert, leuchtet der Aufzug auf und ein Lichtstrahl schießt in der Spielerfarbe nach oben.",
+      "Behoben: Bahnhof-Boss zeigte nach einem Kontowechsel manchmal noch das Geld des vorherigen Kontos an."
+    ]
   }
 ]

@@ -44,7 +44,7 @@ const BB_ACH=[
 const BB_OFFLINE_MAX=8*3600,BB_OFFLINE_RATE=0.5;
 const BB_PRESTIGE_BONUS=0.05;                    // +5 % je Fahrplan-Punkt
 const BB_GOLD_MIN=90,BB_GOLD_MAX=240;            // Sekunden zwischen goldenen Tickets
-let bb=null,bbTab='gens',bbBuy=1,bbTick=null,bbMsg='',bbLastSave=0,bbWelcome=null;
+let bb=null,bbTab='gens',bbBuy=1,bbTick=null,bbMsg='',bbLastSave=0,bbWelcome=null,bbLoadedFor=null;
 
 function bbEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 /* Zahlen lesbar: 1.234 · 12,3 Tsd · 4,56 Mio · 7,8 Mrd … */
@@ -164,7 +164,7 @@ function bbAwardAch(list){
 
 /* ── Oberfläche ── */
 function bbInit(){
-  bb=bbLoad();bbTab='gens';bbMsg='';
+  bb=bbLoad();bbLoadedFor=bbKey();bbTab='gens';bbMsg='';
   const r=bbOffline(bb,Date.now());
   bbWelcome=r.gain>=1&&r.seconds>=60?r:null;
   bbAwardAch(bbCheckAch(bb));
@@ -173,6 +173,7 @@ function bbInit(){
 }
 function bbLoop(){
   if(!bb)return;
+  if(bbKey()!==bbLoadedFor){bb=bbLoad();bbLoadedFor=bbKey();bbWelcome=null;bbRender();}
   const now=Date.now(),dt=Math.min(5,(now-bb.last)/1000);
   bb.last=now;bbAdvance(bb,dt);
   const got=bbCheckAch(bb);if(got.length){bbAwardAch(got);bbRender();}

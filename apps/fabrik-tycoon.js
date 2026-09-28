@@ -230,6 +230,7 @@ const FT_FS='precision mediump float;varying vec3 vN;varying vec3 vW;uniform vec
 /* Schatten-Durchgang: schreibt die Tiefe aus Sicht der Sonne als Farbe */
 const FT_VS_D='attribute vec3 aP;uniform mat4 uLVP;uniform mat4 uM;varying float vD;void main(){vec4 p=uLVP*uM*vec4(aP,1.0);vD=p.z*0.5+0.5;gl_Position=p;}';
 const FT_FS_D='precision highp float;varying float vD;vec4 pack(float d){vec4 enc=vec4(1.0,255.0,65025.0,16581375.0)*d;enc=fract(enc);enc-=enc.yzww*vec4(1.0/255.0,1.0/255.0,1.0/255.0,0.0);return enc;}void main(){gl_FragColor=pack(clamp(vD,0.0,0.99999));}';
+let ftBeam=null,ftPrevDel=0,ftLastCounts={};
 let ftGen=0;   // zählt Spiele hoch: alte Zeitgeber eines beendeten oder neu gestarteten Spiels tun nichts mehr
 let ft=null,ftG=null,ftRaf=null,ftLast=0,ftA=null,ftBusy=false,ftView='setup',ftMsg='',ftNBots=1,ftCam={yaw:0.55,pitch:0.85,dist:19},ftDrag=null,ftTokens=[],ftDiceShow=null,ftDiceT=0;
 
@@ -298,6 +299,30 @@ function ftSmoke(g,time){
     ftDrawMesh(g,g.sph,M4.model(s[0]+ph*0.5,s[1]+ph*1.3,s[2]+ph*0.2,sc,sc,sc,0),'#e8edf5',al,0.25,0);}});
   gl.depthMask(true);
 }
+/* Lieferwagen fahren auf dem inneren Ring (nur zur Zierde, laufen rein nach der Uhrzeit) */
+function ftTruckPos(u){ // u in 0..1 entlang eines Quadrats mit Halbseite 3,1 Felder
+  const h=3.1*FT_SP,p=((u%1)+1)%1*4,side=Math.floor(p),f=p-side;
+  if(side===0)return [-h+2*h*f,h,0];
+  if(side===1)return [h,h-2*h*f,-Math.PI/2];
+  if(side===2)return [h-2*h*f,-h,Math.PI];
+  return [-h,-h+2*h*f,Math.PI/2];
+}
+function ftTrucks(g,time){
+  const cols=['#f0f0f0','#ffb74d','#90caf9'];
+  [0,1,2].forEach(k=>{
+    const q=ftTruckPos(time*0.035+k/3),x=q[0],z=q[1],ry=-q[2];
+    const cy=Math.cos(ry),sy=Math.sin(ry);
+    ftDrawMesh(g,g.cube,M4.model(x,0.16,z,0.5,0.18,0.24,ry),cols[k],1,0,0.3);                                 // Ladefläche
+    ftDrawMesh(g,g.cube,M4.model(x+cy*0.3,0.2,z-sy*0.3,0.2,0.24,0.24,ry),'#455a64',1,0,0.4);                   // Fahrerhaus
+    ftDrawMesh(g,g.cube,M4.model(x+cy*0.42,0.2,z-sy*0.42,0.02,0.08,0.18,ry),'#ffe9a0',1,0.9,0);                // Scheinwerfer
+  });
+}
+function ftBeamDraw(g,time){
+  if(!ftBeam)return;const k=(time-ftBeam.t0)/1.6;if(k>=1){ftBeam=null;return;}
+  const [rx,rz]=ftTilePos(24),a=Math.sin(Math.min(1,k*1.4)*Math.PI);
+  ftDrawMesh(g,g.cube,M4.model(rx,1.2+k*1.5,rz,0.18,2.8,0.18,0),FT_COLORS[ftBeam.id],0.35*a+0.1,1.2,0);
+  ftDrawMesh(g,g.sph,M4.model(0,3.2-k*0.4,0,1.0+a*0.8,1.0+a*0.8,1.0+a*0.8,0),FT_COLORS[ftBeam.id],0.28*a,1.0,0);
+}
 function ftSceneObjects(g,time){
   // Boden und Insel
   ftBox(g,0,-0.55,0,60,0.6,60,'#243247',0,0,1,0);
@@ -327,6 +352,7 @@ function ftSceneObjects(g,time){
   let seg=0;ft.players.forEach(p=>{['plate','cable','frame'].forEach(k=>{for(let n=0;n<p.delivered[k];n++){ftBox(g,0,0.6+seg*0.32,0,0.5-seg*0.01,0.3,0.5-seg*0.01,FT_COLORS[p.id],0,0.1,1,0.3);seg++;}});});
   ftCyl(g,0,0.6+seg*0.32+0.15,0,0.06,0.4,0.06,'#f4f4f4',0,0.8);
   ftBox(g,0,0.75+seg*0.32,0,0.14,0.14,0.14,'#ffffff',time,0.8);
+  ftTrucks(g,time);
   // Figuren
   ftTokens.forEach(tk=>{
     const col=FT_COLORS[tk.id],off=[[-0.25,-0.25],[0.25,-0.25],[-0.25,0.25],[0.25,0.25]][tk.id],y=0.22+tk.y;
@@ -362,6 +388,7 @@ function ftDrawScene(g,time){
   // Markierung des aktuellen Feldes (leuchtend, durchsichtig)
   if(!ft.over){const [cx,cz]=ftTilePos(ftCur(ft).pos);const ph=0.45+0.2*Math.sin(time*4);ftBox(g,cx,0.25,cz,1.35,0.03,1.35,FT_COLORS[ft.cur],0,ph,0.85,0);}
   ftSmoke(g,time);
+  ftBeamDraw(g,time);
 }
 
 /* Beschriftungen (2D über dem 3D-Bild): Symbole der Felder, Namen, Würfelzahl */
@@ -403,7 +430,7 @@ function ftInit(){
 }
 function ftStartGame(){
   ftGen++;
-  ft=ftNew(ftNBots+1,null,1);ftView='game';ftBusy=false;ftA=null;ftDiceShow=null;
+  ft=ftNew(ftNBots+1,null,1);ftPrevDel=0;ftLastCounts={};ftBeam=null;ftView='game';ftBusy=false;ftA=null;ftDiceShow=null;
   ftTokens=ft.players.map(p=>({id:p.id,pos:0,x:ftTilePos(0)[0],z:ftTilePos(0)[1],y:0}));
   ftRenderView();
   ftLast=0;ftRaf=requestAnimationFrame(ftLoop);
@@ -457,6 +484,9 @@ function ftLoop(ts){
   if(ftA){ftA.t+=dt;ftA.update(dt);if(ftA&&ftA.t>=ftA.dur){const d=ftA.done;ftA=null;if(d)d();}}
   if(ftDiceShow)ftDiceT+=dt;
   const time=ts/1000;
+  const del=ft.players.reduce((a,p)=>a+ftDeliveredCount(p),0);
+  if(del>ftPrevDel){let who=ft.cur;let best=-1;ft.players.forEach(p=>{const c=ftDeliveredCount(p);if(c>(ftLastCounts[p.id]||0)){who=p.id;best=c;}});ftBeam={t0:time,id:who};}
+  ftPrevDel=del;ft.players.forEach(p=>{ftLastCounts[p.id]=ftDeliveredCount(p);});
   ftDrawScene(ftG,time);
   const lb=document.getElementById('ft-lbl');if(lb)ftDrawLabels(ftG,lb.getContext('2d'),time);
   ftRaf=requestAnimationFrame(ftLoop);
