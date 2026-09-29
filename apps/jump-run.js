@@ -239,12 +239,12 @@ function jrNewState(idx){
   const n=JR_LEVELS.length,lvl=jrCloneLevel(Math.max(0,Math.min(n-1,idx||0)));
   return {mode:'menu',level:lvl,p:jrPlayerAt(lvl),cam:0,coins:0,score:0,lives:3,timeLeft:lvl.time,frames:0,paused:false,fade:0,
     popups:[],fx:[],fireballs:[],shake:0,shock:null,checkpoint:null,stack:[],crumbs:{},regrow:[],custom:false,customSrc:null,timer:0,bumps:{},sel:Math.max(0,Math.min(n-1,idx||0)),
-    best:jrProf().best,unlocked:Math.max(1,Math.min(n,jrProf().unlocked)),done:jrProf().done,stars:jrProf().stars,times:jrProf().times,msg:'',lvDeaths:0,coinInit:jrCountCoins(lvl),clearInfo:null};
+    best:jrProf().best,unlocked:Math.max(1,Math.min(n,jrProf().unlocked)),done:jrProf().done,stars:jrProf().stars,times:jrProf().times,msg:'',lvDeaths:0,lvFalls:0,coinInit:jrCountCoins(lvl),clearInfo:null};
 }
 /* Level (neu) laden, Fortschritt (Münzen, Punkte, Leben) bleibt */
 function jrLoadLevel(st,idx){
   st.level=st.customSrc?jrCloneFrom(st.customSrc,-1):jrCloneLevel(idx);
-  st.p=jrPlayerAt(st.level);st.cam=0;st.timeLeft=st.level.time;st.frames=0;st.lvDeaths=0;st.coinInit=jrCountCoins(st.level);st.clearInfo=null;st.popups=[];st.bumps={};st.fx=[];st.shake=0;st.shock=null;st.checkpoint=null;st.stack=[];st.crumbs={};st.regrow=[];st.fireballs=[];
+  st.p=jrPlayerAt(st.level);st.cam=0;st.timeLeft=st.level.time;st.frames=0;st.lvDeaths=0;st.lvFalls=0;st.coinInit=jrCountCoins(st.level);st.clearInfo=null;st.popups=[];st.bumps={};st.fx=[];st.shake=0;st.shock=null;st.checkpoint=null;st.stack=[];st.crumbs={};st.regrow=[];st.fireballs=[];
 }
 function jrStart(idx){
   const keep=jrState;
@@ -428,7 +428,7 @@ function jrStep(st,inp){
     else p.warpT=0;
   }else p.warpT=0;
   // Abgrund
-  if(p.y>JR_ROWS*T+40){jrDie(st);return;}
+  if(p.y>JR_ROWS*T+40){st.lvFalls++;jrDie(st);return;}
   // Gegner
   for(const e of st.level.enemies){
     if(!e.alive){if(e.squash>0)e.squash--;continue;}
@@ -756,7 +756,7 @@ function jrClear(st){
   if(!st.custom){
     const idx=st.level.idx,next=idx+2,pf=jrProf();
     const got=st.coinInit>0?(st.coinInit-jrCountCoins(st.level))/st.coinInit:1;
-    const stars=1|(got>=0.8?2:0)|(st.lvDeaths===0?4:0);
+    const stars=1|(got>=0.8?2:0)|(st.lvFalls===0?4:0);
     const old=pf.stars[idx]|0,fresh=stars&~old,firstClear=!(pf.done&(1<<idx));
     pf.stars[idx]=old|stars;
     const secs=Math.round(st.frames/60);if(!pf.times[idx]||secs<pf.times[idx])pf.times[idx]=secs;
@@ -1126,7 +1126,7 @@ function jrDraw(ctx,st){
   else if(st.mode==='clear'){
     const ci=st.clearInfo;
     jrCard(ctx,st.msg.split('  ')[0],ci?[st.msg.split('  ')[1]||'','','','Punkte: '+st.score+(ci.reward>0?'  ·  🪙 +'+ci.reward+' Coins':'')]:[st.msg.split('  ')[1]||'','Punkte: '+st.score],'#69f0ae');
-    if(ci){ // Sterne: Ziel · 80 % der Münzen · kein Leben verloren
+    if(ci){ // Sterne: Ziel · 80 % der Münzen · nie in ein Loch gefallen
       const cy=JR_H/2+24;ctx.textAlign='center';
       [[1,'Ziel'],[2,'Münzen ≥ 80 %'],[4,'Ohne Sturz']].forEach(([b,lab],k)=>{const x=JR_W/2-100+k*100,on=ci.stars&b;
         ctx.font='34px sans-serif';ctx.fillStyle=on?'#ffca28':'rgba(255,255,255,0.22)';ctx.fillText('★',x,cy);

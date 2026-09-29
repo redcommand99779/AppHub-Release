@@ -11,7 +11,7 @@ function zcp(){
   if(!z.coins)z.coins={};if(!z.earned)z.earned={};if(!z.inv)z.inv={};if(!z.titles)z.titles={};
   if(!z.eqp)z.eqp={};if(!z.hist)z.hist={};if(!z.groups)z.groups=[];if(!z.gHist)z.gHist=[];if(!z.bonusD)z.bonusD={};if(!z.custom)z.custom={};
   if(!z.wk)z.wk={week:zcWeekKey(),players:{}};
-  if(!z.wkHist)z.wkHist=[];if(!z.wprog)z.wprog={};if(!z.remind)z.remind={};
+  if(!z.wkHist)z.wkHist=[];if(!z.wprog)z.wprog={};if(!z.remind)z.remind={};if(!z.rotReroll)z.rotReroll={};
   return z;
 }
 function zcCoinsOf(name){return zcp().coins[zcKey(name)]||0;}

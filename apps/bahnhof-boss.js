@@ -21,7 +21,7 @@ const BB_UPGRADES=[
   {id:'k1',name:'Kräftiger Stempel',icon:'🖋️',cost:500,desc:'Ein Ticket bringt doppelt so viel.',click:2},
   {id:'k2',name:'Ticketdrucker',icon:'🖨️',cost:5000,desc:'Ein Ticket bringt nochmal ×3.',click:3},
   {id:'k3',name:'Reiseführer',icon:'📘',cost:250000,desc:'Ein Ticket bringt nochmal ×5.',click:5},
-  {id:'k4',name:'Stammkunden',icon:'🤝',cost:5e7,desc:'Ein Klick bringt zusätzlich 2 % deines Einkommens pro Sekunde.',clickPct:0.02},
+  {id:'k4',name:'Stammkunden',icon:'🤝',cost:5e7,desc:'Ein Klick bringt zusätzlich 2 % deines Kontostands.',clickPct:0.02},
   {id:'g1',name:'Freundliches Personal',icon:'😊',cost:10000,desc:'Alles verdient 50 % mehr.',all:1.5},
   {id:'g2',name:'Werbekampagne',icon:'📣',cost:2e6,desc:'Alles verdient doppelt so viel.',all:2},
   {id:'g3',name:'Digitalisierung',icon:'💻',cost:2e8,desc:'Alles verdient dreimal so viel.',all:3},
@@ -90,7 +90,7 @@ function bbClickValue(s){
   let v=1;BB_UPGRADES.forEach(u=>{if(u.click&&s.ups[u.id])v*=u.click;});
   v*=1+s.pts*BB_PRESTIGE_BONUS;if(s.boost>0)v*=7;
   let pct=0;BB_UPGRADES.forEach(u=>{if(u.clickPct&&s.ups[u.id])pct+=u.clickPct;});
-  return v+pct*bbRate(s);
+  return v+pct*s.money;
 }
 function bbEarn(s,amount){s.money+=amount;s.run+=amount;s.lifetime+=amount;}
 function bbClick(s){const v=bbClickValue(s);bbEarn(s,v);s.clicks++;return v;}

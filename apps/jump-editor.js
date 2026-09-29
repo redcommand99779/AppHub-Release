@@ -6,18 +6,21 @@
    T Röhre · W/V goldene Röhre (Geheimkammer 1/2) · s Stacheln · o Münze · e Gegner · K Checkpoint · F Ziel · P Start
    g Feuerball · h Riese · i Stern (Power-Blöcke) · Wetter: Klar, Regen, Gewitter, Nebel, Sturm
    f Fledermaus · y Stachelkäfer · z Kanonenpflanze · C Bröckelplattform · J Feder · M bewegliche Plattform (4 Kacheln hin und her)
+   Z Boss-Start (Typ per Auswahlfeld) · G Boss-Tor (muss rechts vom Boss stehen, öffnet sich, wenn der Boss besiegt ist)
 ══════════════════════════════════ */
-const JR_ED_CHARS='.#B?abcghiTWVsoeKFPfyzCJM';
+const JR_ED_CHARS='.#B?abcghiTWVsoeKFPfyzCJMZG';
 const JR_ED_WEATHER=[['','☀️ Klar'],['rain','🌧️ Regen (rutschig)'],['storm','⛈️ Gewitter (rutschig)'],['fog','🌫️ Nebel'],['wind','💨 Sturm (Böen)']];
+const JR_ED_BOSSES=[['golem','🗿 Golem (3 Leben, Sprung-Angriff)'],['drake','🐲 Drache (5 Leben, Feuerbälle + Ansturm)'],['imp','👺 Wichtel (2 Leben, wirft Steine)'],['yeti','🧊 Yeti (3 Leben, Sprünge + Eiszapfen)']];
 const JR_ED_TOOLS=[
   ['.','⬜','Radierer'],['#','🟫','Boden'],['B','🧱','Ziegel'],['?','❓','Münzblock'],
   ['a','🛡️','Power: Schild'],['b','🪶','Power: Doppelsprung'],['c','🧲','Power: Magnet'],['g','🔥','Power: Feuerball'],['h','🍄','Power: Riese'],['i','⭐','Power: Stern'],
   ['T','🟩','Röhre'],['W','🟨','Goldene Röhre 1'],['V','🟧','Goldene Röhre 2'],
   ['s','🔺','Stacheln'],['o','🪙','Münze'],['e','👾','Gegner'],['K','🚩','Checkpoint'],['F','🏁','Ziel'],['P','🏃','Start'],
-  ['f','🦇','Fledermaus (fliegt)'],['y','🐞','Stachelkäfer (nur per Slam)'],['z','🌵','Kanonenpflanze (schießt)'],['C','🟤','Bröckelplattform'],['J','🔴','Feder'],['M','↔️','Bewegliche Plattform']
+  ['f','🦇','Fledermaus (fliegt)'],['y','🐞','Stachelkäfer (nur per Slam)'],['z','🌵','Kanonenpflanze (schießt)'],['C','🟤','Bröckelplattform'],['J','🔴','Feder'],['M','↔️','Bewegliche Plattform'],
+  ['Z','👹','Boss-Start (Typ unten wählen)'],['G','🚧','Boss-Tor (muss rechts vom Boss stehen)']
 ];
 const JR_ED_MINW=24,JR_ED_MAXW=300;
-const jrEd={open:false,rows:null,w:60,theme:0,weather:'',name:'Mein Level',time:300,tool:'#',cam:0,undo:[],paint:false,slot:1,hover:null,msg:''};
+const jrEd={open:false,rows:null,w:60,theme:0,weather:'',bossType:'golem',name:'Mein Level',time:300,tool:'#',cam:0,undo:[],paint:false,slot:1,hover:null,msg:''};
 
 /* ── Raster ── */
 function jrEdNewRows(w){
@@ -38,7 +41,7 @@ function jrLevelFromRows(rows,meta){
   const h=rows.length,w=rows[0].length;
   if(h!==JR_ROWS)return {error:'Das Level muss genau '+JR_ROWS+' Zeilen haben.'};
   const g=Array.from({length:JR_ROWS},()=>Array(w).fill('.')),powers={},warps={},enemies=[],movers=[],kCols=[];
-  let start=null,flagCol=-1;
+  let start=null,flagCol=-1,bossCol=-1,gateCol=-1;
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
     const c=rows[y][x];
     if(c==='.')continue;
@@ -53,12 +56,25 @@ function jrLevelFromRows(rows,meta){
     else if(c==='K')kCols.push(x);
     else if(c==='F'){if(flagCol<0)flagCol=x;}
     else if(c==='P'){if(!start)start=[x,y];}
+    else if(c==='Z'){if(bossCol<0)bossCol=x;}
+    else if(c==='G'){if(gateCol<0)gateCol=x;}
   }
   if(!start)return {error:'Es fehlt der Startpunkt (🏃).'};
   if(flagCol<0)return {error:'Es fehlt das Ziel (🏁).'};
+  if(bossCol>=0&&gateCol<0)return {error:'Ein Boss (👹) braucht ein Boss-Tor (🚧).'};
+  if(gateCol>=0&&bossCol<0)return {error:'Ein Boss-Tor (🚧) braucht einen Boss (👹).'};
+  if(bossCol>=0&&gateCol<=bossCol)return {error:'Das Boss-Tor (🚧) muss rechts vom Boss (👹) stehen.'};
   for(let r=2;r<=9;r++)g[r][flagCol]='F';
   kCols.forEach(x=>{g[8][x]='K';g[9][x]='K';});
-  const lv={w,g,enemies:enemies.map(([x,y,type])=>jrMakeEnemy(x,y,type)),movers,boss:null,gate:-1,bullets:[],
+  let boss=null,gate=-1;
+  if(bossCol>=0){
+    gate=gateCol;for(let r=0;r<=9;r++)g[r][gateCol]='G';
+    boss=jrMakeBoss(meta.bossType||'golem',bossCol);
+    let l=bossCol;while(l>0&&g[10][l-1]==='#')l--;
+    boss.minX=l*JR_T;boss.maxX=gateCol*JR_T-boss.w;
+    if(boss.maxX<boss.minX)return {error:'Zwischen Boss (👹) und Tor (🚧) ist nicht genug Platz.'};
+  }
+  const lv={w,g,enemies:enemies.map(([x,y,type])=>jrMakeEnemy(x,y,type)),movers,boss,gate,bullets:[],
     powers,warps,start:[start[0],Math.max(0,start[1]-1)],theme:meta.theme||0,time:meta.time||300,name:meta.name||'Eigenes Level',weather:meta.weather||'',custom:true};
   return {level:lv};
 }
@@ -73,6 +89,7 @@ function jrEdUnrle(str){
 function jrEdEncode(ed){
   const payload={n:ed.name,t:ed.theme,tm:ed.time,r:ed.rows.map(jrEdRle)};
   if(ed.weather)payload.wx=ed.weather;
+  if(ed.bossType&&ed.bossType!=='golem')payload.bt=ed.bossType;
   const json=JSON.stringify(payload);
   let b64;
   try{b64=btoa(unescape(encodeURIComponent(json)));}catch(e){b64=Buffer.from(json,'utf8').toString('base64');}
@@ -89,13 +106,31 @@ function jrEdDecode(code){
   const w=rows[0].length;
   if(w<JR_ED_MINW||w>JR_ED_MAXW||rows.some(r=>r.length!==w))throw new Error('Der Code hat falsche Maße.');
   if(rows.some(r=>r.some(c=>!JR_ED_CHARS.includes(c))))throw new Error('Der Code enthält unbekannte Kacheln.');
-  return {rows,w,weather:JR_ED_WEATHER.some(x=>x[0]===p.wx)?p.wx:'',theme:Math.max(0,Math.min(5,p.t|0)),time:Math.max(30,Math.min(999,p.tm|0||300)),name:String(p.n||'Eigenes Level').slice(0,30)};
+  return {rows,w,weather:JR_ED_WEATHER.some(x=>x[0]===p.wx)?p.wx:'',theme:Math.max(0,Math.min(5,p.t|0)),time:Math.max(30,Math.min(999,p.tm|0||300)),name:String(p.n||'Eigenes Level').slice(0,30),bossType:JR_ED_BOSSES.some(x=>x[0]===p.bt)?p.bt:'golem'};
 }
 
-/* ── Speicherplätze ── */
+/* ── Speicherplätze: 5 fest, bis zu 5 weitere mit AppHub-Coins kaufbar ── */
+const JR_ED_MAX_EXTRA=5;
 function jrEdSlots(){try{const a=JSON.parse(localStorage.getItem('zf_jump_custom')||'[]');return Array.isArray(a)?a:[];}catch(e){return[];}}
+function jrEdExtraSlots(){return Math.max(0,Math.min(JR_ED_MAX_EXTRA,parseInt(localStorage.getItem('zf_jump_ed_extra')||'0',10)||0));}
+function jrEdSlotCount(){return 5+jrEdExtraSlots();}
+function jrEdNextSlotPrice(){return 30+jrEdExtraSlots()*15;}
+function jrEdBuySlot(){
+  if(jrEdExtraSlots()>=JR_ED_MAX_EXTRA){jrEd.msg='Du hast schon alle zusätzlichen Plätze gekauft.';jrEdUi();return;}
+  const price=jrEdNextSlotPrice();
+  try{
+    if(typeof zcp!=='function'||typeof zcKey!=='function')throw new Error();
+    const z=zcp(),name=(z.player||'').trim();
+    if(!name){jrEd.msg='Wähle zuerst einen Spieler (oben rechts).';jrEdUi();return;}
+    const k=zcKey(name);
+    if((z.coins[k]||0)<price){jrEd.msg='Zu wenig Coins – dir fehlen '+(price-(z.coins[k]||0))+' 🪙.';jrEdUi();return;}
+    z.coins[k]-=price;if(typeof smSave==='function')smSave('zentrale');
+  }catch(e){jrEd.msg='Kauf gerade nicht möglich.';jrEdUi();return;}
+  localStorage.setItem('zf_jump_ed_extra',String(jrEdExtraSlots()+1));
+  jrEd.msg='💾 Neuer Speicherplatz freigeschaltet! (−'+price+' 🪙)';jrEdBuildUi();
+}
 function jrEdSaveSlot(n){
-  const a=jrEdSlots();while(a.length<5)a.push(null);
+  const a=jrEdSlots();while(a.length<n)a.push(null);
   a[n-1]={name:jrEd.name,code:jrEdEncode(jrEd)};
   try{localStorage.setItem('zf_jump_custom',JSON.stringify(a));}catch(e){}
 }
@@ -103,15 +138,15 @@ function jrEdLoadSlot(n){
   const s=jrEdSlots()[n-1];if(!s)throw new Error('Platz '+n+' ist leer.');
   jrEdApply(jrEdDecode(s.code));
 }
-function jrEdApply(d){jrEd.rows=d.rows;jrEd.w=d.w;jrEd.theme=d.theme;jrEd.weather=d.weather||'';jrEd.time=d.time;jrEd.name=d.name;jrEd.cam=0;jrEd.undo=[];}
+function jrEdApply(d){jrEd.rows=d.rows;jrEd.w=d.w;jrEd.theme=d.theme;jrEd.weather=d.weather||'';jrEd.bossType=d.bossType||'golem';jrEd.time=d.time;jrEd.name=d.name;jrEd.cam=0;jrEd.undo=[];}
 
 /* ── Rückgängig ── */
 function jrEdSnap(){jrEd.undo.push(JSON.stringify(jrEd.rows));if(jrEd.undo.length>40)jrEd.undo.shift();}
 function jrEdUndo(){const s=jrEd.undo.pop();if(s){jrEd.rows=JSON.parse(s);jrEd.w=jrEd.rows[0].length;}}
-/* Malen: P und F gibt es nur einmal */
+/* Malen: P, F, Z (Boss) und G (Boss-Tor) gibt es nur einmal */
 function jrEdPaint(cx,cy,tool){
   if(cx<0||cy<0||cx>=jrEd.w||cy>=JR_ROWS)return;
-  if(tool==='P'||tool==='F')jrEd.rows.forEach(r=>{const i=r.indexOf(tool);if(i>=0)r[i]='.';});
+  if(tool==='P'||tool==='F'||tool==='Z'||tool==='G')jrEd.rows.forEach(r=>{const i=r.indexOf(tool);if(i>=0)r[i]='.';});
   jrEd.rows[cy][cx]=tool;
 }
 
@@ -142,7 +177,7 @@ function jrEdClose(){
 }
 function jrEdExit(){jrEdClose();if(typeof jrToMenu==='function')jrToMenu();}
 function jrEdTest(){
-  const r=jrLevelFromRows(jrEd.rows,{theme:jrEd.theme,time:jrEd.time,name:jrEd.name,weather:jrEd.weather});
+  const r=jrLevelFromRows(jrEd.rows,{theme:jrEd.theme,time:jrEd.time,name:jrEd.name,weather:jrEd.weather,bossType:jrEd.bossType});
   if(r.error){jrEd.msg='⚠️ '+r.error;jrEdUi();return;}
   jrEd.open=false;
   const bar=document.getElementById('jr-editor-bar');if(bar)bar.style.display='none';
@@ -197,7 +232,7 @@ function jrEdKey(e){
 /* ── Zeichnen ── */
 function jrEdDraw(ctx){
   const T=JR_T,cam=jrEd.cam,t=jrFrame;
-  const g=jrEd.rows.map(r=>r.map(c=>({a:'!',b:'!',c:'!',V:'W',g:'!',h:'!',i:'!',e:'.',f:'.',y:'.',z:'.',M:'.',P:'.'}[c]||c)));
+  const g=jrEd.rows.map(r=>r.map(c=>({a:'!',b:'!',c:'!',V:'W',g:'!',h:'!',i:'!',e:'.',f:'.',y:'.',z:'.',M:'.',P:'.',Z:'.'}[c]||c)));
   const pst={level:{w:jrEd.w,g,theme:jrEd.theme,warps:{}},cam,bumps:{},checkpoint:null};
   jrFrame++;
   jrBackground(ctx,pst);
@@ -213,6 +248,10 @@ function jrEdDraw(ctx){
     else if(raw==='P'){
       ctx.save();jrDrawPlayer(ctx,{p:{x:tx*T+5,y:(ty+1)*T-34,w:22,h:34,face:1,onGround:true,vx:0,anim:0,duck:false,slam:false,inv:0,shield:false,magnet:0},mode:'play',cam},t,JR_SKIN_DEFAULT);ctx.restore();
       ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('START',x+T/2,y+8);
+    }
+    else if(raw==='Z'){
+      ctx.font='26px sans-serif';ctx.textAlign='center';ctx.fillText('👹',x+T/2,y+T-8);
+      ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 9px sans-serif';ctx.fillText('BOSS',x+T/2,y+8);
     }
     else if(ch!=='.')jrDrawTile(ctx,pst,ch,tx,ty,x,y,t);
     if('abcghi'.includes(raw)){ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText({a:'🛡️',b:'🪶',c:'🧲',g:'🔥',h:'🍄',i:'⭐'}[raw],x+T/2,y+T-8);}
@@ -240,12 +279,14 @@ function jrEdBuildUi(){
       <input id="jr-ed-name" class="jr-ed-input" maxlength="30" value="${jrEd.name.replace(/"/g,'&quot;')}" oninput="jrEd.name=this.value" placeholder="Name des Levels"/>
       <select id="jr-ed-theme" class="jr-ed-input" onchange="jrEd.theme=+this.value">${['🌞 Wiese','🌇 Abend','🌙 Nacht','💎 Höhle','❄️ Schnee','🌋 Vulkan'].map((n,i)=>`<option value="${i}" ${jrEd.theme===i?'selected':''}>${n}</option>`).join('')}</select>
       <select id="jr-ed-weather" class="jr-ed-input" title="Wetter" onchange="jrEd.weather=this.value">${JR_ED_WEATHER.map(([v,n])=>`<option value="${v}" ${jrEd.weather===v?'selected':''}>${n}</option>`).join('')}</select>
+      <select id="jr-ed-boss" class="jr-ed-input" title="Boss-Typ für die 👹-Kachel" onchange="jrEd.bossType=this.value">${JR_ED_BOSSES.map(([v,n])=>`<option value="${v}" ${jrEd.bossType===v?'selected':''}>${n}</option>`).join('')}</select>
       ${btn('jr-ed-wm','− Breite','jrEdResize(jrEd.w-10)')}${btn('jr-ed-wp','+ Breite','jrEdResize(jrEd.w+10)')}
     </div>
     <div class="jr-ed-row">
       ${btn('jr-ed-test','▶ Testen','jrEdTest()')}${btn('jr-ed-undo','↩ Rückgängig','jrEdUndo()')}${btn('jr-ed-new','🗑 Neu','jrEdNew()')}
-      <select id="jr-ed-slot" class="jr-ed-input" onchange="jrEd.slot=+this.value">${[1,2,3,4,5].map(n=>{const s=jrEdSlots()[n-1];return`<option value="${n}" ${jrEd.slot===n?'selected':''}>Platz ${n}${s?' · '+String(s.name).replace(/</g,'&lt;'):' · leer'}</option>`;}).join('')}</select>
+      <select id="jr-ed-slot" class="jr-ed-input" onchange="jrEd.slot=+this.value">${Array.from({length:jrEdSlotCount()},(_,i)=>i+1).map(n=>{const s=jrEdSlots()[n-1];return`<option value="${n}" ${jrEd.slot===n?'selected':''}>Platz ${n}${s?' · '+String(s.name).replace(/</g,'&lt;'):' · leer'}</option>`;}).join('')}</select>
       ${btn('jr-ed-save','💾 Speichern','jrEdDoSave()')}${btn('jr-ed-load','📂 Laden','jrEdDoLoad()')}
+      ${jrEdExtraSlots()<JR_ED_MAX_EXTRA?btn('jr-ed-buyslot','🪙 Platz kaufen ('+jrEdNextSlotPrice()+')','jrEdBuySlot()'):''}
     </div>
     <div class="jr-ed-row">
       ${btn('jr-ed-gal','📚 Galerie','jrGalOpen()')}${btn('jr-ed-copy','📋 Code kopieren','jrEdDoCopy()')}${btn('jr-ed-paste','📥 Code einfügen','jrEdDoPaste()')}${btn('jr-ed-exit','⬅ Beenden','jrEdExit()')}

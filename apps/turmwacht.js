@@ -176,6 +176,29 @@ function tdFinish(st){
   if(coins>0){try{const name=tdAccount();if(name&&typeof zcAddCoins==='function'){zcAddCoins(name,coins);if(typeof smSave==='function')smSave('zentrale');}else coins=0;}catch(e){coins=0;}}
   st.coinsEarned=coins;return {coins,stars:m.stars};
 }
+/* Mit Coins weiterkämpfen statt aufzugeben: einmal pro Partie, wird teurer, je weiter man kam */
+function tdReviveCost(st){return 40+st.wave*4;}
+function tdCanRevive(st){
+  if(!st||st.mode!=='lost'||st.revived)return false;
+  try{const name=tdAccount();if(!name||typeof zcCoinsOf!=='function')return false;return zcCoinsOf(name)>=tdReviveCost(st);}catch(e){return false;}
+}
+function tdDoRevive(){
+  if(!tdCanRevive(td))return;
+  const cost=tdReviveCost(td);
+  try{
+    const name=tdAccount(),z=zcp(),k=zcKey(name);
+    z.coins[k]=(z.coins[k]||0)-cost;if(typeof smSave==='function')smSave('zentrale');
+  }catch(e){return;}
+  td.revived=true;td.lives=Math.min(td.maxLives,5);td.mode='build';td.enemies=[];td.spawnQ=[];
+  tdMsg='🪙 Weitergekämpft! +5 ❤️';
+  const over=document.getElementById('td-over');if(over)over.innerHTML='';
+  tdUpdateHud(true);
+}
+function tdGiveUp(){
+  if(!td)return;td.revived=true;
+  const over=document.getElementById('td-over');if(over)over.innerHTML='';
+  tdUpdateHud(true);
+}
 
 /* ══ Zeichnen ══ */
 const TD_THEMES=[{g1:'#7cb668',g2:'#71ab5f',path:'#c9b27c',edge:'#a89060',deco:'#3f7f3a'},{g1:'#c9a06b',g2:'#bf9760',path:'#8d7a63',edge:'#6f5e4c',deco:'#8a6b3f'},{g1:'#7fa3b8',g2:'#759aaf',path:'#d7d0bd',edge:'#b3ab97',deco:'#3f6b7f'}];
@@ -321,6 +344,12 @@ function tdUpdateHud(force){
     if(force||html!==tdLastInfo){info.innerHTML=html;tdLastInfo=html;}
   }
   const over=document.getElementById('td-over');
+  if(over&&td.mode==='lost'&&!td.revived&&tdCanRevive(td)&&!over.innerHTML){
+    over.innerHTML=`<div class="td-over"><div style="font-size:44px">💥</div><div style="font-size:22px;font-weight:800">Die Basis ist gefallen</div>
+      <div style="font-size:14px;margin:6px 0">Welle ${Math.max(0,td.wave-1)}/${TD_WAVES} · ${td.kills} Gegner besiegt</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="lrn-btn" onclick="tdDoRevive()">🪙 ${tdReviveCost(td)} Coins: Weiterkämpfen (+5 ❤️)</button>
+      <button class="lrn-btn ghost" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" onclick="tdGiveUp()">Aufgeben</button></div></div>`;
+  }
   if(over&&(td.mode==='won'||td.mode==='lost')&&!over.innerHTML){
     const r=tdFinish(td)||{coins:td.coinsEarned||0};
     over.innerHTML=`<div class="td-over"><div style="font-size:44px">${td.mode==='won'?'🏆':'💥'}</div><div style="font-size:22px;font-weight:800">${td.mode==='won'?'Alle Wellen geschafft!':'Die Basis ist gefallen'}</div>

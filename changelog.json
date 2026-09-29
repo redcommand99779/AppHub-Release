@@ -174,5 +174,26 @@
       "Jetzt mit bis zu 4 Spielern am selben Gerät: jeder Sitzplatz lässt sich frei zwischen Mensch und Computer umschalten – ideal, um abwechselnd mit Freunden oder der Familie zu spielen.",
       "Grafik aufgehübscht: driftende Wolken am Himmel, Bäume mit zweifarbiger Krone und weiche Kontaktschatten unter Gebäuden und Bäumen."
     ]
+  },
+  {
+    "id": 17,
+    "date": "28.09.2026",
+    "title": "Mehr für AppHub-Coins, wenn der Shop schon leer ist",
+    "items": [
+      "Fabrik-Tycoon: jede Rohstoffart gibt es jetzt genau so oft wie Spieler mitspielen, und jeder darf höchstens ein Feld je Art besitzen – kein Monopol mehr, das andere am Gewinnen hindert.",
+      "Turmwacht: bei einer Niederlage kannst du dich mit Coins freikaufen und mit 5 Leben weiterkämpfen (einmal pro Partie, wird teurer, je weiter du kommst).",
+      "Super-Jumper-Editor: bis zu 5 zusätzliche Speicherplätze mit Coins freischaltbar (10 statt 5).",
+      "Shop-Rotation: die 5 wechselnden Artikel lassen sich jetzt vorzeitig mit Coins neu würfeln, statt 15 Minuten zu warten."
+    ]
+  },
+  {
+    "id": 18,
+    "date": "29.09.2026",
+    "title": "Super Jumper: Sturz-Stern und Bosse im Editor",
+    "items": [
+      "Der dritte Stern gilt jetzt nur noch fürs nie in ein Loch fallen – Tod durch Stacheln oder Gegner zählt nicht mehr dagegen.",
+      "Level-Editor: eigene Level können jetzt einen Boss bekommen (Golem, Drache, Wichtel oder Yeti) mit einem Boss-Tor, das sich erst öffnet, wenn er besiegt ist.",
+      "Bahnhof-Boss: Stammkunden gibt jetzt 2 % des Kontostands pro Klick statt 2 % des Einkommens pro Sekunde."
+    ]
   }
 ]

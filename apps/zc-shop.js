@@ -497,8 +497,23 @@ function zcRotPool(){
   return out;
 }
 function zcRotPlayerKey(){try{return zcKey((zcp().player||'').trim());}catch(e){return '';}}
+/* Vorzeitig neu würfeln: kostet Coins, wird innerhalb der aktuellen 15-Minuten-Runde teurer, danach wieder zurückgesetzt */
+function zcRotRerollState(){
+  try{const z=zcp(),k=zcRotPlayerKey(),r=z.rotReroll[k];return (r&&r.slot===zcRotSlot())?r:{slot:zcRotSlot(),n:0};}catch(e){return {slot:zcRotSlot(),n:0};}
+}
+function zcRotRerollCost(){return 25+zcRotRerollState().n*20;}
+function zcRotReroll(){
+  const z=zcp(),name=(z.player||'').trim();if(!name){showToast('Wähle zuerst einen Spieler');return;}
+  const k=zcKey(name),price=zcRotRerollCost(),admin=zcAdminOn();
+  if(!admin&&(z.coins[k]||0)<price){showToast(`Zu wenig Coins – dir fehlen ${price-(z.coins[k]||0)} 🪙`);return;}
+  if(!admin)z.coins[k]-=price;
+  const st=zcRotRerollState();z.rotReroll[k]={slot:st.slot,n:st.n+1};
+  smSave('zentrale');zcRotCacheSlot=null;
+  sfx('rankup');showToast(`🎲 Shop-Rotation neu gewürfelt! (−${price} 🪙)`,2400);
+  zcRenderShop();
+}
 function zcRotPick(){
-  const slot=zcRotSlot(),rnd=zcRng('zcrot-'+slot+'-'+zcRotPlayerKey()),pool=zcRotPool();
+  const slot=zcRotSlot(),n=zcRotRerollState().n,rnd=zcRng('zcrot-'+slot+'-'+zcRotPlayerKey()+(n?'-'+n:'')),pool=zcRotPool();
   const byRar={};pool.forEach(p=>{(byRar[p.rar]=byRar[p.rar]||[]).push(p);});
   const used=new Set(),picked=[];
   let guard=0;
@@ -517,7 +532,7 @@ function zcRotPick(){
 }
 let zcRotCache=null,zcRotCacheSlot=null;
 function zcRotPickCached(){
-  const slot=zcRotSlot()+'|'+zcRotPlayerKey();
+  const slot=zcRotSlot()+'|'+zcRotPlayerKey()+'|'+zcRotRerollState().n;
   if(zcRotCacheSlot!==slot){zcRotCacheSlot=slot;zcRotCache=zcRotPick();}
   return zcRotCache;
 }
@@ -741,6 +756,7 @@ function zcShopBody(name,k,coins){
           <div><div style="font-size:16px;font-weight:800">🎡 Shop-Rotation</div><div style="font-size:11px;opacity:0.9;margin-top:2px">5 Artikel · alle 15 Minuten neu – nur diese sind gerade kaufbar</div></div>
           <div style="text-align:right"><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.85">Neue Auswahl in</div><div id="zc-rot-cd" style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1">${rm}:${String(rs).padStart(2,'0')}</div></div>
         </div>
+        ${name?`<button class="timer-btn" onclick="zcRotReroll()" style="margin-top:10px;padding:6px 12px;font-size:12px;background:rgba(255,255,255,0.18);color:#fff;border:0.5px solid rgba(255,255,255,0.4)" title="Würfelt die 5 Artikel sofort neu, wird innerhalb der Runde teurer">🎲 Jetzt neu würfeln (${zcRotRerollCost()} 🪙)</button>`:''}
         <div style="height:5px;background:rgba(255,255,255,0.28);border-radius:3px;margin-top:10px;overflow:hidden"><div id="zc-rot-bar" style="height:100%;width:${(ms/ZC_ROT_MS*100).toFixed(1)}%;background:#fff;border-radius:3px"></div></div>
       </div>`
       +(name?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">${rot.map(o=>zcRotTile(name,coins,o)).join('')}</div>`:'<div style="font-size:12px;color:var(--text-3)">Wähle einen Spieler, um die Rotation zu sehen.</div>')
