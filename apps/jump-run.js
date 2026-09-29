@@ -1,7 +1,7 @@
 /* ══════════════════════════════════
    SUPER JUMPER – Jump-and-Run (eigene Figuren und Grafik, komplett gezeichnet)
    Laufen, Springen, Münzen sammeln, Gegnern auf den Kopf springen, Stacheln und Löcher meiden,
-   am Ende des Levels die Zielfahne erreichen. 6 Level auf einer Weltkarte, Geheimkammern, Power-ups,
+   am Ende des Levels die Zielfahne erreichen. 10 Level auf einer Weltkarte, Geheimkammern, Power-ups,
    Checkpoints und ein Level-Editor (apps/jump-editor.js).
    Steuerung: ←/→ oder A/D laufen · Leertaste/↑/W springen (länger halten = höher)
    ↓/S ducken (auf einer goldenen Röhre gehalten = Geheimkammer) · in der Luft ↓/S = Slam-Attacke
@@ -53,8 +53,9 @@ function jrMakeEnemy(x,y,type){
   if(type==='spiky')return {type,sp:0.5,x:x*T+3,y:(y+1)*T-24,w:26,h:24,vx:-0.5,dir:-1,alive:true,squash:0};
   return {type:'walk',x:x*T+3,y:(y+1)*T-24,w:26,h:24,vx:-0.8,dir:-1,alive:true,squash:0};
 }
-/* Bosse: imp (Mini-Boss: wirft Steine, 2 Leben), golem (Sprung-Angriff, 3), yeti (Sprünge + Eiszapfen, 3), drake (Feuerbälle + Ansturm, 5) */
-const JR_BOSS_DIMS={golem:[56,56,3],drake:[64,44,5],imp:[44,44,2],yeti:[54,58,3]};
+/* Bosse: imp (Mini-Boss: wirft Steine, 2 Leben), golem (Sprung-Angriff, 3), yeti (Sprünge + Eiszapfen, 3), drake (Feuerbälle + Ansturm, 5),
+   komet (nur Stern-Dimension: Sprung-Angriff + Gesteinsschauer, 4), sternwächter (nur Stern-Dimension, finaler Boss: Feuerbälle + Ansturm, 6) */
+const JR_BOSS_DIMS={golem:[56,56,3],drake:[64,44,5],imp:[44,44,2],yeti:[54,58,3],komet:[50,40,4],sternwaechter:[66,46,6]};
 function jrMakeBoss(type,col){
   const T=JR_T,[w,h,hp]=JR_BOSS_DIMS[type]||JR_BOSS_DIMS.golem;type=JR_BOSS_DIMS[type]?type:'golem';
   return {type,x:col*T,y:10*T-h,sx:col*T,sy:10*T-h,w,h,hp,maxhp:hp,vx:0,vy:0,dir:-1,inv:0,alive:true,cd:120,mode:'walk',t:0};
@@ -132,7 +133,7 @@ const JR_SPECS=[
    enemies:[[12,9],[21,9],[30,9],[66,9],[93,9],[102,9],[129,9]]}
 ];
 
-/* Generator für die Level 4–6: gleichmäßige Abschnitte (je 15 Kacheln) mit einem Merkmal pro Abschnitt.
+/* Generator für die Level 4–10: gleichmäßige Abschnitte (je 15 Kacheln) mit einem Merkmal pro Abschnitt.
    Regeln, damit alles schaffbar bleibt: Landezone am Anfang frei, Stacheln nie unter Plattformen,
    keine Gegner in Stachel-Abschnitten, Löcher höchstens 3 Kacheln breit. */
 function jrGenSpec(name,theme,time,plan,gaps,weather){
@@ -170,7 +171,11 @@ function jrGenSpec(name,theme,time,plan,gaps,weather){
 JR_SPECS.push(
   jrGenSpec('Kristallhöhle',3,300,['start','power:giant','pipe','crumble','spikes','fly','tunnel','checkpoint','warp:1','stairs','spring:feather','spikes','mover','plain','finish'],[2,3,3,3,3,3,3],'fog'),
   jrGenSpec('Schneegipfel',4,290,['start','plain','pipe:3','spikes','spiky','stairs','power:magnet','tunnel','checkpoint','spikes:3','power:fire','warp:0','shoot','pipe:3','fly','spikes','arena:yeti'],[3,3,3,3,3,3,3],'wind'),
-  jrGenSpec('Vulkan-Festung',5,280,['start','enemies','spikes:3','pipe:3','power:shield','spiky','spikes','tunnel','checkpoint','stairs','spikes:3','warp:1','spring:magnet','shoot','pipe:3','spikes:3','crumble','power:star','arena:drake'],[3,3,3,3,3,3,3])
+  jrGenSpec('Vulkan-Festung',5,280,['start','enemies','spikes:3','pipe:3','power:shield','spiky','spikes','tunnel','checkpoint','stairs','spikes:3','warp:1','spring:magnet','shoot','pipe:3','spikes:3','crumble','power:star','arena:drake'],[3,3,3,3,3,3,3]),
+  jrGenSpec('Herbstwald',1,300,['start','plain','power:feather','pipe','spikes','mover','tunnel','checkpoint','spiky','warp:0','platform','spikes:3','shoot','fly','finish'],[2,3,3,3,3,3,3]),
+  jrGenSpec('Wüstensturm',1,300,['start','pipe:3','spikes','fly','power:magnet','tunnel','checkpoint','crumble','spikes:3','warp:1','stairs','spring:fire','shoot','spiky','arena:imp'],[3,3,3,3,3,3,3],'wind'),
+  jrGenSpec('Kristalltiefen',3,300,['start','plain','power:star','pipe','spikes','mover','tunnel','checkpoint','fly','spikes:3','warp:0','crumble','spring:giant','spiky','shoot','finish'],[2,3,3,3,3,3,3],'fog'),
+  jrGenSpec('Drachenthron',5,300,['start','enemies','pipe:3','power:shield','spikes','fly','tunnel','checkpoint','spiky','warp:1','stairs','spring:magnet','shoot','spikes:3','crumble','power:star','arena:drake'],[3,3,3,3,3,3,3])
 );
 
 /* Geheimkammern (Bonusräume): über goldene Röhren erreichbar, Ausgang = Röhre rechts */
@@ -189,6 +194,20 @@ const JR_LEVELS=JR_SPECS.map(jrBuild);
 const JR_BONUS=JR_BONUS_SPECS.map(jrBuild);
 JR_BONUS.forEach(L=>{L.bonus=true;});
 
+/* ── Stern-Dimension: geheime Zusatz-Level, erst ab 30/30 Sternen sichtbar ── */
+const JR_STAR_SPECS=[
+  jrGenSpec('Sternentor',6,300,['start','plain','power:star','pipe','spikes','fly','tunnel','checkpoint','warp:1','spiky','finish'],[2,3,3,3,3,3,3]),
+  jrGenSpec('Kometenbahn',6,300,['start','pipe:3','spikes','fly','power:magnet','tunnel','checkpoint','crumble','spikes:3','warp:0','stairs','spring:feather','spiky','shoot','arena:komet'],[3,3,3,3,3,3,3]),
+  jrGenSpec('Herz des Sterns',6,320,['start','enemies','pipe:3','power:shield','spikes','fly','tunnel','checkpoint','spiky','warp:1','stairs','spring:magnet','spikes:3','crumble','power:star','arena:sternwaechter'],[3,3,3,3,3,3,3])
+];
+const JR_STAR_LEVELS=JR_STAR_SPECS.map(jrBuild);
+/* Exklusive Kosmetik: je Level in der Stern-Dimension ein neuer Held-Skin, nirgendwo sonst erhältlich */
+const JR_STAR_SKINS=[
+  {id:'nova',name:'Sterntor-Kapitän',cap:'#ff6d00',capTop:'#ffd180',body:'#4527a0',strap:'#b39ddb',skin:'#ffe0b2',boots:'#311b92',trail:'#ce93d8',glow:'#ce93d8',visor:true,mask:false,cape:null},
+  {id:'komet',name:'Kometenreiter',cap:'#00bcd4',capTop:'#b2ebf2',body:'#01579b',strap:'#4dd0e1',skin:'#ffe0b2',boots:'#263238',trail:'#4dd0e1',glow:null,visor:false,mask:false,cape:'#00bcd4'},
+  {id:'guard',name:'Sternwächter-Rüstung',cap:'#9575cd',capTop:'#d1c4e9',body:'#311b92',strap:'#ffd54f',skin:'#ffe0b2',boots:'#1a237e',trail:'rainbow',glow:'#fff59d',visor:true,mask:true,cape:'#7e57c2'}
+];
+
 /* ── Zustand ── */
 let jrState=null,jrRaf=null,jrLast=0,jrAcc=0,jrFrame=0;
 const jrIn={left:false,right:false,jump:false,jumpHeld:false,down:false,downPress:false,fire:false};
@@ -202,13 +221,39 @@ function jrProfAll(){try{const o=JSON.parse(localStorage.getItem('zf_jump_p')||'
 function jrProf(name){
   if(name===undefined)name=jrAccount();
   const all=jrProfAll(),p=all[jrProfKey(name)];
-  if(p)return Object.assign({name:name||'',best:0,unlocked:1,done:0,stars:{},times:{},coins:0,slams:0,bosses:0,cleared:0},p);
-  const q={name:name||'',best:0,unlocked:1,done:0,stars:{},times:{},coins:0,slams:0,bosses:0,cleared:0};
+  if(p)return Object.assign({name:name||'',best:0,unlocked:1,done:0,stars:{},times:{},coins:0,slams:0,bosses:0,cleared:0,ach:{}},p);
+  const q={name:name||'',best:0,unlocked:1,done:0,stars:{},times:{},coins:0,slams:0,bosses:0,cleared:0,ach:{}};
   if(!all._legacy){q.best=jrLoad('zf_jump_best',0);q.unlocked=Math.max(1,jrLoad('zf_jump_unlocked',1));q.done=jrLoad('zf_jump_done',0);}  // alter Fortschritt gehört dem ersten Konto
   return q;
 }
 function jrProfSave(p){const all=jrProfAll();all[jrProfKey(p.name)]=p;all._legacy=1;jrSave('zf_jump_p',JSON.stringify(all));}
 function jrStarCount(p){let n=0;for(const k in p.stars){const v=p.stars[k]|0;n+=(v&1?1:0)+(v&2?1:0)+(v&4?1:0);}return n;}
+/* ── Erfolge (Trophäen): einmalige Belohnungen in AppHub-Coins ── */
+const JR_BOSS_LEVELS=[1,2,4,5,7,9];
+const JR_ACH=[
+  {id:'first',name:'Erster Sprung',desc:'Ein Level zum ersten Mal geschafft',test:p=>p.cleared>=1,coins:2},
+  {id:'clear10',name:'Weltenbummler',desc:'Alle 10 Level geschafft',test:p=>JR_LEVELS.every((_,i)=>p.done&(1<<i)),coins:8},
+  {id:'star15',name:'Sternensammler',desc:'15 Sterne gesammelt',test:p=>jrStarCount(p)>=15,coins:3},
+  {id:'star30',name:'Perfektionist',desc:'Alle 30 Sterne gesammelt',test:p=>jrStarCount(p)>=30,coins:10},
+  {id:'boss1',name:'Erster Bosskampf',desc:'Einen Boss besiegt',test:p=>p.bosses>=1,coins:2},
+  {id:'boss6',name:'Bossbezwinger',desc:'Alle 6 Bosse besiegt',test:p=>JR_BOSS_LEVELS.every(i=>p.done&(1<<i)),coins:8},
+  {id:'coins500',name:'Münzjäger',desc:'500 Münzen im Spiel gesammelt',test:p=>p.coins>=500,coins:3},
+  {id:'nofall',name:'Trockene Füße',desc:'In jedem Level nie in ein Loch gefallen (3. Stern überall)',test:p=>JR_LEVELS.every((_,i)=>(p.stars[i]|0)&4),coins:6},
+  {id:'best5000',name:'Highscore-Held',desc:'5.000 Punkte in einem Lauf erreicht',test:p=>p.best>=5000,coins:3},
+  {id:'fast',name:'Blitzstart',desc:'Level 1 in unter 20 Sekunden geschafft',test:p=>p.times[0]!=null&&p.times[0]<20,coins:2},
+  {id:'stardim',name:'Sternenheld',desc:'Alle 3 Level der Stern-Dimension geschafft',test:p=>!!p.star&&((p.star.done|0)&7)===7,coins:10},
+  {id:'starcos',name:'Kosmetik-Sammler',desc:'Alle exklusiven Skins der Stern-Dimension freigeschaltet',test:p=>!!p.star&&!!p.star.cos&&JR_STAR_SKINS.every(s=>p.star.cos[s.id]),coins:6}
+];
+function jrCheckAch(p){
+  const got=[];JR_ACH.forEach(a=>{if(!p.ach[a.id]&&a.test(p)){p.ach[a.id]=true;got.push(a);}});return got;
+}
+function jrAwardAch(list){
+  if(!list.length)return;
+  const coins=list.reduce((a,x)=>a+x.coins,0);let paid=0;
+  try{const name=jrAccount();if(name&&typeof zcAddCoins==='function'){zcAddCoins(name,coins);paid=coins;if(typeof smSave==='function')smSave('zentrale');}}catch(e){}
+  if(typeof showToast==='function')showToast('🏅 '+list.map(a=>a.name).join(', ')+(paid?` · +${paid} 🪙 AppHub-Coins`:''),3200);
+  if(typeof sfx==='function'){try{sfx('chime');}catch(e){}}
+}
 /* Herausforderungen (Tages-Challenges der Spielzentrale): Ereignisse sammeln und gebündelt melden */
 const jrChalBuf={};
 function jrChal(kind,n){jrChalBuf[kind]=(jrChalBuf[kind]||0)+(n||1);}
@@ -238,7 +283,7 @@ function jrPlayerAt(level){
 function jrNewState(idx){
   const n=JR_LEVELS.length,lvl=jrCloneLevel(Math.max(0,Math.min(n-1,idx||0)));
   return {mode:'menu',level:lvl,p:jrPlayerAt(lvl),cam:0,coins:0,score:0,lives:3,timeLeft:lvl.time,frames:0,paused:false,fade:0,
-    popups:[],fx:[],fireballs:[],shake:0,shock:null,checkpoint:null,stack:[],crumbs:{},regrow:[],custom:false,customSrc:null,timer:0,bumps:{},sel:Math.max(0,Math.min(n-1,idx||0)),
+    popups:[],fx:[],fireballs:[],shake:0,shock:null,checkpoint:null,stack:[],crumbs:{},regrow:[],custom:false,customSrc:null,starIdx:null,timer:0,bumps:{},sel:Math.max(0,Math.min(n-1,idx||0)),
     best:jrProf().best,unlocked:Math.max(1,Math.min(n,jrProf().unlocked)),done:jrProf().done,stars:jrProf().stars,times:jrProf().times,msg:'',lvDeaths:0,lvFalls:0,coinInit:jrCountCoins(lvl),clearInfo:null};
 }
 /* Level (neu) laden, Fortschritt (Münzen, Punkte, Leben) bleibt */
@@ -578,27 +623,28 @@ function jrBossStep(st,inp){
     if(b.onGround)b.dir=dirTo;
     if(b.mode==='walk'){b.vx=b.dir*0.9*rage;if(b.t>110){b.mode='throw';b.t=0;}}
     else{b.vx=0;if(b.t===22){st.level.bullets.push({x:b.x+b.w/2+b.dir*18,y:b.y+4,vx:b.dir*2.6,vy:-5.5,g:0.28,t:240,r:8,rock:true});jrSfx('jrShoot');}if(b.t>50){b.mode='walk';b.t=0;}}
-  }else if(b.type==='yeti'){
+  }else if(b.type==='yeti'||b.type==='komet'){
     if(b.onGround)b.dir=dirTo;
-    b.vx=b.dir*(1.0*rage);
+    b.vx=b.dir*((b.type==='komet'?1.15:1.0)*rage);
     if(--b.cd<=0&&b.onGround){b.vy=-10.5;b.cd=Math.max(90,170-(b.maxhp-b.hp)*30);b.vx=dirTo*2.6;b.air=true;jrSfx('jrSlam');}
   }else{
     b.t++;
     if(b.mode==='walk'){b.dir=dirTo;b.vx=b.dir*1.1*rage;if(b.t>90){b.mode='shoot';b.t=0;}}
-    else if(b.mode==='shoot'){b.dir=dirTo;b.vx=0;if(b.t===30){st.level.bullets.push({x:b.x+b.w/2+b.dir*30,y:b.y+b.h*0.5,vx:b.dir*2.4,vy:0,t:240,r:7});jrSfx('jrShoot');}if(b.t>80){b.mode='windup';b.t=0;}}
-    else if(b.mode==='windup'){b.dir=dirTo;b.vx=0;if(b.t>32){b.mode='charge';b.t=0;b.dir=dirTo;}}
-    else if(b.mode==='charge'){b.vx=b.dir*3*Math.min(1.3,rage);if(b.t>40){b.mode='rest';b.t=0;}}
+    else if(b.mode==='shoot'){b.dir=dirTo;b.vx=0;if(b.t===30){st.level.bullets.push({x:b.x+b.w/2+b.dir*30,y:b.y+b.h*0.5,vx:b.dir*2.4,vy:0,t:240,r:7,nova:b.type==='sternwaechter'});jrSfx('jrShoot');}if(b.t>80){b.mode='windup';b.t=0;}}
+    else if(b.mode==='windup'){b.dir=dirTo;b.vx=0;if(b.t>(b.type==='sternwaechter'?42:32)){b.mode='charge';b.t=0;b.dir=dirTo;}}
+    else if(b.mode==='charge'){b.vx=b.dir*(b.type==='sternwaechter'?2.3:3)*Math.min(1.3,rage);if(b.t>40){b.mode='rest';b.t=0;}}
     else{b.vx=0;if(b.t>100){b.mode='walk';b.t=0;}}
   }
   const o=b,before=b.x;
   const rr=jrMove(st,{get x(){return o.x;},set x(v){o.x=v;},get y(){return o.y;},set y(v){o.y=v;},get vx(){return o.vx;},set vx(v){o.vx=v;},get vy(){return o.vy;},set vy(v){o.vy=v;},w:o.w,h:o.h});
   b.onGround=rr.ground;
-  if(b.type==='yeti'&&b.air&&rr.ground){ // Landung: Eiszapfen fallen von der Decke
+  if((b.type==='yeti'||b.type==='komet')&&b.air&&rr.ground){ // Landung: Eiszapfen (Yeti) bzw. Gesteinsbrocken (Komet) fallen von der Decke
     b.air=false;st.shake=8;jrSfx('jrBoom');
-    [0,70*dirTo].forEach(o=>st.level.bullets.push({x:p.x+p.w/2+o,y:-10,vx:0,vy:1.5,g:0.1,t:220,r:7,icicle:true}));
+    const shard=b.type==='komet';
+    [0,70*dirTo].forEach(o=>st.level.bullets.push(Object.assign({x:p.x+p.w/2+o,y:-10,vx:0,vy:1.5,g:0.1,t:220,r:7},shard?{shard:true}:{icicle:true})));
   }
   if(b.x<b.minX){b.x=b.minX;b.dir=1;}else if(b.x>b.maxX){b.x=b.maxX;b.dir=-1;}
-  if(rr.hitX&&b.type==='drake'&&b.mode==='charge'){b.mode='rest';b.t=0;}
+  if(rr.hitX&&(b.type==='drake'||b.type==='sternwaechter')&&b.mode==='charge'){b.mode='rest';b.t=0;}
   // Kontakt mit dem Spieler
   if(p.x<b.x+b.w&&p.x+p.w>b.x&&p.y<b.y+b.h&&p.y+p.h>b.y){
     const above=p.vy>0&&(p.y+p.h)-b.y<26;
@@ -753,7 +799,9 @@ function jrClear(st){
   if(st.mode!=='play')return;
   const bonus=Math.max(0,st.timeLeft)*5+500;
   st.score+=bonus;st.mode='clear';st.timer=150;st.msg='Level geschafft!  +'+bonus;
-  if(!st.custom){
+  if(st.starIdx!=null){
+    jrStarClearSave(st);
+  }else if(!st.custom){
     const idx=st.level.idx,next=idx+2,pf=jrProf();
     const got=st.coinInit>0?(st.coinInit-jrCountCoins(st.level))/st.coinInit:1;
     const stars=1|(got>=0.8?2:0)|(st.lvFalls===0?4:0);
@@ -769,8 +817,11 @@ function jrClear(st){
     if(firstClear&&st.level.boss)reward+=10;
     pf.coins+=Math.max(0,Math.round(got*(st.coinInit)));
     st.clearInfo={stars,got:Math.round(got*100),reward};
-    jrSaveBestInto(st,pf);jrProfSave(pf);
+    jrSaveBestInto(st,pf);
+    const achGot=jrCheckAch(pf);
+    jrProfSave(pf);
     if(reward>0&&jrAccount()&&typeof zcAddCoins==='function'){try{zcAddCoins(jrAccount(),reward);if(typeof smSave==='function')smSave('zentrale');}catch(e){}}
+    jrAwardAch(achGot);
     jrChal('clear',1);jrChalFlush();
   }
   jrSfx('jrClear');
@@ -781,11 +832,143 @@ function jrNextLevel(st){
     if(st.gallery){jrGalMark(st.gallery);jrToMenu();return;}   // Galerie-Level: zurück zur Weltkarte
     if(typeof jrEdReturn==='function')jrEdReturn(true);return;
   }
+  if(st.starIdx!=null){
+    if(st.starIdx>=JR_STAR_LEVELS.length-1){st.mode='win';st.msg='Die Stern-Dimension ist bezwungen!';jrSaveBest(st);return;}
+    st.starIdx++;st.customSrc=JR_STAR_LEVELS[st.starIdx];jrLoadLevel(st,0);st.mode='play';return;
+  }
   if(st.level.idx>=JR_LEVELS.length-1){st.mode='win';st.msg='Alle Level geschafft!';jrSaveBest(st);return;}
   jrLoadLevel(st,st.level.idx+1);st.mode='play';
 }
 function jrSaveBestInto(st,pf){if(st.score>pf.best)pf.best=st.score;st.best=pf.best;}
 function jrSaveBest(st){if(st.custom||st.score<=st.best)return;const pf=jrProf();jrSaveBestInto(st,pf);jrProfSave(pf);}
+
+/* ── Stern-Dimension: Fortschritt, Level starten/abschließen, exklusive Kosmetik ── */
+function jrStarNorm(pf){pf.star=Object.assign({done:0,stars:{},times:{},cos:{},equipped:null},pf.star||{});return pf.star;}
+function jrStarUnlocked(pf){return jrStarCount(pf||jrProf())>=30;}
+function jrStartStarLevel(i){
+  const pf=jrProf();if(!jrStarUnlocked(pf))return false;
+  const sp=jrStarNorm(pf);
+  if(i>0&&!(sp.done&(1<<(i-1))))return false;
+  const L=JR_STAR_LEVELS[i];if(!L)return false;
+  const keep=jrState;
+  jrState=jrNewState(0);
+  if(keep)jrState.unlocked=Math.max(jrState.unlocked,keep.unlocked);
+  jrState.customSrc=L;jrState.custom=false;jrState.starIdx=i;
+  jrLoadLevel(jrState,0);jrState.mode='play';jrHud(true);
+  jrSfx('click');
+  return true;
+}
+function jrStarClearSave(st){
+  const idx=st.starIdx,pf=jrProf(),sp=jrStarNorm(pf);
+  const got=st.coinInit>0?(st.coinInit-jrCountCoins(st.level))/st.coinInit:1;
+  const stars=1|(got>=0.8?2:0)|(st.lvFalls===0?4:0);
+  const old=sp.stars[idx]|0,fresh=stars&~old,firstClear=!(sp.done&(1<<idx));
+  sp.stars[idx]=old|stars;
+  const secs=Math.round(st.frames/60);if(!sp.times[idx]||secs<sp.times[idx])sp.times[idx]=secs;
+  if(st.level.boss&&!st.level.boss.alive)pf.bosses++;
+  sp.done|=(1<<idx);
+  const sk=JR_STAR_SKINS[idx];let cosNew=false;
+  if(sk&&!sp.cos[sk.id]){sp.cos[sk.id]=true;cosNew=true;}
+  pf.coins+=Math.max(0,Math.round(got*(st.coinInit)));
+  jrSaveBestInto(st,pf);
+  const achGot=jrCheckAch(pf);
+  jrProfSave(pf);
+  let reward=0;[1,2,4].forEach(b=>{if(fresh&b)reward+=5;});
+  if(firstClear&&st.level.boss)reward+=10;
+  if(cosNew)reward+=10;
+  st.clearInfo={stars,got:Math.round(got*100),reward};
+  if(reward>0&&jrAccount()&&typeof zcAddCoins==='function'){try{zcAddCoins(jrAccount(),reward);if(typeof smSave==='function')smSave('zentrale');}catch(e){}}
+  if(cosNew&&sk&&typeof showToast==='function')showToast('✨ Neue Kosmetik freigeschaltet: '+sk.name,3200);
+  jrAwardAch(achGot);
+}
+function jrCosEquip(id){
+  const pf=jrProf(),sp=jrStarNorm(pf);
+  if(id&&!sp.cos[id])return;
+  sp.equipped=id||null;jrProfSave(pf);
+}
+
+/* ── Erfolge-Übersicht (Overlay über der Weltkarte) ── */
+function jrAchClose(){const el=document.getElementById('jr-ach');if(el)el.remove();}
+function jrAchOpen(){
+  jrAchClose();
+  const p=jrProf();
+  const el=document.createElement('div');el.id='jr-ach';
+  el.style.cssText='position:fixed;inset:0;z-index:3500;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px';
+  el.onclick=e=>{if(e.target===el)jrAchClose();};
+  const n=JR_ACH.filter(a=>p.ach[a.id]).length;
+  el.innerHTML=`<div style="background:var(--bg);color:var(--text);border:0.5px solid var(--divider);border-radius:18px;padding:18px;max-width:520px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><div style="font-size:19px;font-weight:800;flex:1">🏆 Erfolge (${n}/${JR_ACH.length})</div><button class="set-btn" onclick="jrAchClose()">✕</button></div>
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:12px">Einmalige Belohnungen in AppHub-Coins.</div>
+    ${JR_ACH.map(a=>{const has=!!p.ach[a.id];return `<div style="background:var(--surface);border:0.5px solid var(--divider);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;${has?'':'opacity:.55'}">
+      <div style="font-size:22px">${has?'🏅':'🔒'}</div>
+      <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14px">${String(a.name).replace(/</g,'&lt;')}</div><div style="font-size:12px;color:var(--text-3)">${String(a.desc).replace(/</g,'&lt;')}</div></div>
+      <div style="font-size:12px;font-weight:700;color:#f59f00;white-space:nowrap">+${a.coins} 🪙</div>
+    </div>`;}).join('')}
+  </div>`;
+  document.body.appendChild(el);
+}
+
+/* ── Stern-Dimension: Level-Auswahl (Overlay) ── */
+function jrStarClose(){const el=document.getElementById('jr-star');if(el)el.remove();}
+function jrStarOpen(){
+  jrStarClose();
+  const pf=jrProf(),unlocked=jrStarUnlocked(pf),n=jrStarCount(pf);
+  const el=document.createElement('div');el.id='jr-star';
+  el.style.cssText='position:fixed;inset:0;z-index:3500;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px';
+  el.onclick=e=>{if(e.target===el)jrStarClose();};
+  if(!unlocked){
+    el.innerHTML=`<div style="background:var(--bg);color:var(--text);border:0.5px solid var(--divider);border-radius:18px;padding:22px;max-width:400px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+      <div style="font-size:40px;margin-bottom:8px">🔒✨</div>
+      <div style="font-weight:800;font-size:17px;margin-bottom:6px">Stern-Dimension gesperrt</div>
+      <div style="font-size:13px;color:var(--text-3);margin-bottom:16px">Sammle alle 30 Sterne in den 10 Hauptleveln, um dieses Geheimnis freizuschalten. Du hast ${n}/30.</div>
+      <button class="set-btn" onclick="jrStarClose()">Schließen</button>
+    </div>`;
+    document.body.appendChild(el);return;
+  }
+  const sp=jrStarNorm(pf);
+  el.innerHTML=`<div style="background:var(--bg);color:var(--text);border:0.5px solid var(--divider);border-radius:18px;padding:18px;max-width:480px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><div style="font-size:19px;font-weight:800;flex:1">✨ Stern-Dimension</div><button class="set-btn" onclick="jrStarClose()">✕</button></div>
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:12px">Geheime Zusatz-Level mit neuen Bossen und exklusiver Kosmetik.</div>
+    ${JR_STAR_LEVELS.map((L,i)=>{
+      const locked=i>0&&!(sp.done&(1<<(i-1)));
+      const cnt=((sp.stars[i]|0)&1?1:0)+((sp.stars[i]|0)&2?1:0)+((sp.stars[i]|0)&4?1:0),dots='★'.repeat(cnt)+'☆'.repeat(3-cnt);
+      return `<div style="background:var(--surface);border:0.5px solid var(--divider);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;${locked?'opacity:.5':''}">
+        <div style="font-size:22px">${locked?'🔒':(sp.done&(1<<i))?'✅':'✨'}</div>
+        <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14px">${i+1}. ${String(L.name).replace(/</g,'&lt;')}</div><div style="font-size:12px;color:#f59f00">${dots}</div></div>
+        <button class="set-btn" ${locked?'disabled':''} onclick="jrStarClose();jrStartStarLevel(${i})">▶ Spielen</button>
+      </div>`;
+    }).join('')}
+    <button class="units-cat-btn" style="width:100%;margin-top:6px" onclick="jrStarClose();jrCosOpen()">✨ Kosmetik ansehen</button>
+  </div>`;
+  document.body.appendChild(el);
+}
+/* ── Stern-Dimension: exklusive Kosmetik auswählen ── */
+function jrCosClose(){const el=document.getElementById('jr-cos');if(el)el.remove();}
+function jrCosOpen(){
+  jrCosClose();
+  const pf=jrProf(),sp=jrStarNorm(pf);
+  const el=document.createElement('div');el.id='jr-cos';
+  el.style.cssText='position:fixed;inset:0;z-index:3500;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px';
+  el.onclick=e=>{if(e.target===el)jrCosClose();};
+  el.innerHTML=`<div style="background:var(--bg);color:var(--text);border:0.5px solid var(--divider);border-radius:18px;padding:18px;max-width:440px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><div style="font-size:19px;font-weight:800;flex:1">✨ Kosmetik aus der Stern-Dimension</div><button class="set-btn" onclick="jrCosClose()">✕</button></div>
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:12px">Held-Skins, die es nur hier gibt.</div>
+    <div style="background:var(--surface);border:0.5px solid var(--divider);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px">
+      <div style="font-size:22px">👤</div>
+      <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14px">Standard-Held</div></div>
+      <button class="set-btn" onclick="jrCosEquip(null);jrCosOpen()">${!sp.equipped?'✓ Ausgerüstet':'Ausrüsten'}</button>
+    </div>
+    ${JR_STAR_SKINS.map((sk,i)=>{
+      const has=!!sp.cos[sk.id],eq=sp.equipped===sk.id;
+      return `<div style="background:var(--surface);border:0.5px solid var(--divider);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;${has?'':'opacity:.5'}">
+        <div style="font-size:22px">${has?'✨':'🔒'}</div>
+        <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14px">${String(sk.name).replace(/</g,'&lt;')}</div><div style="font-size:12px;color:var(--text-3)">${has?'Freigeschaltet in „'+String(JR_STAR_LEVELS[i].name).replace(/</g,'&lt;')+'“':'Schalte Level '+(i+1)+' der Stern-Dimension frei'}</div></div>
+        <button class="set-btn" ${has?'':'disabled'} onclick="jrCosEquip('${sk.id}');jrCosOpen()">${eq?'✓ Ausgerüstet':'Ausrüsten'}</button>
+      </div>`;
+    }).join('')}
+  </div>`;
+  document.body.appendChild(el);
+}
 
 /* ── Held-Skin (aus dem Shop) ── */
 const JR_SKIN_DEFAULT={cap:'#ffb300',capTop:'#ffe082',body:'#3f6fe6',strap:'#ffd54f',skin:'#ffdcb8',boots:'#5d4037',trail:null,glow:null,visor:false,mask:false,cape:null};
@@ -802,6 +985,10 @@ function jrSlamFx(){
 }
 function jrSkin(){
   try{
+    const eq=jrProf().star&&jrProf().star.equipped;
+    if(eq){const sk=JR_STAR_SKINS.find(s=>s.id===eq);if(sk)return Object.assign({},JR_SKIN_DEFAULT,sk);}
+  }catch(e){}
+  try{
     if(typeof zcEquipped==='function'&&typeof zcItem==='function'){
       const id=zcEquipped('jskin'),it=id&&zcItem('jskin',id);
       if(it&&it.hero)return Object.assign({},JR_SKIN_DEFAULT,it.hero);
@@ -817,7 +1004,8 @@ const JR_THEMES=[
   {sky:['#0b1030','#33427e'],hill:'rgba(63,81,181,0.35)',hill2:'rgba(26,35,126,0.5)',cloud:'rgba(180,190,255,0.25)',stars:true,ground:['#6d4a25','#4c9a4c','#367a36']},
   {sky:['#141824','#2c3550'],hill:'rgba(120,144,156,0.25)',hill2:'rgba(84,110,122,0.35)',cloud:'rgba(140,170,220,0.12)',stars:true,ground:['#59606e','#7d8798','#626b7a']},
   {sky:['#9ec9f0','#f4fbff'],hill:'rgba(176,190,197,0.55)',hill2:'rgba(144,164,174,0.6)',cloud:'rgba(255,255,255,0.95)',snow:true,ground:['#7b8fa1','#ffffff','#dfe9f2']},
-  {sky:['#3b0d0d','#ff7043'],hill:'rgba(62,39,35,0.6)',hill2:'rgba(33,15,15,0.7)',cloud:'rgba(255,171,145,0.22)',embers:true,ground:['#4a2c2a','#ff7043','#c2431f']}
+  {sky:['#3b0d0d','#ff7043'],hill:'rgba(62,39,35,0.6)',hill2:'rgba(33,15,15,0.7)',cloud:'rgba(255,171,145,0.22)',embers:true,ground:['#4a2c2a','#ff7043','#c2431f']},
+  {sky:['#170a2e','#5c2a8c'],hill:'rgba(142,36,170,0.35)',hill2:'rgba(74,20,140,0.5)',cloud:'rgba(224,195,252,0.35)',stars:true,sparkle:true,ground:['#3b1a5c','#ce93d8','#8e24aa']}
 ];
 function jrRR(ctx,x,y,w,h,r){ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,w,h,r);else ctx.rect(x,y,w,h);}
 function jrBackground(ctx,st){
@@ -838,6 +1026,7 @@ function jrBackground(ctx,st){
   // Schneeflocken / Glut
   if(th.snow){ctx.fillStyle='rgba(255,255,255,0.9)';for(let i=0;i<40;i++){const x=(i*61+t*0.6*(1+i%3)*0.4-cam*0.3)%JR_W,y=(i*47+t*(0.8+(i%4)*0.3))%JR_H;ctx.fillRect((x+JR_W)%JR_W,y,2,2);}}
   if(th.embers){ctx.fillStyle='rgba(255,183,77,0.85)';for(let i=0;i<30;i++){const x=(i*73+Math.sin(t*0.02+i)*20-cam*0.2)%JR_W,y=JR_H-((i*41+t*(0.6+(i%3)*0.4))%JR_H);ctx.fillRect((x+JR_W)%JR_W,y,2,2);}}
+  if(th.sparkle){ctx.fillStyle='rgba(255,224,178,0.9)';for(let i=0;i<35;i++){const x=(i*67+Math.sin(t*0.03+i)*14-cam*0.15)%JR_W,y=(i*59+Math.cos(t*0.025+i)*10)%JR_H;const s=1+Math.sin(t*0.1+i)*0.6;ctx.fillRect((x+JR_W)%JR_W,(y+JR_H)%JR_H,2*s,2*s);}}
 }
 function jrDrawTile(ctx,st,ch,tx,ty,x,y,t){
   const T=JR_T,th=JR_THEMES[st.level.theme]||JR_THEMES[0];
@@ -1037,7 +1226,7 @@ function jrDrawBoss(ctx,st,t){
     ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+b.w/2-7+b.dir*2,y+14,3.5,0,Math.PI*2);ctx.arc(x+b.w/2+7+b.dir*2,y+14,3.5,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#e53935';ctx.beginPath();ctx.arc(x+b.w/2-7+b.dir*3,y+14,1.6,0,Math.PI*2);ctx.arc(x+b.w/2+7+b.dir*3,y+14,1.6,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#b3e5fc';[10,24,38].forEach(o=>{ctx.beginPath();ctx.moveTo(x+o,y+34);ctx.lineTo(x+o+4,y+46);ctx.lineTo(x+o+8,y+34);ctx.fill();});
-  }else{
+  }else if(b.type==='drake'){
     const f=b.dir;ctx.translate(x+b.w/2,y+b.h/2);ctx.scale(f,1);
     if(b.mode==='windup'||b.mode==='charge')ctx.translate(Math.sin(t*1.6)*1.5,0);
     ctx.fillStyle='#c62828';jrRR(ctx,-30,-14,60,34,14);ctx.fill();
@@ -1047,6 +1236,24 @@ function jrDrawBoss(ctx,st,t){
     ctx.fillStyle='#fff59d';ctx.beginPath();ctx.arc(26,-14,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#111';ctx.beginPath();ctx.arc(27,-14,2,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#3e2723';ctx.fillRect(-16,16,10,7);ctx.fillRect(8,16,10,7);
     if(b.mode==='shoot'||b.mode==='windup'){ctx.fillStyle='rgba(255,152,0,'+(0.5+0.4*Math.sin(t*0.5))+')';ctx.beginPath();ctx.arc(38,-4,5+(b.mode==='windup'?3:0),0,Math.PI*2);ctx.fill();}
+  }else if(b.type==='komet'){ // Stern-Dimension: rasender Trümmerbrocken mit Feuerschweif
+    const f=b.dir;ctx.translate(x+b.w/2,y+b.h/2);ctx.scale(f,1);
+    ctx.fillStyle='rgba(255,111,0,0.5)';ctx.beginPath();ctx.moveTo(-b.w/2-2,-7);ctx.lineTo(-b.w/2-28,0);ctx.lineTo(-b.w/2-2,7);ctx.fill();
+    ctx.fillStyle='rgba(255,213,79,0.65)';ctx.beginPath();ctx.moveTo(-b.w/2-2,-3);ctx.lineTo(-b.w/2-15,0);ctx.lineTo(-b.w/2-2,3);ctx.fill();
+    ctx.fillStyle='#4e342e';ctx.beginPath();ctx.ellipse(0,0,b.w/2,b.h/2,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#6d4c41';ctx.beginPath();ctx.ellipse(-4,-4,b.w/2-9,b.h/2-9,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#ff7043';ctx.beginPath();ctx.arc(6,0,5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffee58';ctx.beginPath();ctx.arc(7,0,2.2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#3e2723';[[-8,-9],[6,-11],[-2,9]].forEach(o=>{ctx.beginPath();ctx.arc(o[0],o[1],3,0,Math.PI*2);ctx.fill();});
+  }else{ // sternwaechter: kristalliner Endboss der Stern-Dimension
+    const f=b.dir;ctx.translate(x+b.w/2,y+b.h/2);ctx.scale(f,1);
+    if(b.mode==='windup'||b.mode==='charge')ctx.translate(Math.sin(t*1.6)*1.5,0);
+    ctx.fillStyle='#4527a0';jrRR(ctx,-b.w/2,-b.h/2+10,b.w,b.h-10,16);ctx.fill();
+    ctx.fillStyle='#673ab7';jrRR(ctx,-b.w/2+8,-b.h/2,b.w-16,30,12);ctx.fill();
+    ctx.fillStyle='#b39ddb';for(let i=0;i<5;i++){const px=-b.w/2+10+i*(b.w-20)/4;ctx.beginPath();ctx.moveTo(px-6,-b.h/2+4);ctx.lineTo(px,-b.h/2-16);ctx.lineTo(px+6,-b.h/2+4);ctx.fill();}
+    ctx.fillStyle='#ff5252';ctx.beginPath();ctx.arc(-b.w/2+18,-b.h/2+16,4,0,Math.PI*2);ctx.arc(b.w/2-18,-b.h/2+16,4,0,Math.PI*2);ctx.fill();
+    ctx.save();ctx.translate(b.w/2-14,-2);ctx.rotate(t*0.05);ctx.fillStyle='rgba(255,249,196,'+(0.65+0.3*Math.sin(t*0.2))+')';
+    ctx.beginPath();ctx.moveTo(0,-9);ctx.lineTo(2.5,-2.5);ctx.lineTo(9,0);ctx.lineTo(2.5,2.5);ctx.lineTo(0,9);ctx.lineTo(-2.5,2.5);ctx.lineTo(-9,0);ctx.lineTo(-2.5,-2.5);ctx.closePath();ctx.fill();ctx.restore();
+    if(b.mode==='shoot'||b.mode==='windup'){ctx.fillStyle='rgba(179,157,219,'+(0.5+0.4*Math.sin(t*0.5))+')';ctx.beginPath();ctx.arc(b.w/2-6,-4,5+(b.mode==='windup'?3:0),0,Math.PI*2);ctx.fill();}
   }
   ctx.restore();
   // Lebensleiste
@@ -1097,6 +1304,8 @@ function jrDraw(ctx,st){
     const bx=b.x-cam;
     if(b.rock){ctx.fillStyle='#8d6e63';ctx.beginPath();ctx.arc(bx,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5d4037';ctx.beginPath();ctx.arc(bx-2,b.y-2,b.r*0.4,0,Math.PI*2);ctx.fill();return;}
     if(b.icicle){ctx.fillStyle='#b3e5fc';ctx.beginPath();ctx.moveTo(bx-b.r,b.y-b.r*1.6);ctx.lineTo(bx+b.r,b.y-b.r*1.6);ctx.lineTo(bx,b.y+b.r*1.6);ctx.fill();ctx.strokeStyle='#4fc3f7';ctx.lineWidth=1.5;ctx.stroke();return;}
+    if(b.shard){ctx.save();ctx.translate(bx,b.y);ctx.rotate(b.y*0.05);ctx.fillStyle='#ff8a65';ctx.beginPath();ctx.moveTo(0,-b.r*1.4);ctx.lineTo(b.r,0);ctx.lineTo(0,b.r*1.4);ctx.lineTo(-b.r,0);ctx.closePath();ctx.fill();ctx.restore();return;}
+    if(b.nova){ctx.fillStyle='rgba(179,157,219,0.4)';ctx.beginPath();ctx.arc(bx-b.vx*3,b.y,b.r*1.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#7e57c2';ctx.beginPath();ctx.arc(bx,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff9c4';ctx.beginPath();ctx.arc(bx,b.y,b.r*0.5,0,Math.PI*2);ctx.fill();return;}
     ctx.fillStyle='rgba(255,152,0,0.35)';ctx.beginPath();ctx.arc(bx-b.vx*3,b.y,b.r*1.2,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#ff6d00';ctx.beginPath();ctx.arc(bx,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffee58';ctx.beginPath();ctx.arc(bx,b.y,b.r*0.5,0,Math.PI*2);ctx.fill();
   });
@@ -1138,7 +1347,7 @@ function jrDraw(ctx,st){
 }
 
 /* ── Weltkarte (Levelauswahl) ── */
-const JR_MAP_NODES=[[70,250],[170,175],[270,255],[370,170],[470,250],[570,170]];
+const JR_MAP_NODES=[[50,260],[110,170],[170,260],[230,170],[290,260],[350,170],[410,260],[470,170],[530,260],[590,170]];
 function jrMapNodeAt(x,y){
   for(let i=0;i<JR_LEVELS.length;i++){const n=JR_MAP_NODES[i];if(Math.hypot(x-n[0],y-n[1])<=28)return i;}
   return -1;
@@ -1184,7 +1393,7 @@ function jrHud(force){
   const set=(id,v)=>{const e=document.getElementById(id);if(e&&e.textContent!==String(v))e.textContent=v;};
   set('jr-coins',st.coins);set('jr-score',st.score);set('jr-lives',st.lives);
   const mainLv=st.stack&&st.stack.length?st.stack[0].level:st.level;
-  set('jr-level',st.custom?'Eigenes Level':(mainLv.idx+1)+' · '+mainLv.name);set('jr-time',Math.max(0,st.timeLeft));
+  set('jr-level',st.starIdx!=null?'✨ '+(st.starIdx+1)+' · '+mainLv.name:st.custom?'Eigenes Level':(mainLv.idx+1)+' · '+mainLv.name);set('jr-time',Math.max(0,st.timeLeft));
   for(let i=1;i<=JR_LEVELS.length;i++){
     const b=document.getElementById('jr-lv-'+i);if(!b)continue;
     b.disabled=i>st.unlocked;b.style.opacity=i>st.unlocked?'0.45':'';

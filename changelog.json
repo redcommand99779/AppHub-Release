@@ -204,5 +204,25 @@
       "Stammkunden gibt jetzt 0,1 % statt 2 % des Kontostands pro Klick – die 2 % waren viel zu stark.",
       "Neu im Fahrplan-Reiter: „Spiel komplett zurücksetzen“ löscht wirklich alles (auch Fahrplan-Punkte und Erfolge), anders als der normale Neue Fahrplan."
     ]
+  },
+  {
+    "id": 20,
+    "date": "29.09.2026",
+    "title": "Super Jumper: 4 neue Level und Erfolge",
+    "items": [
+      "4 neue Level (Herbstwald, Wüstensturm, Kristalltiefen, Drachenthron) – jetzt 10 statt 6 auf der Weltkarte, mit zwei weiteren Bossen.",
+      "Neu: „🏆 Erfolge“-Knopf zeigt Trophäen mit einmaliger AppHub-Coins-Belohnung, z. B. für alle Sterne, alle Bosse oder alle Level."
+    ]
+  },
+  {
+    "id": 21,
+    "date": "29.09.2026",
+    "title": "Super Jumper: Geheime Stern-Dimension",
+    "items": [
+      "Neu: Wer alle 30 Sterne der 10 Hauptlevel sammelt, schaltet die geheime „✨ Stern-Dimension“ frei – 3 neue Level mit eigenem Weltraum-Look.",
+      "2 neue Bosse nur dort: der schnelle Komet und der finale Sternwächter.",
+      "3 exklusive Held-Skins, die es nur in der Stern-Dimension gibt – ausrüstbar im neuen Kosmetik-Menü.",
+      "2 weitere Erfolge für die Stern-Dimension dazugekommen."
+    ]
   }
 ]
