@@ -232,5 +232,14 @@
     "items": [
       "Neu: Mit dem Knopf „🪙 20: +1 ❤️“ oben kannst du dir mitten in der Partie ein Extraleben mit AppHub-Coins kaufen. Jedes weitere in derselben Partie kostet 10 Coins mehr, mehr als das Maximum der Karte geht nicht."
     ]
+  },
+  {
+    "id": 23,
+    "date": "29.09.2026",
+    "title": "Turmwacht: Admin-Modus und Weiterkämpfen",
+    "items": [
+      "Der Admin-Modus (unendlich Münzen) gilt jetzt auch in der Turmwacht: Extraleben und Weiterkämpfen kosten dann nichts.",
+      "Nach einer Niederlage zeigt der Bildschirm das Weiterkämpfen immer an – ausgegraut, wenn die Coins nicht reichen."
+    ]
   }
 ]

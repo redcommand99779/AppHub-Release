@@ -178,14 +178,15 @@ function tdFinish(st){
 }
 /* Mit Coins weiterkämpfen statt aufzugeben: einmal pro Partie, wird teurer, je weiter man kam */
 function tdReviveCost(st){return 40+st.wave*4;}
+function tdAdmin(){try{return typeof zcAdminOn==='function'&&zcAdminOn();}catch(e){return false;}}
 function tdCanRevive(st){
   if(!st||st.mode!=='lost'||st.revived)return false;
-  try{const name=tdAccount();if(!name||typeof zcCoinsOf!=='function')return false;return zcCoinsOf(name)>=tdReviveCost(st);}catch(e){return false;}
+  if(tdAdmin())return true;try{const name=tdAccount();if(!name||typeof zcCoinsOf!=='function')return false;return zcCoinsOf(name)>=tdReviveCost(st);}catch(e){return false;}
 }
 function tdDoRevive(){
   if(!tdCanRevive(td))return;
   const cost=tdReviveCost(td);
-  try{
+  if(!tdAdmin())try{
     const name=tdAccount(),z=zcp(),k=zcKey(name);
     z.coins[k]=(z.coins[k]||0)-cost;if(typeof smSave==='function')smSave('zentrale');
   }catch(e){return;}
@@ -198,12 +199,12 @@ function tdDoRevive(){
 function tdLifeCost(st){return 20+(st.lifeBuys|0)*10;}
 function tdCanBuyLife(st){
   if(!st||st.mode==='won'||st.mode==='lost'||st.lives>=st.maxLives)return false;
-  try{const name=tdAccount();if(!name||typeof zcCoinsOf!=='function')return false;return zcCoinsOf(name)>=tdLifeCost(st);}catch(e){return false;}
+  if(tdAdmin())return true;try{const name=tdAccount();if(!name||typeof zcCoinsOf!=='function')return false;return zcCoinsOf(name)>=tdLifeCost(st);}catch(e){return false;}
 }
 function tdBuyLife(){
   if(!tdCanBuyLife(td))return;
   const cost=tdLifeCost(td);
-  try{
+  if(!tdAdmin())try{
     const name=tdAccount(),z=zcp(),k=zcKey(name);
     z.coins[k]=(z.coins[k]||0)-cost;if(typeof smSave==='function')smSave('zentrale');
   }catch(e){return;}
@@ -374,7 +375,7 @@ function tdUpdateHud(force){
     const r=tdFinish(td)||{coins:td.coinsEarned||0};
     over.innerHTML=`<div class="td-over"><div style="font-size:44px">${td.mode==='won'?'🏆':'💥'}</div><div style="font-size:22px;font-weight:800">${td.mode==='won'?'Alle Wellen geschafft!':'Die Basis ist gefallen'}</div>
       <div style="font-size:14px;margin:6px 0">${td.mode==='won'?'<span style="color:#ffca28;font-size:24px;letter-spacing:4px">'+'★'.repeat(td.stars)+'☆'.repeat(3-td.stars)+'</span><br>':''}Welle ${Math.max(0,td.mode==='won'?TD_WAVES:td.wave-1)}/${TD_WAVES} · ${td.kills} Gegner besiegt${r.coins?'<br>🪙 +'+r.coins+' AppHub-Coins':''}</div>
-      <div style="display:flex;gap:8px;justify-content:center"><button class="lrn-btn" onclick="tdRestart()">Nochmal</button><button class="lrn-btn ghost" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" onclick="tdShowMenu()">Karten</button></div></div>`;
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">${td.mode==='lost'&&!td.revived?`<button class="lrn-btn" disabled title="Zu wenig AppHub-Coins">🪙 ${tdReviveCost(td)} Coins: Weiterkämpfen (zu wenig Coins)</button>`:''}<button class="lrn-btn" onclick="tdRestart()">Nochmal</button><button class="lrn-btn ghost" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" onclick="tdShowMenu()">Karten</button></div></div>`;
   }
 }
 function tdLoop(ts){
