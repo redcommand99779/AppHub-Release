@@ -195,5 +195,14 @@
       "Level-Editor: eigene Level können jetzt einen Boss bekommen (Golem, Drache, Wichtel oder Yeti) mit einem Boss-Tor, das sich erst öffnet, wenn er besiegt ist.",
       "Bahnhof-Boss: Stammkunden gibt jetzt 2 % des Kontostands pro Klick statt 2 % des Einkommens pro Sekunde."
     ]
+  },
+  {
+    "id": 19,
+    "date": "29.09.2026",
+    "title": "Bahnhof-Boss: Balance-Korrektur und kompletter Reset",
+    "items": [
+      "Stammkunden gibt jetzt 0,1 % statt 2 % des Kontostands pro Klick – die 2 % waren viel zu stark.",
+      "Neu im Fahrplan-Reiter: „Spiel komplett zurücksetzen“ löscht wirklich alles (auch Fahrplan-Punkte und Erfolge), anders als der normale Neue Fahrplan."
+    ]
   }
 ]

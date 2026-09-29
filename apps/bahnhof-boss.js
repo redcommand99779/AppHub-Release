@@ -21,7 +21,7 @@ const BB_UPGRADES=[
   {id:'k1',name:'Kräftiger Stempel',icon:'🖋️',cost:500,desc:'Ein Ticket bringt doppelt so viel.',click:2},
   {id:'k2',name:'Ticketdrucker',icon:'🖨️',cost:5000,desc:'Ein Ticket bringt nochmal ×3.',click:3},
   {id:'k3',name:'Reiseführer',icon:'📘',cost:250000,desc:'Ein Ticket bringt nochmal ×5.',click:5},
-  {id:'k4',name:'Stammkunden',icon:'🤝',cost:5e7,desc:'Ein Klick bringt zusätzlich 2 % deines Kontostands.',clickPct:0.02},
+  {id:'k4',name:'Stammkunden',icon:'🤝',cost:5e7,desc:'Ein Klick bringt zusätzlich 0,1 % deines Kontostands.',clickPct:0.001},
   {id:'g1',name:'Freundliches Personal',icon:'😊',cost:10000,desc:'Alles verdient 50 % mehr.',all:1.5},
   {id:'g2',name:'Werbekampagne',icon:'📣',cost:2e6,desc:'Alles verdient doppelt so viel.',all:2},
   {id:'g3',name:'Digitalisierung',icon:'💻',cost:2e8,desc:'Alles verdient dreimal so viel.',all:3},
@@ -205,6 +205,14 @@ function bbDoPrestige(){
   const go=()=>{bbPrestige(bb);bbMsg=`🔄 Neuer Fahrplan! +${g} Fahrplan-Punkte (dauerhaft +${Math.round(g*BB_PRESTIGE_BONUS*100)} % Einkommen).`;bbAwardAch(bbCheckAch(bb));bbSave();bbTab='gens';bbRender();};
   if(typeof appConfirm==='function')appConfirm(`Alles zurücksetzen und ${g} Fahrplan-Punkte erhalten? Gebäude und Upgrades gehen verloren, die Punkte bleiben für immer.`,go);else go();
 }
+/* Kompletter Reset: wirklich alles weg, auch Fahrplan-Punkte (anders als "Neuer Fahrplan") */
+function bbFullReset(s){
+  const fresh=bbNew();Object.keys(fresh).forEach(k=>{s[k]=fresh[k];});return s;
+}
+function bbDoFullReset(){
+  const go=()=>{bbFullReset(bb);bbMsg='🗑️ Bahnhof-Boss wurde komplett zurückgesetzt.';bbSave();bbTab='gens';bbRender();};
+  if(typeof appConfirm==='function')appConfirm('Wirklich ALLES zurücksetzen? Geld, Gebäude, Upgrades, Erfolge und auch alle Fahrplan-Punkte gehen unwiderruflich verloren. Bereits erhaltene AppHub-Coins bleiben dir.',go);else go();
+}
 function bbDismissWelcome(){bbWelcome=null;bbRender();}
 function bbLive(){
   const set=(id,v)=>{const e=document.getElementById(id);if(e&&e.textContent!==String(v))e.textContent=v;};
@@ -263,7 +271,9 @@ function bbRenderPrestige(){
   return `<div class="lrn-card" style="text-align:center;padding:22px 16px"><div style="font-size:40px">🔄</div><div style="font-size:18px;font-weight:800;margin:6px 0">Neuer Fahrplan</div>
     <div style="font-size:13px;color:var(--text-3);line-height:1.5;margin-bottom:14px">Beginne mit einem frischen Bahnhof und behalte <b>Fahrplan-Punkte</b>: Jeder Punkt bringt dauerhaft <b>+${Math.round(BB_PRESTIGE_BONUS*100)} %</b> auf alles Einkommen – und auf jedes Ticket.</div>
     <div class="lrn-tiles" style="max-width:420px;margin:0 auto 14px"><div class="lrn-tile"><b>${bb.pts}</b><span>Punkte jetzt (+${Math.round(bb.pts*BB_PRESTIGE_BONUS*100)} %)</span></div><div class="lrn-tile"><b>+<span id="bb-prestige-gain">${g}</span></b><span>bei Neustart</span></div><div class="lrn-tile"><b>${bb.resets}</b><span>Neustarts</span></div></div>
-    <button class="lrn-btn" onclick="bbDoPrestige()" ${g<1?'disabled':''}>${g<1?'Noch zu früh – verdiene mehr (ab 100 Mio. € in dieser Runde)':'🔄 Jetzt neuen Fahrplan einführen'}</button></div>`;
+    <button class="lrn-btn" onclick="bbDoPrestige()" ${g<1?'disabled':''}>${g<1?'Noch zu früh – verdiene mehr (ab 100 Mio. € in dieser Runde)':'🔄 Jetzt neuen Fahrplan einführen'}</button></div>
+    <div class="lrn-card" style="text-align:center;padding:16px;margin-top:10px;border-color:#ff453a"><div style="font-size:13px;color:var(--text-3);line-height:1.5;margin-bottom:10px">Ganz von vorne anfangen? Das setzt <b>wirklich alles</b> zurück – auch die Fahrplan-Punkte.</div>
+    <button class="lrn-btn ghost" style="border-color:#ff453a;color:#ff453a" onclick="bbDoFullReset()">🗑️ Spiel komplett zurücksetzen</button></div>`;
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&bb)bbSave();});
 window.addEventListener('beforeunload',()=>{if(bb)bbSave();});
