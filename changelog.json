@@ -241,5 +241,16 @@
       "Der Admin-Modus (unendlich Münzen) gilt jetzt auch in der Turmwacht: Extraleben und Weiterkämpfen kosten dann nichts.",
       "Nach einer Niederlage zeigt der Bildschirm das Weiterkämpfen immer an – ausgegraut, wenn die Coins nicht reichen."
     ]
+  },
+  {
+    "id": 24,
+    "date": "29.09.2026",
+    "title": "Vier neue Lern-Apps",
+    "items": [
+      "Neu: „Periodensystem“ – alle 118 Elemente als Tabelle mit Steckbrief (Gruppe, Masse, Zustand) und ein Quiz mit drei Schwierigkeitsstufen.",
+      "Neu: „Formelsammlung“ – über 70 Karteikarten zu Mathe, Physik und Chemie, die du im Karteikasten-Prinzip lernst, dazu eine Liste zum Nachschlagen mit Suche.",
+      "Neu: „Tippschule“ – 12 Lektionen zum Zehn-Finger-System mit Tastatur-Anzeige, Sternen und Bestwerten.",
+      "Neu: „Karten-Rätsel“ – ein Land wird genannt, du klickst auf die Weltkarte; je näher du dran bist, desto mehr Punkte."
+    ]
   }
 ]
