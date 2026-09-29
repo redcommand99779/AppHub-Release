@@ -194,6 +194,23 @@ function tdDoRevive(){
   const over=document.getElementById('td-over');if(over)over.innerHTML='';
   tdUpdateHud(true);
 }
+/* Extraleben mit Coins kaufen: +1 ❤️, jedes weitere in derselben Partie 10 Coins teurer, nie über das Maximum der Karte */
+function tdLifeCost(st){return 20+(st.lifeBuys|0)*10;}
+function tdCanBuyLife(st){
+  if(!st||st.mode==='won'||st.mode==='lost'||st.lives>=st.maxLives)return false;
+  try{const name=tdAccount();if(!name||typeof zcCoinsOf!=='function')return false;return zcCoinsOf(name)>=tdLifeCost(st);}catch(e){return false;}
+}
+function tdBuyLife(){
+  if(!tdCanBuyLife(td))return;
+  const cost=tdLifeCost(td);
+  try{
+    const name=tdAccount(),z=zcp(),k=zcKey(name);
+    z.coins[k]=(z.coins[k]||0)-cost;if(typeof smSave==='function')smSave('zentrale');
+  }catch(e){return;}
+  td.lives++;td.lifeBuys=(td.lifeBuys|0)+1;
+  tdMsg='🪙 Extraleben gekauft! +1 ❤️';
+  tdUpdateHud(true);
+}
 function tdGiveUp(){
   if(!td)return;td.revived=true;
   const over=document.getElementById('td-over');if(over)over.innerHTML='';
@@ -294,6 +311,7 @@ function tdRenderView(){
   root.innerHTML=`<div style="display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
       <span class="game-chip">❤️ <strong id="td-lives">${td.lives}</strong></span><span class="game-chip">💰 <strong id="td-gold">${td.gold}</strong></span><span class="game-chip">🌊 <strong id="td-wave">0</strong>/${TD_WAVES}</span>
       <button class="lrn-btn" id="td-next" onclick="tdNextWave()">▶ Welle 1</button>
+      <button class="lrn-btn ghost" id="td-life" onclick="tdBuyLife()" title="Extraleben mit AppHub-Coins kaufen"></button>
       <button class="lrn-btn ghost" id="td-speed" onclick="tdToggleSpeed()">⏩ ×1</button><button class="lrn-btn ghost" id="td-pause" onclick="tdTogglePause()">⏸</button><button class="lrn-btn ghost" onclick="tdShowMenu()">☰ Karten</button></div>
     <div style="position:relative;max-width:640px;margin:0 auto"><canvas id="td-canvas" width="${TD_W}" height="${TD_H}" style="display:block;width:100%;height:auto;border-radius:14px;box-shadow:0 6px 22px rgba(0,0,0,0.25);cursor:crosshair;touch-action:none"></canvas><div id="td-over"></div></div>
     <div id="td-shop" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:640px;margin:12px auto 0">${Object.keys(TD_TOWERS).map((k,i)=>`<button class="td-tbtn" id="td-t-${k}" onclick="tdPickTower('${k}')"><span style="font-size:22px">${TD_TOWERS[k].icon}</span><b>${TD_TOWERS[k].name}</b><small>${TD_TOWERS[k].cost} 💰 · Taste ${i+1}</small></button>`).join('')}</div>
@@ -330,6 +348,8 @@ function tdUpdateHud(force){
   set('td-lives',td.lives);set('td-gold',td.gold);set('td-wave',td.wave);
   const nb=document.getElementById('td-next');
   if(nb){const can=tdCanStartWave(td),txt=td.wave>=TD_WAVES?'Letzte Welle':(td.spawnQ.length?'Welle läuft …':'▶ Welle '+(td.wave+1)+(td.enemies.length?' (früh +'+(6+td.wave+1)+'💰)':''));if(nb.textContent!==txt)nb.textContent=txt;nb.disabled=!can;}
+  const lb=document.getElementById('td-life');
+  if(lb){const ok=tdCanBuyLife(td),txt=td.lives>=td.maxLives?'❤️ Voll':'🪙 '+tdLifeCost(td)+': +1 ❤️';if(lb.textContent!==txt)lb.textContent=txt;lb.disabled=!ok;}
   set('td-speed','⏩ ×'+tdSpeed);set('td-pause',td.paused?'▶':'⏸');
   Object.keys(TD_TOWERS).forEach(k=>{const b=document.getElementById('td-t-'+k);if(b){b.classList.toggle('active',tdBuild===k&&!tdSel);b.classList.toggle('poor',td.gold<TD_TOWERS[k].cost);}});
   const info=document.getElementById('td-info');
