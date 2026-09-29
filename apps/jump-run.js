@@ -1401,6 +1401,7 @@ function jrHud(force){
     b.textContent=i>st.unlocked?'🔒 '+i:'Level '+i;
   }
   const pb=document.getElementById('jr-pause');if(pb)pb.textContent=st.paused?'▶ Weiter':'⏸ Pause';
+  const mb=document.getElementById('jr-map');if(mb)mb.style.display=st.mode==='menu'?'none':'';
 }
 
 /* ── Pause ── */
@@ -1452,6 +1453,11 @@ function jrTouch(k,down){
 function jrToMenu(){
   const sel=jrState?Math.max(0,jrState.level.idx):0;
   jrState=jrNewState(sel);jrState.mode='menu';jrHud(true);
+}
+function jrBackToMap(){
+  jrChalFlush();
+  jrIn.left=jrIn.right=jrIn.jumpHeld=jrIn.down=false;
+  jrToMenu();
 }
 function jrClick(ev){
   const st=jrState;if(!st)return;
