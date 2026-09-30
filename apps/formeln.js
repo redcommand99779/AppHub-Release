@@ -1,6 +1,7 @@
 /* ══════════════════════════════════
    TAFELWERK – Nachschlagen (Tabellen aus tafelwerk-daten.js plus alle Formeln, mit Suche über alles) und Lernen mit
    Karteikarten zu Mathe, Physik und Chemie nach dem Karteikasten-Prinzip (Leitner) wie bei den Vokabeln.
+   Favoriten (⭐) für Tabellen: zf_tafel_fav. Tabellen mit TAFEL_LEARN (tafelwerk-daten2.js) lassen sich zusätzlich als Karteikarten lernen.
    Fortschritt der Karten: zf_formeln  { id: {box, due} }
 ══════════════════════════════════ */
 const FORM_KEY='zf_formeln';
@@ -56,6 +57,20 @@ chemie:[
 ]};
 const FORM_CARDS=[];
 Object.keys(FORM_RAW).forEach(k=>FORM_RAW[k].forEach((c,i)=>FORM_CARDS.push({id:k[0]+(i+1),deck:k,f:c[0],b:c[1]})));
+/* Karten aus Tabellen (Zeichen, Einheiten, Ionen, Geschichte …): Vorderseite = eine Spalte, Rückseite = die passenden anderen Spalten */
+function formTableCards(){
+  const out=[];if(typeof TAFEL==='undefined'||typeof TAFEL_LEARN==='undefined')return out;
+  TAFEL.forEach(sec=>{const L=TAFEL_LEARN[sec.id];if(!L)return;
+    sec.rows.forEach((row,ri)=>L.pairs.forEach((pr,pi)=>{
+      const front=row[pr[0]],cols=pr[1];if(!front)return;
+      const parts=cols.map(c=>row[c]).filter(Boolean);if(!parts.length)return;
+      const back=cols.length>1?cols.filter(c=>row[c]).map(c=>sec.cols[c]+': '+row[c]).join('\n'):parts[0];
+      out.push({id:'t-'+sec.id+'-'+ri+'-'+pi,deck:'tabellen',ctx:L.short,f:front,b:back});
+    }));});
+  return out;
+}
+FORM_DECKS.tabellen={name:'Tabellen',icon:'📋'};
+formTableCards().forEach(c=>FORM_CARDS.push(c));
 
 function formDay(){return Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/86400000);}
 function formLoad(){let d=null;try{d=JSON.parse(localStorage.getItem(FORM_KEY)||'null');}catch(e){}return d&&typeof d==='object'&&!Array.isArray(d)?d:{};}
@@ -81,24 +96,35 @@ function formPickSession(d,deck,rnd){
 }
 
 /* ── Tafelwerk: Abschnitte (Tabellen + Formel-Übersichten aus den Karteikarten) ── */
-const TAFEL_ORDER=['mathe','physik','chemie','astro','info','alltag'];
+const TAFEL_ORDER=['mathe','physik','chemie','bio','astro','info','gesch','alltag'];
 function formSections(){
   const list=[];
-  Object.keys(FORM_DECKS).forEach(k=>list.push({id:'f-'+k,subj:k,title:'Formeln – Übersicht',icon:'🧾',cols:['Name','Formel'],rows:formCardsOf(k).map(c=>[c.f,c.b]),formula:true}));
+  Object.keys(FORM_RAW).forEach(k=>list.push({id:'f-'+k,subj:k,title:'Formeln – Übersicht',icon:'🧾',cols:['Name','Formel'],rows:formCardsOf(k).map(c=>[c.f,c.b]),formula:true}));
   (typeof TAFEL!=='undefined'?TAFEL:[]).forEach(t=>list.push(t));
   return list.map((x,i)=>({x,i})).sort((a,b)=>TAFEL_ORDER.indexOf(a.x.subj)-TAFEL_ORDER.indexOf(b.x.subj)||a.i-b.i).map(o=>o.x);
 }
 /* Suche: passt der Suchtext auf den Titel (dann ganzer Abschnitt) oder auf einzelne Zeilen? */
-function formFilter(sections,subj,query){
+function formFilter(sections,subj,query,favs){
   const q=(query||'').trim().toLowerCase(),out=[];
   sections.forEach(sec=>{
-    if(subj&&subj!=='alle'&&sec.subj!==subj)return;
+    if(subj==='fav'){if(!(favs||[]).includes(sec.id))return;}
+    else if(subj&&subj!=='alle'&&sec.subj!==subj)return;
     if(!q){out.push({sec,rows:sec.rows});return;}
     if(sec.title.toLowerCase().includes(q)){out.push({sec,rows:sec.rows});return;}
     const rows=sec.rows.filter(r=>r.join(' ').toLowerCase().includes(q));
     if(rows.length)out.push({sec,rows});
   });
   return out;
+}
+
+/* ── Favoriten ── */
+const FORM_FAV_KEY='zf_tafel_fav';
+function formFavs(){let a=null;try{a=JSON.parse(localStorage.getItem(FORM_FAV_KEY)||'null');}catch(e){}return Array.isArray(a)?a.filter(x=>typeof x==='string'):[];}
+function formToggleFav(id){
+  const a=formFavs(),i=a.indexOf(id);if(i>=0)a.splice(i,1);else a.push(id);
+  try{localStorage.setItem(FORM_FAV_KEY,JSON.stringify(a));}catch(e){}
+  const el=document.getElementById('form-list');if(el)el.innerHTML=formTafelHtml();
+  const ch=document.getElementById('form-favcount');if(ch)ch.textContent=a.length;
 }
 
 /* ── Oberfläche ── */
@@ -119,7 +145,7 @@ function formAnswer(ok){
   const c=s.queue.shift();
   if(ok){if(!s.retry[c.id])formGrade(formData,c.id,true);s.ok++;}
   else{if(!s.retry[c.id])formGrade(formData,c.id,false);s.retry[c.id]=1;s.queue.push(c);}   // falsche Karte kommt am Ende noch einmal
-  formSave(formData);
+  formSave(formData);if(typeof lsMark==='function')lsMark('formeln');
   s.flipped=false;if(!s.queue.length)s.done=true;
   formRender();
 }
@@ -150,17 +176,18 @@ function formSessHtml(){
   return `<div style="font-size:12px;color:var(--text-3);margin-bottom:6px;display:flex;justify-content:space-between"><span>${FORM_DECKS[c.deck].icon} ${FORM_DECKS[c.deck].name}</span><span>${s.queue.length} übrig</span></div>
     <div class="lrn-bar" style="margin-bottom:10px"><div style="width:${done/s.total*100}%"></div></div>
     <div class="lrn-flash" onclick="formFlip()">${s.flipped
-      ?`<div class="lrn-label">${escHtml(c.f)}</div><div class="lrn-big" style="font-size:26px;font-family:'Cambria Math',Georgia,serif">${escHtml(c.b)}</div>`
-      :`<div class="lrn-label">Wie lautet die Formel?</div><div class="lrn-big">${escHtml(c.f)}</div><div style="font-size:12px;color:var(--text-3);margin-top:14px">Tippen zum Umdrehen</div>`}</div>
+      ?(c.deck==='tabellen'?`<div class="lrn-label">${escHtml(c.ctx)}: ${escHtml(c.f)}</div><div class="lrn-big" style="font-size:${c.b.length>90?17:c.b.length>40?21:26}px;white-space:pre-line;text-align:left">${escHtml(c.b)}</div>`
+        :`<div class="lrn-label">${escHtml(c.f)}</div><div class="lrn-big" style="font-size:26px;font-family:'Cambria Math',Georgia,serif">${escHtml(c.b)}</div>`)
+      :`<div class="lrn-label">${c.deck==='tabellen'?escHtml(c.ctx):'Wie lautet die Formel?'}</div><div class="lrn-big">${escHtml(c.f)}</div><div style="font-size:12px;color:var(--text-3);margin-top:14px">Tippen zum Umdrehen</div>`}</div>
     <div class="lrn-two">${s.flipped?`<button class="lrn-btn bad" onclick="formAnswer(false)">✗ Nicht gewusst</button><button class="lrn-btn good" onclick="formAnswer(true)">✓ Gewusst</button>`:`<button class="lrn-btn" style="grid-column:1/3" onclick="formFlip()">Umdrehen</button>`}</div>`;
 }
 function formTafelPageHtml(){
-  const chips=`<div class="lrn-chips" style="margin-bottom:10px"><button type="button" class="lrn-chip ${formSubj==='alle'?'active':''}" onclick="formSetSubj('alle')">Alles</button>${TAFEL_ORDER.map(k=>`<button type="button" class="lrn-chip ${formSubj===k?'active':''}" onclick="formSetSubj('${k}')">${TAFEL_SUBJ[k].icon} ${TAFEL_SUBJ[k].name}</button>`).join('')}</div>`;
+  const chips=`<div class="lrn-chips" style="margin-bottom:10px"><button type="button" class="lrn-chip ${formSubj==='alle'?'active':''}" onclick="formSetSubj('alle')">Alles</button><button type="button" class="lrn-chip ${formSubj==='fav'?'active':''}" onclick="formSetSubj('fav')">⭐ Favoriten (<span id="form-favcount">${formFavs().length}</span>)</button>${TAFEL_ORDER.map(k=>`<button type="button" class="lrn-chip ${formSubj===k?'active':''}" onclick="formSetSubj('${k}')">${TAFEL_SUBJ[k].icon} ${TAFEL_SUBJ[k].name}</button>`).join('')}</div>`;
   return `<div class="lrn-card">${chips}<input class="lrn-input" style="width:100%;margin-bottom:12px" placeholder="Im ganzen Tafelwerk suchen (z. B. Kraft, Kreis, pH, Gold, Mars) …" value="${escHtml(formQuery)}" oninput="formSearch(this.value)"><div id="form-list">${formTafelHtml()}</div></div>`;
 }
 function formTafelHtml(){
-  const res=formFilter(formSections(),formSubj,formQuery),searching=!!formQuery.trim();
-  if(!res.length)return '<div style="font-size:13px;color:var(--text-3);text-align:center;padding:14px">Nichts gefunden.</div>';
+  const favs=formFavs(),res=formFilter(formSections(),formSubj,formQuery,favs),searching=!!formQuery.trim();
+  if(!res.length)return '<div style="font-size:13px;color:var(--text-3);text-align:center;padding:14px">'+(formSubj==='fav'&&!formQuery.trim()?'Noch keine Favoriten. Tippe bei einer Tabelle auf den Stern ☆, dann findest du sie hier wieder.':'Nichts gefunden.')+'</div>';
   let lastSubj='';
   return res.map(({sec,rows})=>{
     const head=sec.subj!==lastSubj?`<div class="lrn-label" style="margin:14px 0 6px">${TAFEL_SUBJ[sec.subj].icon} ${TAFEL_SUBJ[sec.subj].name}</div>`:'';lastSubj=sec.subj;
@@ -168,6 +195,6 @@ function formTafelHtml(){
     const body=rows.map(r=>`<tr>${r.map((c,i)=>`<td style="padding:6px 8px;border-bottom:0.5px solid var(--divider);vertical-align:top;${i===r.length-1&&sec.formula?"font-family:'Cambria Math',Georgia,serif;font-weight:700;":''}">${escHtml(c)}</td>`).join('')}</tr>`).join('');
     const link=sec.link?`<div style="margin-top:8px"><button class="lrn-btn" onclick="goTo('${sec.link.app}')">${escHtml(sec.link.label)}</button></div>`:'';
     const note=sec.note?`<div style="font-size:12px;color:var(--text-3);margin-top:8px">${escHtml(sec.note)}</div>`:'';
-    return head+`<details ${searching?'open':''} style="background:var(--bg);border:0.5px solid var(--divider);border-radius:12px;padding:8px 12px;margin-bottom:8px"><summary style="cursor:pointer;font-weight:700;font-size:14px;padding:4px 0">${sec.icon} ${escHtml(sec.title)} <span style="font-weight:500;color:var(--text-3);font-size:12px">· ${rows.length}</span></summary><div style="margin-top:8px"><div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>${note}${link}</div></details>`;
+    return head+`<details ${searching?'open':''} style="background:var(--bg);border:0.5px solid var(--divider);border-radius:12px;padding:8px 12px;margin-bottom:8px"><summary style="cursor:pointer;font-weight:700;font-size:14px;padding:4px 0">${sec.icon} ${escHtml(sec.title)} <span style="font-weight:500;color:var(--text-3);font-size:12px">· ${rows.length}</span><span title="${favs.includes(sec.id)?'Aus den Favoriten nehmen':'Zu den Favoriten'}" onclick="event.preventDefault();event.stopPropagation();formToggleFav('${sec.id}')" style="float:right;font-size:17px;cursor:pointer;padding:0 4px">${favs.includes(sec.id)?'⭐':'☆'}</span></summary><div style="margin-top:8px"><div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>${note}${link}</div></details>`;
   }).join('');
 }

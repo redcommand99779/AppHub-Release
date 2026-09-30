@@ -3614,6 +3614,7 @@ function goTo(id){
   if(id==='formeln') formInit();
   if(id==='tippschule') tlInit();
   if(id==='georaetsel') geoInit();
+  if(typeof lsAttach==='function'&&['vokabeln','mathe','periodensystem','formeln','tippschule','georaetsel'].includes(id)) lsAttach(id);
   if(id==='typing') typingNew();
   if(id==='laenderquiz') lqInit();
   if(id==='flaggenquiz') fqInit();
@@ -4061,12 +4062,16 @@ function initSavedSettings(){
 <script>
 
 </script>
+<script src="apps/lern-serie.js"></script>
 <script src="apps/mathe.js"></script>
+<script src="apps/pt-daten.js"></script>
 <script src="apps/periodensystem.js"></script>
 <script src="apps/tafelwerk-daten.js"></script>
+<script src="apps/tafelwerk-daten2.js"></script>
 <script src="apps/formeln.js"></script>
 <script src="apps/tippschule.js"></script>
 <script src="apps/geo-daten.js"></script>
+<script src="apps/geo-daten2.js"></script>
 <script src="apps/geo-raetsel.js"></script>
 <script>
 </script>

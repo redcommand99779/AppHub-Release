@@ -149,6 +149,7 @@ function mathEnter(){
   if(isNaN(v)){mathFeedback('Bitte eine Zahl eingeben','warn');if(inp)inp.focus();return;}
   const ok=mathIsRight(inp.value,mathQ.ans),S=mathSess;
   mathStat(mathQ.topic,ok);S.answered=true;
+  if(typeof lsMark==='function')lsMark('mathe');
   if(ok){S.ok++;S.streak++;if(S.streak>math.bestStreak)math.bestStreak=S.streak;mathFeedback('✓ Richtig!','good');mathNextT=setTimeout(mathNext,750);}
   else{S.no++;S.streak=0;mathFeedback(`✗ Richtig wäre <b>${mathNiceNumber(mathQ.ans)}</b> &nbsp;<small>(Enter = weiter)</small>`,'bad');}
   mathSave();
@@ -207,6 +208,7 @@ function mathSprintEnd(){
   mathStopTimer();R.running=false;R.done=true;
   const prev=math.sprint[math.level]||0;
   R.record=R.score>prev&&R.score>0;if(R.record)math.sprint[math.level]=R.score;
+  if(typeof lsMark==='function')lsMark('mathe');
   // Coins: 1 pro 8 richtige Antworten, höchstens 10 pro Tag
   const today=mathTodayKey();if(math.coinsDate!==today){math.coinsDate=today;math.coinsDay=0;}
   let coins=Math.min(Math.floor(R.score/8),MATH_COINS_PER_DAY-math.coinsDay);

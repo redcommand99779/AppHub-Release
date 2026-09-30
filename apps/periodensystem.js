@@ -79,30 +79,82 @@ function ptMakeQuestion(level,type,rnd){
 }
 
 /* ── Oberfläche ── */
-let ptView='table',ptSel=1,ptFilter='',ptQuiz=null,ptLevel='leicht',ptData=null;
+/* ── Eigenschaften-Ansicht: die Tabelle nach einem Wert einfärben ── */
+const PT_VIEWS={
+  gruppe:{name:'Gruppe'},zustand:{name:'Zustand (20 °C)'},
+  masse:{name:'Atommasse',hue:320,get:e=>+e.mass,fmt:v=>ptDe(v,v<100?3:2)+' u'},
+  dichte:{name:'Dichte',hue:265,idx:0,log:true,fmt:v=>v<0.01?ptDe(v*1000,v<0.001?4:3)+' g/L':ptDe(v,v<10?3:2)+' g/cm³'},
+  schmelz:{name:'Schmelzpunkt',hue:12,idx:1,fmt:v=>ptDe(v-273.15,0)+' °C'},
+  siede:{name:'Siedepunkt',hue:35,idx:2,fmt:v=>ptDe(v-273.15,0)+' °C'},
+  en:{name:'Elektronegativität',hue:150,idx:3,fmt:v=>ptDe(v,2)},
+  ie:{name:'1. Ionisierungsenergie',hue:195,idx:4,fmt:v=>ptDe(v,1)+' kJ/mol'}};
+const PT_STATE_COLORS={'fest':'#a5d8ff','flüssig':'#ffd43b','gasförmig':'#ffa8a8','unbekannt':'#dee2e6'};
+function ptDe(v,d){return Number(v).toFixed(d).replace('.',',');}
+function ptProp(view,e){
+  const v=PT_VIEWS[view];if(!v||(v.get===undefined&&v.idx===undefined))return null;
+  if(v.get)return v.get(e);
+  const row=typeof PT_PROPS!=='undefined'?PT_PROPS[e.z-1]:null;return row&&row[v.idx]!=null?row[v.idx]:null;
+}
+/* Wertebereich einer Ansicht (Dichte logarithmisch, weil sie über 5 Zehnerpotenzen reicht) */
+function ptRange(view){
+  const v=PT_VIEWS[view],vals=PT_EL.map(e=>ptProp(view,e)).filter(x=>x!=null);
+  const f=v.log?Math.log10:x=>x;const a=vals.map(f);
+  return {min:Math.min(...a),max:Math.max(...a),f,count:vals.length};
+}
+function ptT(view,e,r){const x=ptProp(view,e);return x==null?null:(r.max===r.min?0:(r.f(x)-r.min)/(r.max-r.min));}
+function ptCellStyle(view,e,r){
+  if(view==='gruppe')return {bg:PT_CATS[e.cat].color,fg:'#111'};
+  if(view==='zustand')return {bg:PT_STATE_COLORS[e.state],fg:'#111'};
+  const t=ptT(view,e,r);if(t===null)return {bg:'#e9ecef',fg:'#868e96'};
+  const l=94-t*62;return {bg:`hsl(${PT_VIEWS[view].hue},70%,${l}%)`,fg:l<58?'#fff':'#111'};
+}
+function ptRanks(view){
+  const list=PT_EL.map(e=>[e,ptProp(view,e)]).filter(x=>x[1]!=null).sort((a,b)=>b[1]-a[1]),f=PT_VIEWS[view].fmt;
+  const nm=x=>x.map(y=>`<b>${y[0].sym}</b> ${escHtml(f(y[1]))}`).join(' · ');
+  return {hi:nm(list.slice(0,3)),lo:nm(list.slice(-3).reverse()),n:list.length};
+}
+let ptView='table',ptSel=1,ptFilter='',ptQuiz=null,ptLevel='leicht',ptData=null,ptProperty='gruppe';
 function ptInit(){ptData=ptLoad();ptView='table';ptSel=1;ptFilter='';ptQuiz=null;ptRender();}
 function ptSetView(v){ptView=v;ptQuiz=null;ptRender();}
 function ptSelect(z){ptSel=z;ptRender();}
 function ptSetFilter(k){ptFilter=ptFilter===k?'':k;ptRender();}
+function ptSetProperty(k){ptProperty=k;ptFilter='';ptRender();}
 function ptRender(){
   const root=document.getElementById('pt-root');if(!root)return;
   const tabs=`<div class="lrn-tabs"><button class="lrn-tab ${ptView==='table'?'active':''}" onclick="ptSetView('table')">🧪 Tabelle</button><button class="lrn-tab ${ptView==='quiz'?'active':''}" onclick="ptSetView('quiz')">🎯 Quiz</button></div>`;
   root.innerHTML=tabs+(ptView==='quiz'?ptQuizHtml():ptTableHtml());
 }
 function ptTableHtml(){
-  const cell=e=>{const c=PT_CATS[e.cat],dim=ptFilter&&ptFilter!==e.cat;
-    return `<button type="button" onclick="ptSelect(${e.z})" title="${escHtml(e.name)}" style="grid-column:${e.col};grid-row:${e.row};background:${c.color};opacity:${dim?0.18:1};border:${e.z===ptSel?'2px solid var(--text)':'1px solid rgba(0,0,0,0.15)'};border-radius:5px;padding:1px 0;cursor:pointer;color:#111;font-family:inherit;line-height:1.05;min-width:0"><span style="display:block;font-size:8px;opacity:.7">${e.z}</span><b style="display:block;font-size:12px">${e.sym}</b></button>`;};
+  const view=ptProperty,r=view==='gruppe'||view==='zustand'?null:ptRange(view),fmt=PT_VIEWS[view].fmt;
+  const cell=e=>{
+    const st=ptCellStyle(view,e,r),dim=view==='gruppe'&&ptFilter&&ptFilter!==e.cat,val=r?ptProp(view,e):null;
+    const tip=escHtml(e.name)+(r?': '+(val==null?'kein Wert':fmt(val)):view==='zustand'?': '+e.state:'');
+    return `<button type="button" onclick="ptSelect(${e.z})" title="${tip}" style="grid-column:${e.col};grid-row:${e.row};background:${st.bg};opacity:${dim?0.18:1};border:${e.z===ptSel?'2px solid var(--text)':'1px solid rgba(0,0,0,0.15)'};border-radius:5px;padding:1px 0;cursor:pointer;color:${st.fg};font-family:inherit;line-height:1.05;min-width:0"><span style="display:block;font-size:8px;opacity:.7">${e.z}</span><b style="display:block;font-size:12px">${e.sym}</b></button>`;};
+  const hint=view==='gruppe'?'Tippe ein Element an. Unten kannst du eine Gruppe hervorheben.':view==='zustand'?'So liegen die Elemente bei 20 °C vor.':'Je dunkler, desto höher der Wert. Graue Felder: kein Wert bekannt.';
   const grid=`<div style="overflow-x:auto;padding-bottom:6px"><div style="display:grid;grid-template-columns:repeat(18,minmax(30px,1fr));grid-template-rows:repeat(7,38px) 14px repeat(2,38px);gap:2px;min-width:620px">${PT_EL.map(cell).join('')}
-    <div style="grid-column:3/13;grid-row:1/4;font-size:12px;color:var(--text-3);display:flex;align-items:center;justify-content:center;text-align:center;padding:0 10px">Tippe ein Element an. Unten kannst du eine Gruppe hervorheben.</div></div></div>`;
-  const legend=`<div class="lrn-chips" style="margin:10px 0">${Object.keys(PT_CATS).map(k=>`<button type="button" class="lrn-chip ${ptFilter===k?'active':''}" onclick="ptSetFilter('${k}')"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${PT_CATS[k].color};margin-right:5px"></span>${PT_CATS[k].name}</button>`).join('')}</div>`;
+    <div style="grid-column:3/13;grid-row:1/4;font-size:12px;color:var(--text-3);display:flex;align-items:center;justify-content:center;text-align:center;padding:0 10px">${hint}</div></div></div>`;
+  const chips=`<div class="lrn-label" style="margin-top:8px">Einfärben nach</div><div class="lrn-chips" style="margin-bottom:10px">${Object.keys(PT_VIEWS).map(k=>`<button type="button" class="lrn-chip ${ptProperty===k?'active':''}" onclick="ptSetProperty('${k}')">${PT_VIEWS[k].name}</button>`).join('')}</div>`;
+  let legend;
+  if(view==='gruppe')legend=`<div class="lrn-chips" style="margin:10px 0">${Object.keys(PT_CATS).map(k=>`<button type="button" class="lrn-chip ${ptFilter===k?'active':''}" onclick="ptSetFilter('${k}')"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${PT_CATS[k].color};margin-right:5px"></span>${PT_CATS[k].name}</button>`).join('')}</div>`;
+  else if(view==='zustand')legend=`<div class="lrn-chips" style="margin:10px 0">${Object.keys(PT_STATE_COLORS).map(k=>`<span class="lrn-chip"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${PT_STATE_COLORS[k]};margin-right:5px"></span>${k}</span>`).join('')}</div>`;
+  else{
+    const rk=ptRanks(view),h=PT_VIEWS[view].hue;
+    legend=`<div style="margin:10px 0"><div style="height:12px;border-radius:6px;background:linear-gradient(90deg,hsl(${h},70%,94%),hsl(${h},70%,32%))"></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);margin-top:3px"><span>niedrig</span><span>${PT_VIEWS[view].log?'logarithmische Skala':''}</span><span>hoch</span></div>
+      <div style="font-size:12px;color:var(--text-2);margin-top:6px">Höchste: ${rk.hi}</div><div style="font-size:12px;color:var(--text-2);margin-top:2px">Niedrigste: ${rk.lo}</div>
+      <div style="font-size:11px;color:var(--text-3);margin-top:2px">${rk.n} von 118 Elementen mit Wert</div></div>`;
+  }
   const e=PT_EL[ptSel-1],c=PT_CATS[e.cat];
+  const fv=k=>{const x=ptProp(k,e);return x==null?'–':PT_VIEWS[k].fmt(x);};
   const card=`<div class="lrn-card" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div style="width:96px;height:96px;border-radius:14px;background:${c.color};color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1"><span style="font-size:12px;opacity:.7">${e.z}</span><b style="font-size:38px">${e.sym}</b></div>
     <div style="flex:1;min-width:200px"><div style="font-size:22px;font-weight:800">${escHtml(e.name)}</div>
     <div style="font-size:13px;color:var(--text-2);margin-top:4px">${c.name} · ${ptGroupInfo(e)}</div>
     <div style="font-size:13px;color:var(--text-2);margin-top:2px">Atommasse ${escHtml(e.mass)} u · bei 20 °C ${e.state}</div>
-    <div style="font-size:13px;color:var(--text-2);margin-top:2px">${e.z} Protonen · ${e.z} Elektronen</div></div>
-    <div style="display:flex;gap:6px"><button class="lrn-btn ghost" ${ptSel<=1?'disabled':''} onclick="ptSelect(${ptSel-1})">◀</button><button class="lrn-btn ghost" ${ptSel>=118?'disabled':''} onclick="ptSelect(${ptSel+1})">▶</button></div></div>`;
-  return grid+legend+card;
+    <div style="font-size:13px;color:var(--text-2);margin-top:2px">${e.z} Protonen · ${e.z} Elektronen</div>
+    ${typeof PT_PROPS!=='undefined'?`<div style="font-size:13px;color:var(--text-2);margin-top:6px;display:grid;grid-template-columns:auto auto;gap:2px 16px;justify-content:start"><span>Dichte</span><b>${fv('dichte')}</b><span>Schmelzpunkt</span><b>${fv('schmelz')}</b><span>Siedepunkt</span><b>${fv('siede')}</b><span>Elektronegativität</span><b>${fv('en')}</b><span>1. Ionisierungsenergie</span><b>${fv('ie')}</b></div>`:''}</div>
+    <div style="display:flex;gap:6px"><button class="lrn-btn ghost" ${ptSel<=1?'disabled':''} onclick="ptSelect(${ptSel-1})">◀</button><button class="lrn-btn ghost" ${ptSel>=118?'disabled':''} onclick="ptSelect(${ptSel+1})">▶</button></div></div>
+    <div style="font-size:11px;color:var(--text-3);margin-top:8px">Kohlenstoff und Arsen sublimieren, Helium wird bei Normdruck nicht fest (kein Schmelz-/Siedepunkt). Daten: Wikipedia-Datenseiten (CRC-Handbuch, CC BY-SA) und Periodic-Table-JSON (CC BY-SA).</div>`;
+  return grid+chips+legend+card;
 }
 function ptNewQuiz(){
   ptQuiz={level:ptLevel,n:0,score:0,streak:0,best:0,q:null,answered:null,total:10,done:false};
@@ -123,7 +175,7 @@ function ptAdvance(){
   const t=ptQuiz;if(!t||t.answered===null)return;
   t.n++;
   if(t.n>=t.total){
-    t.done=true;const d=ptLoad();d.games++;if((d.best[t.level]||0)<t.score)d.best[t.level]=t.score;ptSave(d);ptData=d;
+    t.done=true;const d=ptLoad();d.games++;if((d.best[t.level]||0)<t.score)d.best[t.level]=t.score;ptSave(d);ptData=d;if(typeof lsMark==='function')lsMark('periodensystem');
   }else ptNextQ();
   ptRender();
 }

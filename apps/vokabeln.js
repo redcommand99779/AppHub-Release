@@ -241,6 +241,7 @@ function vokEnd(){vokSess=null;vokRender();}
 function vokFinish(){
   const S=vokSess;S.finished=true;
   if(S.ok+S.no>0){vok.days[vokDay()]=(vok.days[vokDay()]||0)+S.ok+S.no;}
+  if(S.ok+S.no>0&&typeof lsMark==='function')lsMark('vokabeln');
   // Coins: 1 pro 5 richtig wiederholte, wirklich fällige Karten – höchstens 10 pro Tag
   const today=String(vokDay());if(vok.coinsDate!==today){vok.coinsDate=today;vok.coinsDay=0;}
   let coins=Math.min(Math.floor(S.dueOk/5),VOK_COINS_PER_DAY-vok.coinsDay);
