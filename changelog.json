@@ -294,5 +294,14 @@
       "Tafelwerk: Neue Fächer Biologie (Zelle, DNA, Vitamine, Blutgruppen …) und Geschichte (Zeittafel, Epochen). Tabellen lassen sich mit ⭐ zu Favoriten machen, und über 380 Tabellenwerte gibt es als Karteikarten zum Lernen.",
       "Tippschule: Bestenliste über alle Lektionen, Fehlerstatistik je Taste mit „Problemtasten üben“ und Freies Üben mit eigenem Text."
     ]
+  },
+  {
+    "id": 29,
+    "date": "30.09.2026",
+    "title": "Suche über alle Inhalte",
+    "items": [
+      "Neu: Die Suche (Strg+K oder oben auf „Suchen …“) findet jetzt auch Inhalte, nicht nur Apps: Zeilen und Formeln aus dem Tafelwerk, Elemente, Länder, Hauptstädte, Flüsse, Seen, Meere, Berge und Inseln – und deine eigenen Vokabeln, Notizen und Aufgaben.",
+      "Ein Klick auf einen Treffer springt direkt hin: zum Tafelwerk mit dem Suchtext, zum Element im Periodensystem oder zu einer Kartenansicht mit den wichtigsten Angaben. Umlaute sind egal (aetna findet Ätna), und H2SO4 findet H₂SO₄."
+    ]
   }
 ]

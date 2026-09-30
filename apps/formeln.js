@@ -131,6 +131,8 @@ function formToggleFav(id){
 let formView='tafel',formSubj='alle',formDeck='alle',formSess=null,formQuery='',formData=null;
 function formInit(){formData=formLoad();formView='tafel';formSess=null;formQuery='';formRender();}
 function formSetView(v){formView=v;formSess=null;formRender();}
+/* aus der globalen Suche (Strg+K): Tafelwerk mit diesem Suchtext öffnen */
+function formOpenSearch(q){formView='tafel';formSubj='alle';formQuery=String(q||'');formSess=null;formRender();}
 function formSetSubj(k){formSubj=k;formRender();}
 function formSetDeck(k){formDeck=k;formSess=null;formRender();}
 function formSearch(v){formQuery=v;const el=document.getElementById('form-list');if(el)el.innerHTML=formTafelHtml();}

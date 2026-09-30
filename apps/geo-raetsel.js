@@ -163,6 +163,19 @@ function geoSet(k,v){
   if(k==='theme'&&!GEO_THEMES[v].modes.includes(geoSetup.mode))geoSetup.mode=GEO_THEMES[v].modes.includes('guess')?'guess':GEO_THEMES[v].modes[0];
   geoRender();
 }
+/* aus der globalen Suche (Strg+K): Land, Fluss, Berg … auf der Karte zeigen, mit den wichtigsten Angaben */
+function geoExplore(t){
+  geoData=geoLoad();
+  geo={mode:'explore',explore:true,theme:t.theme,region:'welt',level:'alle',list:[t],n:1,i:0,score:0,tries:1,wrong:[],found:true,done:false,msg:'',opts:null,answered:-1,pin:null,daily:null};
+  geoFitCountry(t);geoRender();
+}
+function geoInfoText(t){
+  const kind={land:'Land',fluss:'Fluss',see:'See',meer:'Meer',berg:'Berg',insel:'Insel'}[t.type]||'';
+  const parts=[kind];
+  if(t.theme==='laender'){if(t.capital)parts.push('Hauptstadt '+t.capital);if(t.pop)parts.push(t.pop.toLocaleString('de-DE')+' Mio. Einwohner');}
+  if(t.height)parts.push(t.height.toLocaleString('de-DE')+' m hoch');if(t.area)parts.push(t.area.toLocaleString('de-DE')+' km²');
+  if(t.cont)parts.push(t.cont);return parts.filter(Boolean).join(' · ');
+}
 function geoStart(daily){
   const s=geoSetup;let cfg,list;
   if(daily===true){cfg={theme:'laender',mode:'guess',region:'welt',level:'alle'};list=geoDailyList(geoDayKey());}
@@ -203,6 +216,17 @@ function geoRender(){
       <button class="lrn-btn" onclick="geoStart()">▶ Runde starten</button></div>`;
     return;
   }
+  if(geo.explore){
+    const t=geo.list[0];
+    root.innerHTML=`<div class="lrn-card" style="margin-bottom:10px"><div style="font-size:22px;font-weight:800">${escHtml(geoNameOf(t))}</div><div style="font-size:13px;color:var(--text-2);margin-top:3px">${escHtml(geoInfoText(t))}</div></div>
+      <div style="position:relative"><canvas id="geo-canvas" width="${GEO_W}" height="${GEO_H}" style="display:block;width:100%;height:auto;border-radius:12px;background:#a5d0ea;cursor:grab;touch-action:none"></canvas>
+      <div style="position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px"><button class="lrn-btn ghost" style="padding:4px 10px;font-size:16px" onclick="geoZoom(1.6)">＋</button><button class="lrn-btn ghost" style="padding:4px 10px;font-size:16px" onclick="geoZoom(1/1.6)">－</button><button class="lrn-btn ghost" style="padding:4px 8px;font-size:13px" title="Ansicht zurücksetzen" onclick="geoFitCountry(geo.list[0]);geoDraw()">⟲</button></div></div>
+      <div style="text-align:center;margin-top:12px"><button class="lrn-btn ghost" onclick="geo=null;geoRender()">◀ Zurück zum Karten-Rätsel</button></div>`;
+    const cv0=document.getElementById('geo-canvas');
+    cv0.onpointerdown=geoPointerDown;cv0.onpointermove=geoPointerMove;cv0.onpointerup=geoPointerUp;cv0.onpointercancel=()=>{geoDrag=null;};
+    cv0.addEventListener('wheel',e=>{e.preventDefault();const r=cv0.getBoundingClientRect();geoZoomAt(e.deltaY<0?1.25:0.8,(e.clientX-r.left)*GEO_W/r.width,(e.clientY-r.top)*GEO_H/r.height);},{passive:false});
+    geoDraw();return;
+  }
   const max=geoMax(geo.mode,geo.n);
   if(geo.done){
     const rec=!geo.daily&&(d.best[geoKey(geo)]||0)===geo.score&&geo.score>0,me=geoPlayer();
@@ -226,7 +250,7 @@ function geoRender(){
   geoDraw();geoUpdateUi();
 }
 function geoUpdateUi(){
-  if(!geo||geo.done)return;
+  if(!geo||geo.done||geo.explore)return;
   const msg=document.getElementById('geo-msg'),ctrl=document.getElementById('geo-ctrl');
   if(msg)msg.innerHTML=geo.msg;
   if(!ctrl)return;
@@ -331,7 +355,7 @@ function geoAnswer(i){
   geoDraw();geoUpdateUi();
 }
 function geoNext(){
-  if(!geo)return;
+  if(!geo||geo.explore)return;
   geo.i++;
   if(geo.i>=geo.n){
     geo.done=true;const d=geoLoad();

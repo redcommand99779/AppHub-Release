@@ -231,7 +231,7 @@
     document.body.appendChild(tb);
     const vl=document.createElement('div');vl.id='zf-sb-veil';vl.onclick=()=>document.body.classList.remove('sb-open');document.body.appendChild(vl);
     const pal=document.createElement('div');pal.id='zf-pal';pal.onclick=e=>{if(e.target===pal)palClose();};
-    pal.innerHTML=`<div class="pal-box"><input id="pal-in" placeholder="App suchen oder Befehl eingeben…" autocomplete="off" oninput="palFilter(this.value)" onkeydown="palKey(event)"/><div class="pal-list" id="pal-list"></div><div class="pal-foot"><span>↑↓ auswählen</span><span>↵ öffnen</span><span>Esc schließen</span></div></div>`;
+    pal.innerHTML=`<div class="pal-box"><input id="pal-in" placeholder="Suchen: Apps, Tafelwerk, Elemente, Länder, Notizen …" autocomplete="off" oninput="palFilter(this.value)" onkeydown="palKey(event)"/><div class="pal-list" id="pal-list"></div><div class="pal-foot"><span>↑↓ auswählen</span><span>↵ öffnen</span><span>Esc schließen</span></div></div>`;
     document.body.appendChild(pal);
     const fx=document.createElement('button');fx.id='sb-focus-exit';fx.textContent='⤡ Fokus beenden';fx.title='Strg+.';fx.onclick=()=>sbFocus();document.body.appendChild(fx);
     const kb=document.createElement('div');kb.id='zf-keys';kb.onclick=e=>{if(e.target===kb)kb.style.display='none';};document.body.appendChild(kb);
@@ -500,7 +500,8 @@
       const acts=all.filter(x=>x.k==='Aktion').slice(0,5);
       list=[...fv.map(x=>({...x,g:'Favoriten'})),...rec.map(x=>({...x,g:'Zuletzt genutzt'})),...acts.map(x=>({...x,g:'Aktionen'}))];
     }else{
-      list=all.map(x=>({x,s:score(x,q)})).filter(o=>o.s>0).sort((a,b)=>b.s-a.s).slice(0,40).map(o=>({...o.x,g:'Ergebnisse'}));
+      list=all.map(x=>({x,s:score(x,q)})).filter(o=>o.s>0).sort((a,b)=>b.s-a.s).slice(0,12).map(o=>({...o.x,g:'Apps & Aktionen'}));
+      try{if(typeof srcContent==='function')list=list.concat(srcContent(q));}catch(e){}   // Inhalte: Tafelwerk, Elemente, Länder, Vokabeln, Notizen …
     }
     palItems=list;palSel=0;palRender();
   };
