@@ -71,7 +71,7 @@ function tlStart(i){
   setTimeout(()=>{const inp=document.getElementById('tl-in');if(inp)inp.focus();},30);
 }
 function tlAcc(t){return t.keys?Math.round((t.keys-t.errors)/t.keys*1000)/10:100;}
-function tlWpm(t){const min=(Date.now()-t.t0)/60000;return min>0&&t.pos>0?Math.round(t.pos/5/min):0;}
+function tlWpm(t){if(!t.t0||t.pos<5)return 0;const min=Math.max(Date.now()-t.t0,2000)/60000;return Math.round(t.pos/5/min);}   // erst ab 5 Zeichen, sonst springt der Wert am Anfang
 function tlType(ch){
   if(!tl||tl.done||!ch)return;
   if(!tl.t0)tl.t0=Date.now();
@@ -104,13 +104,13 @@ function tlRender(){
         <div style="margin-top:6px;font-size:15px;color:#f59f00;letter-spacing:2px">${'★'.repeat(s)}<span style="opacity:.3">${'★'.repeat(3-s)}</span>${d.wpm[l.id]?`<span style="font-size:11px;color:var(--text-3);letter-spacing:0;margin-left:8px">${d.wpm[l.id]} WPM</span>`:''}</div></button>`;}).join('')}</div>`;
 }
 function tlKeyboardHtml(next){
-  const nk=next?tlKeyFor(next):null;
-  const rows=TL_ROWS.map((row,ri)=>`<div style="display:flex;gap:4px;margin-left:${TL_ROW_OFFSET[ri]*34}px;margin-bottom:4px">${row.split('').map(k=>{
+  const nk=next?tlKeyFor(next):null,U=100/12.5;   // Tastenbreite in Prozent der Zeile: 11 Tasten + Versatz passen immer in die Breite
+  const rows=TL_ROWS.map((row,ri)=>`<div style="display:flex;gap:${U*0.12}%;margin-left:${TL_ROW_OFFSET[ri]*U}%;margin-bottom:${U*0.12}%">${row.split('').map(k=>{
     const col=TL_FINGER_COL[k],color=TL_FINGER_COLORS[col],on=nk&&nk.key===k;
-    return `<div style="width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;text-transform:uppercase;background:${on?color:'var(--bg)'};color:${on?'#111':'var(--text-3)'};border:1.5px solid ${color};${on?'transform:scale(1.15);box-shadow:0 0 10px '+color:''}">${k}</div>`;}).join('')}</div>`).join('');
-  const space=`<div style="height:26px;width:${9*34}px;margin:0 0 0 ${3*34}px;border-radius:6px;background:${nk&&nk.key===' '?'#c0c0c8':'var(--bg)'};border:1.5px solid var(--divider)"></div>`;
+    return `<div style="flex:0 0 ${U*0.88}%;aspect-ratio:1;box-sizing:border-box;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:clamp(9px,2.6vw,14px);font-weight:700;background:${on?color:'var(--bg)'};color:${on?'#111':'var(--text-3)'};border:1.5px solid ${color};${on?'transform:scale(1.12);box-shadow:0 0 10px '+color:''}">${k==='ß'?k:k.toUpperCase()}</div>`;}).join('')}</div>`).join('');
+  const space=`<div style="aspect-ratio:8/0.9;width:${U*8}%;margin-left:${U*2.5}%;box-sizing:border-box;border-radius:6px;background:${nk&&nk.key===' '?'#c0c0c8':'var(--bg)'};border:1.5px solid var(--divider)"></div>`;
   const shift=`<div style="text-align:center;font-size:12px;height:18px;margin-bottom:4px;color:${nk&&nk.shift?'var(--accent)':'transparent'};font-weight:700">⇧ Shift gedrückt halten</div>`;
-  return `<div style="overflow-x:auto;margin-top:12px"><div style="min-width:400px;display:inline-block;text-align:left">${shift}${rows}${space}</div></div>`;
+  return `<div style="margin:12px auto 0;max-width:460px;text-align:left">${shift}${rows}${space}</div>`;
 }
 function tlRenderPlay(full){
   const root=document.getElementById('tl-root');if(!root||!tl)return;

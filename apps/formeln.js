@@ -1,6 +1,7 @@
 /* ══════════════════════════════════
-   FORMELSAMMLUNG – fertige Karteikarten zu Mathe, Physik und Chemie. Lernen nach dem Karteikasten-Prinzip (Leitner)
-   wie bei den Vokabeln; zum Nachschlagen gibt es die Liste mit Suche. Fortschritt: zf_formeln  { id: {box, due} }
+   TAFELWERK – Nachschlagen (Tabellen aus tafelwerk-daten.js plus alle Formeln, mit Suche über alles) und Lernen mit
+   Karteikarten zu Mathe, Physik und Chemie nach dem Karteikasten-Prinzip (Leitner) wie bei den Vokabeln.
+   Fortschritt der Karten: zf_formeln  { id: {box, due} }
 ══════════════════════════════════ */
 const FORM_KEY='zf_formeln';
 const FORM_BOX_DAYS=[0,1,3,7,14,30];
@@ -19,7 +20,12 @@ mathe:[
 ['Kosinus im Dreieck','cos α = Ankathete / Hypotenuse'],['Tangens im Dreieck','tan α = Gegenkathete / Ankathete'],
 ['Trigonometrischer Pythagoras','sin² α + cos² α = 1'],['Logarithmus eines Produkts','log(a · b) = log a + log b'],
 ['Gaußsche Summenformel','1 + 2 + … + n = n · (n + 1) / 2'],['Prozentwert','W = G · p / 100'],['Kosinussatz','c² = a² + b² − 2ab · cos γ'],
-['Summe der Innenwinkel im n-Eck','(n − 2) · 180°']
+['Summe der Innenwinkel im n-Eck','(n − 2) · 180°'],
+['Zinseszins','Kₙ = K₀ · (1 + p/100)ⁿ'],['Summe einer arithmetischen Folge','sₙ = n/2 · (a₁ + aₙ)'],['Summe einer geometrischen Folge','sₙ = a₁ · (1 − qⁿ) / (1 − q)'],
+['Ableitung von eˣ','(eˣ)′ = eˣ'],['Ableitung von sin x','(sin x)′ = cos x'],['Ableitung von ln x','(ln x)′ = 1 / x'],['Stammfunktion von xⁿ','∫ xⁿ dx = xⁿ⁺¹ / (n + 1) + C'],
+['Binomialkoeffizient','(n über k) = n! / (k! · (n − k)!)'],['Abstand zweier Punkte','d = √((x₂ − x₁)² + (y₂ − y₁)²)'],['Skalarprodukt','a · b = a₁b₁ + a₂b₂ + a₃b₃'],
+['Kreisgleichung','(x − m)² + (y − n)² = r²'],['Sinussatz','a / sin α = b / sin β = c / sin γ'],['Höhensatz','h² = p · q'],
+['Quotientenregel','(u / v)′ = (u′ · v − u · v′) / v²'],['Basiswechsel beim Logarithmus','log_a(b) = ln b / ln a']
 ],
 physik:[
 ['Geschwindigkeit','v = s / t'],['Beschleunigung','a = Δv / Δt'],['Weg bei gleichmäßiger Beschleunigung','s = ½ · a · t²'],
@@ -31,7 +37,11 @@ physik:[
 ['Gravitationsgesetz','F = G · m₁ · m₂ / r²'],['Zentripetalkraft','F = m · v² / r'],['Masse-Energie-Äquivalenz','E = m · c²'],
 ['Hookesches Gesetz (Feder)','F = D · s'],['Auftriebskraft','F = ρ · V · g'],['Elektrische Ladung','Q = I · t'],
 ['Wirkungsgrad','η = P(nutz) / P(zu)'],['Brechungsgesetz (Snellius)','n₁ · sin α = n₂ · sin β'],['Linsengleichung','1/f = 1/g + 1/b'],
-['Lichtgeschwindigkeit im Vakuum','c ≈ 3 · 10⁸ m/s']
+['Lichtgeschwindigkeit im Vakuum','c ≈ 3 · 10⁸ m/s'],
+['Drehmoment','M = F · r'],['Hebelgesetz','F₁ · l₁ = F₂ · l₂'],['Reibungskraft','F_R = μ · F_N'],['Freier Fall: Geschwindigkeit','v = g · t'],['Freier Fall: Weg','s = ½ · g · t²'],
+['Fadenpendel (Periodendauer)','T = 2π · √(l / g)'],['Federpendel (Periodendauer)','T = 2π · √(m / D)'],['Bahngeschwindigkeit (Kreisbewegung)','v = 2π · r / T = ω · r'],
+['Spezifischer Widerstand','R = ρ · l / A'],['Elektrische Arbeit','W = U · I · t'],['Kapazität eines Kondensators','C = Q / U'],['Transformator','U₁ / U₂ = N₁ / N₂'],
+['Energie eines Photons','E = h · f'],['Radioaktiver Zerfall','N(t) = N₀ · (½)^(t / T½)'],['Lorentzkraft','F = q · v · B'],['Energieerhaltung (Mechanik)','E_kin + E_pot = konstant']
 ],
 chemie:[
 ['Stoffmenge','n = m / M'],['Stoffmengenkonzentration','c = n / V'],['Ideales Gasgesetz','p · V = n · R · T'],['Massenanteil','w = m(Stoff) / m(Gesamt)'],
@@ -40,7 +50,9 @@ chemie:[
 ['Verdünnungsgleichung','c₁ · V₁ = c₂ · V₂'],['Reaktionsgeschwindigkeit','v = Δc / Δt'],['Massenwirkungsgesetz','K = c(C)ᶜ · c(D)ᵈ / (c(A)ᵃ · c(B)ᵇ)'],
 ['Ausbeute','η = m(real) / m(theoretisch)'],['Neutronenzahl','N = A − Z   (Massenzahl − Ordnungszahl)'],
 ['Photosynthese (Reaktionsgleichung)','6 CO₂ + 6 H₂O → C₆H₁₂O₆ + 6 O₂'],['Neutralisation','H₃O⁺ + OH⁻ → 2 H₂O'],
-['Verbrennung von Methan','CH₄ + 2 O₂ → CO₂ + 2 H₂O'],['Faradaysches Gesetz','m = M · I · t / (z · F)'],['Dichte','ρ = m / V']
+['Verbrennung von Methan','CH₄ + 2 O₂ → CO₂ + 2 H₂O'],['Faradaysches Gesetz','m = M · I · t / (z · F)'],['Dichte','ρ = m / V'],
+['Stoffmenge aus Teilchenzahl','n = N / N_A'],['Massenkonzentration','β = m / V'],['Volumenanteil','φ = V(Stoff) / V(Gesamt)'],['Säure- und Basenkonstante','K_S · K_B = K_W'],
+['Summe der Oxidationszahlen','= Ladung des Teilchens'],['Allgemeine Formel der Alkane','CₙH₂ₙ₊₂'],['Allgemeine Formel der Alkene','CₙH₂ₙ'],['Salzbildung','Säure + Base → Salz + Wasser']
 ]};
 const FORM_CARDS=[];
 Object.keys(FORM_RAW).forEach(k=>FORM_RAW[k].forEach((c,i)=>FORM_CARDS.push({id:k[0]+(i+1),deck:k,f:c[0],b:c[1]})));
@@ -68,12 +80,34 @@ function formPickSession(d,deck,rnd){
   return sh(due).concat(sh(fresh)).slice(0,FORM_SESSION);
 }
 
+/* ── Tafelwerk: Abschnitte (Tabellen + Formel-Übersichten aus den Karteikarten) ── */
+const TAFEL_ORDER=['mathe','physik','chemie','astro','info','alltag'];
+function formSections(){
+  const list=[];
+  Object.keys(FORM_DECKS).forEach(k=>list.push({id:'f-'+k,subj:k,title:'Formeln – Übersicht',icon:'🧾',cols:['Name','Formel'],rows:formCardsOf(k).map(c=>[c.f,c.b]),formula:true}));
+  (typeof TAFEL!=='undefined'?TAFEL:[]).forEach(t=>list.push(t));
+  return list.map((x,i)=>({x,i})).sort((a,b)=>TAFEL_ORDER.indexOf(a.x.subj)-TAFEL_ORDER.indexOf(b.x.subj)||a.i-b.i).map(o=>o.x);
+}
+/* Suche: passt der Suchtext auf den Titel (dann ganzer Abschnitt) oder auf einzelne Zeilen? */
+function formFilter(sections,subj,query){
+  const q=(query||'').trim().toLowerCase(),out=[];
+  sections.forEach(sec=>{
+    if(subj&&subj!=='alle'&&sec.subj!==subj)return;
+    if(!q){out.push({sec,rows:sec.rows});return;}
+    if(sec.title.toLowerCase().includes(q)){out.push({sec,rows:sec.rows});return;}
+    const rows=sec.rows.filter(r=>r.join(' ').toLowerCase().includes(q));
+    if(rows.length)out.push({sec,rows});
+  });
+  return out;
+}
+
 /* ── Oberfläche ── */
-let formView='learn',formDeck='alle',formSess=null,formQuery='',formData=null;
-function formInit(){formData=formLoad();formView='learn';formSess=null;formQuery='';formRender();}
+let formView='tafel',formSubj='alle',formDeck='alle',formSess=null,formQuery='',formData=null;
+function formInit(){formData=formLoad();formView='tafel';formSess=null;formQuery='';formRender();}
 function formSetView(v){formView=v;formSess=null;formRender();}
+function formSetSubj(k){formSubj=k;formRender();}
 function formSetDeck(k){formDeck=k;formSess=null;formRender();}
-function formSearch(v){formQuery=v;const el=document.getElementById('form-list');if(el)el.innerHTML=formListHtml();}
+function formSearch(v){formQuery=v;const el=document.getElementById('form-list');if(el)el.innerHTML=formTafelHtml();}
 function formStart(){
   const cards=formPickSession(formData,formDeck);
   if(!cards.length){formSess=null;formRender();return;}
@@ -91,8 +125,8 @@ function formAnswer(ok){
 }
 function formRender(){
   const root=document.getElementById('form-root');if(!root)return;
-  const tabs=`<div class="lrn-tabs"><button class="lrn-tab ${formView==='learn'?'active':''}" onclick="formSetView('learn')">🧠 Lernen</button><button class="lrn-tab ${formView==='list'?'active':''}" onclick="formSetView('list')">📚 Nachschlagen</button></div>`;
-  root.innerHTML=tabs+(formView==='list'?formListPageHtml():formSess?formSessHtml():formLearnHtml());
+  const tabs=`<div class="lrn-tabs"><button class="lrn-tab ${formView==='tafel'?'active':''}" onclick="formSetView('tafel')">📖 Tafelwerk</button><button class="lrn-tab ${formView==='learn'?'active':''}" onclick="formSetView('learn')">🧠 Karteikarten</button></div>`;
+  root.innerHTML=tabs+(formView==='tafel'?formTafelPageHtml():formSess?formSessHtml():formLearnHtml());
 }
 function formDeckChips(){
   return `<div class="lrn-chips" style="margin-bottom:12px"><button type="button" class="lrn-chip ${formDeck==='alle'?'active':''}" onclick="formSetDeck('alle')">Alle (${FORM_CARDS.length})</button>${Object.keys(FORM_DECKS).map(k=>`<button type="button" class="lrn-chip ${formDeck===k?'active':''}" onclick="formSetDeck('${k}')">${FORM_DECKS[k].icon} ${FORM_DECKS[k].name} (${formCardsOf(k).length})</button>`).join('')}</div>`;
@@ -120,12 +154,20 @@ function formSessHtml(){
       :`<div class="lrn-label">Wie lautet die Formel?</div><div class="lrn-big">${escHtml(c.f)}</div><div style="font-size:12px;color:var(--text-3);margin-top:14px">Tippen zum Umdrehen</div>`}</div>
     <div class="lrn-two">${s.flipped?`<button class="lrn-btn bad" onclick="formAnswer(false)">✗ Nicht gewusst</button><button class="lrn-btn good" onclick="formAnswer(true)">✓ Gewusst</button>`:`<button class="lrn-btn" style="grid-column:1/3" onclick="formFlip()">Umdrehen</button>`}</div>`;
 }
-function formListPageHtml(){
-  return `<div class="lrn-card">${formDeckChips()}<input class="lrn-input" style="width:100%;margin-bottom:10px" placeholder="Suchen (z. B. Kraft, Kreis, pH)…" value="${escHtml(formQuery)}" oninput="formSearch(this.value)"><div id="form-list">${formListHtml()}</div></div>`;
+function formTafelPageHtml(){
+  const chips=`<div class="lrn-chips" style="margin-bottom:10px"><button type="button" class="lrn-chip ${formSubj==='alle'?'active':''}" onclick="formSetSubj('alle')">Alles</button>${TAFEL_ORDER.map(k=>`<button type="button" class="lrn-chip ${formSubj===k?'active':''}" onclick="formSetSubj('${k}')">${TAFEL_SUBJ[k].icon} ${TAFEL_SUBJ[k].name}</button>`).join('')}</div>`;
+  return `<div class="lrn-card">${chips}<input class="lrn-input" style="width:100%;margin-bottom:12px" placeholder="Im ganzen Tafelwerk suchen (z. B. Kraft, Kreis, pH, Gold, Mars) …" value="${escHtml(formQuery)}" oninput="formSearch(this.value)"><div id="form-list">${formTafelHtml()}</div></div>`;
 }
-function formListHtml(){
-  const q=formQuery.trim().toLowerCase();
-  const list=formCardsOf(formDeck).filter(c=>!q||c.f.toLowerCase().includes(q)||c.b.toLowerCase().includes(q));
-  if(!list.length)return '<div style="font-size:13px;color:var(--text-3);text-align:center;padding:12px">Nichts gefunden.</div>';
-  return list.map(c=>`<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:9px 2px;border-bottom:0.5px solid var(--divider);flex-wrap:wrap"><span style="font-size:13px;color:var(--text-2)">${FORM_DECKS[c.deck].icon} ${escHtml(c.f)}</span><b style="font-size:15px;font-family:'Cambria Math',Georgia,serif">${escHtml(c.b)}</b></div>`).join('');
+function formTafelHtml(){
+  const res=formFilter(formSections(),formSubj,formQuery),searching=!!formQuery.trim();
+  if(!res.length)return '<div style="font-size:13px;color:var(--text-3);text-align:center;padding:14px">Nichts gefunden.</div>';
+  let lastSubj='';
+  return res.map(({sec,rows})=>{
+    const head=sec.subj!==lastSubj?`<div class="lrn-label" style="margin:14px 0 6px">${TAFEL_SUBJ[sec.subj].icon} ${TAFEL_SUBJ[sec.subj].name}</div>`:'';lastSubj=sec.subj;
+    const th=sec.cols.map(c=>`<th style="text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--divider);color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">${escHtml(c)}</th>`).join('');
+    const body=rows.map(r=>`<tr>${r.map((c,i)=>`<td style="padding:6px 8px;border-bottom:0.5px solid var(--divider);vertical-align:top;${i===r.length-1&&sec.formula?"font-family:'Cambria Math',Georgia,serif;font-weight:700;":''}">${escHtml(c)}</td>`).join('')}</tr>`).join('');
+    const link=sec.link?`<div style="margin-top:8px"><button class="lrn-btn" onclick="goTo('${sec.link.app}')">${escHtml(sec.link.label)}</button></div>`:'';
+    const note=sec.note?`<div style="font-size:12px;color:var(--text-3);margin-top:8px">${escHtml(sec.note)}</div>`:'';
+    return head+`<details ${searching?'open':''} style="background:var(--bg);border:0.5px solid var(--divider);border-radius:12px;padding:8px 12px;margin-bottom:8px"><summary style="cursor:pointer;font-weight:700;font-size:14px;padding:4px 0">${sec.icon} ${escHtml(sec.title)} <span style="font-weight:500;color:var(--text-3);font-size:12px">· ${rows.length}</span></summary><div style="margin-top:8px"><div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>${note}${link}</div></details>`;
+  }).join('');
 }

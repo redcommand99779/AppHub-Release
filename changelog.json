@@ -252,5 +252,16 @@
       "Neu: „Tippschule“ – 12 Lektionen zum Zehn-Finger-System mit Tastatur-Anzeige, Sternen und Bestwerten.",
       "Neu: „Karten-Rätsel“ – ein Land wird genannt, du klickst auf die Weltkarte; je näher du dran bist, desto mehr Punkte."
     ]
+  },
+  {
+    "id": 25,
+    "date": "30.09.2026",
+    "title": "Tafelwerk und echtes Karten-Rätsel",
+    "items": [
+      "Die „Formelsammlung“ ist jetzt ein komplettes „Tafelwerk“: über 40 Tabellen zu Mathe, Physik, Chemie, Astronomie, Informatik und Umrechnungen (z. B. Konstanten, Stoffwerte, Ionen, Planeten, Zahlensysteme), dazu alle Formeln.",
+      "Im Tafelwerk gibt es eine Suche über alles auf einmal. Die Karteikarten zum Lernen sind mit über 100 Formeln weiter im Tab „Karteikarten“.",
+      "Das „Karten-Rätsel“ hat jetzt echte Ländergrenzen: Länder direkt anklicken, dazu Zoomen und Verschieben.",
+      "Neu im Karten-Rätsel: drei Spielarten (Land finden mit Richtungs-Hinweis, Hauptstadt, Land benennen), Auswahl nach Weltteil und Bestwerte je Einstellung."
+    ]
   }
 ]
