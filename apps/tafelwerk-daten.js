@@ -55,8 +55,52 @@ const TAFEL=[
 {id:'m-quadrate',subj:'mathe',title:'Quadrat-, Kubikzahlen und Wurzeln (1–25)',icon:'🔲',cols:['n','n²','n³','√n'],
  rows:Array.from({length:25},(_,i)=>{const n=i+1;return [String(n),String(n*n),String(n*n*n),TAFEL_DE(Math.sqrt(n),3)];})},
 {id:'m-primzahlen',subj:'mathe',title:'Primzahlen bis 200',icon:'🔐',cols:['Primzahlen'],rows:[[TAFEL_PRIMES.join(', ')],['Es gibt '+TAFEL_PRIMES.length+' Primzahlen bis 200. Teilbarkeit: durch 3, wenn die Quersumme durch 3 teilbar ist; durch 9 bei Quersumme durch 9; durch 4, wenn die letzten zwei Ziffern durch 4 teilbar sind.']]},
-{id:'m-konstanten',subj:'mathe',title:'Wichtige Zahlen',icon:'🅿️',cols:['Name','Wert'],rows:[
- ['Kreiszahl π','3,14159265…'],['Eulersche Zahl e','2,71828183…'],['√2','1,41421356…'],['√3','1,73205081…'],['√5','2,23606798…'],['Goldener Schnitt φ','1,61803399…   (φ = (1 + √5) / 2)'],['ln 2','0,69314718…'],['ln 10','2,30258509…']]},
+{id:'m-konstanten',subj:'mathe',title:'Wichtige Zahlen mit vielen Nachkommastellen',icon:'🅿️',cols:['Name','Wert (50 Nachkommastellen, in Fünfergruppen)'],rows:[
+ ['Kreiszahl π','3,14159 26535 89793 23846 26433 83279 50288 41971 69399 37510 …'],
+ ['Eulersche Zahl e','2,71828 18284 59045 23536 02874 71352 66249 77572 47093 69995 …'],
+ ['√2 (Diagonale im Einheitsquadrat)','1,41421 35623 73095 04880 16887 24209 69807 85696 71875 37694 …'],
+ ['√3','1,73205 08075 68877 29352 74463 41505 87236 69428 05253 81038 …'],
+ ['√5','2,23606 79774 99789 69640 91736 68731 27623 54406 18359 61152 …'],
+ ['Goldener Schnitt φ = (1 + √5) / 2','1,61803 39887 49894 84820 45868 34365 63811 77203 09179 80576 …'],
+ ['ln 2','0,69314 71805 59945 30941 72321 21458 17656 80755 00134 36025 …'],
+ ['ln 10','2,30258 50929 94045 68401 79914 54684 36420 76011 01488 62877 …'],
+ ['Euler-Mascheroni-Konstante γ','0,57721 56649 01532 86060 65120 90082 …'],
+ ['Catalansche Konstante G','0,91596 55941 77219 01505 46035 14932 …']],
+ note:'π ist die Zahl, die man erhält, wenn man den Umfang eines Kreises durch seinen Durchmesser teilt. Sie ist irrational (unendlich viele Stellen ohne Wiederholung), e und φ ebenso. Für den Alltag reichen π ≈ 3,14159 und e ≈ 2,71828.'},
+{id:'m-naeherung',subj:'mathe',title:'Näherungen für π und Wurzeln',icon:'🎯',cols:['Näherung','Dezimalwert','Fehler'],rows:[
+ ['π ≈ 3','3,000 000','−0,142 (4,5 %)'],['π ≈ 3,14','3,140 000','−0,0016'],['π ≈ 22/7 (Archimedes)','3,142 857','+0,0013'],['π ≈ 355/113 (Zu Chongzhi)','3,141 592 92','+0,000 000 27'],['π ≈ √10','3,162 278','+0,0207'],
+ ['√2 ≈ 99/70','1,414 285 7','+0,000 072'],['√2 ≈ 1,4142','1,414 200','−0,000 014'],['e ≈ 19/7','2,714 286','−0,0040'],['e ≈ 2,718','2,718 000','−0,000 282']],
+ note:'Fehler = Näherung minus genauer Wert (Vorzeichen: + heißt zu groß).'},
+{id:'m-fibonacci',subj:'mathe',title:'Fibonacci-Zahlen, Fakultäten und Dreieckszahlen',icon:'🐚',cols:['n','Fibonacci Fₙ','Fakultät n!','Dreieckszahl n(n+1)/2'],rows:[
+['0','0','1','0'],
+['1','1','1','1'],
+['2','1','2','3'],
+['3','2','6','6'],
+['4','3','24','10'],
+['5','5','120','15'],
+['6','8','720','21'],
+['7','13','5 040','28'],
+['8','21','40 320','36'],
+['9','34','362 880','45'],
+['10','55','3 628 800','55'],
+['11','89','39 916 800','66'],
+['12','144','479 001 600','78'],
+['13','233','6 227 020 800','91'],
+['14','377','87 178 291 200','105'],
+['15','610','1 307 674 368 000','120'],
+['16','987','20 922 789 888 000','136'],
+['17','1 597','355 687 428 096 000','153'],
+['18','2 584','6 402 373 705 728 000','171'],
+['19','4 181','121 645 100 408 832 000','190'],
+['20','6 765','2 432 902 008 176 640 000','210']],
+ note:'Fibonacci: F₀ = 0, F₁ = 1, Fₙ = Fₙ₋₁ + Fₙ₋₂. Das Verhältnis Fₙ₊₁ / Fₙ nähert sich dem Goldenen Schnitt φ ≈ 1,618.'},
+{id:'m-bruch',subj:'mathe',title:'Brüche, Dezimalzahlen und Prozent',icon:'🍰',cols:['Bruch','Dezimalzahl','Prozent'],rows:[
+ ['1/2','0,5','50 %'],['1/3','0,333… (Periode 3)','33,3 %'],['2/3','0,666… (Periode 6)','66,7 %'],['1/4','0,25','25 %'],['3/4','0,75','75 %'],['1/5','0,2','20 %'],['2/5','0,4','40 %'],['3/5','0,6','60 %'],['4/5','0,8','80 %'],
+ ['1/6','0,1666…','16,7 %'],['1/7','0,142857142857… (Periode 142857)','14,3 %'],['1/8','0,125','12,5 %'],['3/8','0,375','37,5 %'],['5/8','0,625','62,5 %'],['7/8','0,875','87,5 %'],['1/9','0,111… (Periode 1)','11,1 %'],['1/10','0,1','10 %'],['1/12','0,08333…','8,3 %'],['1/16','0,0625','6,25 %'],['1/20','0,05','5 %'],['1/25','0,04','4 %'],['1/50','0,02','2 %'],['1/100','0,01','1 %']]},
+{id:'m-zehner',subj:'mathe',title:'Große und kleine Zahlen (Zehnerpotenzen)',icon:'🔭',cols:['Zehnerpotenz','Zahl','Name (deutsch)'],rows:[
+ ['10³','1 000','Tausend'],['10⁶','1 000 000','Million'],['10⁹','1 000 000 000','Milliarde'],['10¹²','1 000 000 000 000','Billion'],['10¹⁵','1 000 000 000 000 000','Billiarde'],['10¹⁸','1 000 000 000 000 000 000','Trillion'],['10²¹','1 000 000 000 000 000 000 000','Trilliarde'],['10²⁴','1 mit 24 Nullen','Quadrillion'],['10¹⁰⁰','1 mit 100 Nullen','Googol'],
+ ['10⁻³','0,001','Tausendstel'],['10⁻⁶','0,000 001','Millionstel'],['10⁻⁹','0,000 000 001','Milliardstel'],['10⁻¹²','0,000 000 000 001','Billionstel']],
+ note:'Vorsicht bei Übersetzungen: Die englische „billion“ ist unsere Milliarde (10⁹), die englische „trillion“ ist unsere Billion (10¹²).'},
 {id:'m-roemisch',subj:'mathe',title:'Römische Zahlen',icon:'🏛️',cols:['Zeichen','Wert','Beispiele'],rows:[
  ['I','1','III = 3,  IV = 4'],['V','5','VI = 6,  IX = 9'],['X','10','XIV = 14,  XL = 40'],['L','50','XC = 90'],['C','100','CD = 400'],['D','500','CM = 900'],['M','1000','MMXXVI = 2026']],note:'Kleinere Zeichen vor einem größeren werden abgezogen (IV = 5 − 1).'},
 {id:'m-griechisch',subj:'mathe',title:'Griechisches Alphabet',icon:'Ω',cols:['Klein','Groß','Name'],rows:[
@@ -80,7 +124,7 @@ const TAFEL=[
  note:'Werte nach CODATA 2022 (NIST). Seit 2019 sind c, h, e, k_B und N_A per Definition exakt.'},
 {id:'p-widerstand',subj:'physik',title:'Farbcode für Widerstände',icon:'🌈',cols:['Farbe','Ziffer','Multiplikator','Toleranz'],rows:[
  ['schwarz','0','× 1','–'],['braun','1','× 10','± 1 %'],['rot','2','× 100','± 2 %'],['orange','3','× 1 kΩ','–'],['gelb','4','× 10 kΩ','–'],['grün','5','× 100 kΩ','± 0,5 %'],['blau','6','× 1 MΩ','± 0,25 %'],
- ['violett','7','× 10 MΩ','± 0,1 %'],['grau','8','–','± 0,05 %'],['weiß','9','–','–'],['gold','–','× 0,1','± 5 %'],['silber','–','× 0,01','± 10 %']],note:'Die ersten beiden (oder drei) Ringe sind Ziffern, danach kommt der Multiplikator, zuletzt die Toleranz.'},
+ ['violett','7','× 10 MΩ','± 0,1 %'],['grau','8','–','–'],['weiß','9','–','–'],['gold','–','× 0,1','± 5 %'],['silber','–','× 0,01','± 10 %']],note:'Die ersten beiden (oder drei) Ringe sind Ziffern, danach kommt der Multiplikator, zuletzt die Toleranz. Weitere, engere Toleranzen (z. B. grau ± 0,01 %) kommen nur bei Präzisionswiderständen vor.'},
 {id:'p-dichte',subj:'physik',title:'Stoffwerte: Dichte, Schmelz- und Siedepunkt',icon:'🧲',cols:['Stoff','Dichte in g/cm³','Schmelzpunkt in °C','Siedepunkt in °C'],rows:[
  ['Wasser','1,00 (bei 4 °C)','0','100'],['Eis','0,92','0','–'],['Ethanol','0,79','−114','78'],['Quecksilber','13,53','−38,8','356,7'],['Aluminium','2,70','660,3','2519'],['Eisen','7,86','1538','2861'],['Kupfer','8,96','1084,6','2562'],
  ['Silber','10,49','961,8','2162'],['Gold','19,3','1064,2','2856'],['Blei','11,34','327,5','1749'],['Zink','7,14','419,5','907'],['Zinn (weiß)','7,27','231,9','2602'],['Stahl','ca. 7,85','ca. 1400–1500','–'],['Glas','ca. 2,5','–','–'],['Luft (20 °C)','0,0012','–','–']],
@@ -108,7 +152,7 @@ const TAFEL=[
  ['Batteriesäure','0'],['Magensäure','1–2'],['Zitronensaft','2'],['Cola','ca. 3'],['Essig','ca. 2,5'],['Kaffee','5'],['Regen (sauber)','ca. 5,6'],['Milch','6,5'],['reines Wasser','7'],['Blut','7,4'],['Meerwasser','ca. 8'],['Seife','9–10'],['Ammoniaklösung','11'],['Bleiche','12–13'],['Natronlauge','14']],
  note:'pH < 7 sauer, pH = 7 neutral, pH > 7 basisch (alkalisch).'},
 {id:'c-alkane',subj:'chemie',title:'Alkane',icon:'⛓️',cols:['Name','Formel','Siedepunkt in °C'],rows:[
- ['Methan','CH₄','−162'],['Ethan','C₂H₆','−89'],['Propan','C₃H₈','−42'],['Butan','C₄H₁₀','−1'],['Pentan','C₅H₁₂','36'],['Hexan','C₆H₁₄','69'],['Heptan','C₇H₁₆','98'],['Octan','C₈H₁₈','126'],['Nonan','C₉H₂₀','151'],['Decan','C₁₀H₂₂','174']],note:'Allgemeine Formel der Alkane: CₙH₂ₙ₊₂.'},
+ ['Methan','CH₄','−162'],['Ethan','C₂H₆','−89'],['Propan','C₃H₈','−42'],['Butan','C₄H₁₀','−0,5'],['Pentan','C₅H₁₂','36'],['Hexan','C₆H₁₄','69'],['Heptan','C₇H₁₆','98'],['Octan','C₈H₁₈','126'],['Nonan','C₉H₂₀','151'],['Decan','C₁₀H₂₂','174']],note:'Allgemeine Formel der Alkane: CₙH₂ₙ₊₂.'},
 {id:'c-gruppen',subj:'chemie',title:'Funktionelle Gruppen (Organik)',icon:'🧬',cols:['Stoffklasse','Gruppe','Beispiel'],rows:[
  ['Alkohol','–OH  (Hydroxy)','Ethanol C₂H₅OH'],['Aldehyd','–CHO','Ethanal CH₃CHO'],['Keton','C=O in der Kette','Propanon (Aceton)'],['Carbonsäure','–COOH','Essigsäure CH₃COOH'],['Ester','–COO–','Essigsäureethylester'],['Ether','–O–','Diethylether'],['Amin','–NH₂','Methylamin CH₃NH₂']]},
 {id:'c-molmasse',subj:'chemie',title:'Molare Massen häufiger Stoffe',icon:'⚖️',cols:['Stoff','Formel','M in g/mol'],rows:[
@@ -124,9 +168,9 @@ const TAFEL=[
 {id:'c-reihe',subj:'chemie',title:'Spannungsreihe der Metalle',icon:'🔋',cols:['unedel → edel'],rows:[['Li, K, Ca, Na, Mg, Al, Zn, Fe, Ni, Sn, Pb, H, Cu, Ag, Hg, Pt, Au'],['Je weiter links, desto unedler: Das Metall gibt leichter Elektronen ab und reagiert stärker mit Säuren.']]},
 
 /* ───────── ASTRONOMIE & ERDE ───────── */
-{id:'a-planeten',subj:'astro',title:'Planeten des Sonnensystems',icon:'🪐',cols:['Planet','Abstand zur Sonne in Mio. km','Durchmesser am Äquator in km','Umlaufzeit','Fallbeschleunigung in m/s²'],rows:[
- ['Merkur','57,9','4879','88,0 Tage','3,7'],['Venus','108,2','12 104','224,7 Tage','8,9'],['Erde','149,6','12 756','365,2 Tage','9,8'],['Mars','228,0','6792','687,0 Tage','3,7'],['Jupiter','778,5','142 984','4331 Tage (11,9 Jahre)','23,1'],
- ['Saturn','1432','120 536','10 747 Tage (29,4 Jahre)','9,0'],['Uranus','2867','51 118','30 589 Tage (83,7 Jahre)','8,7'],['Neptun','4515','49 528','59 800 Tage (163,7 Jahre)','11,0']],note:'Nach dem NASA Planetary Fact Sheet. Bei den Gasplaneten gilt die Fallbeschleunigung in Höhe der Wolkenobergrenze.'},
+{id:'a-planeten',subj:'astro',title:'Planeten des Sonnensystems',icon:'🪐',cols:['Planet','Abstand zur Sonne (Bahnhalbachse) in Mio. km','Durchmesser am Äquator in km','Umlaufzeit','Fallbeschleunigung in m/s²'],rows:[
+ ['Merkur','57,9','4879','88,0 Tage','3,7'],['Venus','108,2','12 104','224,7 Tage','8,9'],['Erde','149,6','12 756','365,26 Tage','9,8'],['Mars','227,9','6792','687,0 Tage','3,7'],['Jupiter','778,4','142 984','4333 Tage (11,86 Jahre)','23,1'],
+ ['Saturn','1427','120 536','10 759 Tage (29,45 Jahre)','9,0'],['Uranus','2871','51 118','30 688 Tage (84,02 Jahre)','8,7'],['Neptun','4498','49 528','60 182 Tage (164,8 Jahre)','11,0']],note:'Bahnhalbachse und Umlaufzeit nach JPL (mittlere Bahnelemente), Durchmesser und Fallbeschleunigung nach dem NASA Planetary Fact Sheet. Bei den Gasplaneten gilt die Fallbeschleunigung in Höhe der Wolkenobergrenze. Die Bahnhalbachsen der großen Planeten schwanken je nach Quelle um etwa 0,5 %, weil sie sich gegenseitig anziehen.'},
 {id:'a-daten',subj:'astro',title:'Sonne, Erde, Mond und Entfernungen',icon:'☀️',cols:['Größe','Wert'],rows:[
  ['Sonne: Radius','ca. 695 700 km'],['Sonne: Masse','1,989 · 10³⁰ kg'],['Erde: mittlerer Radius','6371 km'],['Erde: Masse','5,972 · 10²⁴ kg'],['Erde: Umfang am Äquator','40 075 km'],['Mond: mittlerer Radius','1737,4 km'],['Mond: Masse','7,346 · 10²² kg'],
  ['Mond: mittlere Entfernung zur Erde','384 400 km'],['Astronomische Einheit (AE)','149 597 870,7 km  (≈ 149,6 Mio. km)'],['Lichtjahr','9,461 · 10¹² km'],['Parsec','3,26 Lichtjahre'],['Licht von der Sonne zur Erde','ca. 8 min 19 s'],['Umlauf der Erde um die Sonne','ca. 365,25 Tage'],['Umlauf des Mondes um die Erde','27,32 Tage (Mondphasen: 29,53 Tage)']]},

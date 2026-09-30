@@ -272,5 +272,15 @@
       "Behoben: Im Karten-Rätsel meldete das Spiel bei jedem Klick „Wasser“. Jetzt wird das angeklickte Land richtig erkannt.",
       "Neu: Spielart „🎯 Entfernung“ wie bei GeoGuessr – klick irgendwohin (auch aufs Meer), je näher am gesuchten Land, desto mehr Punkte (bis 1000)."
     ]
+  },
+  {
+    "id": 27,
+    "date": "30.09.2026",
+    "title": "Tafelwerk: mehr Zahlen",
+    "items": [
+      "Neu im Tafelwerk: π, e, √2, √3, √5, der Goldene Schnitt, ln 2 und ln 10 mit je 50 Nachkommastellen, dazu die Konstanten γ und Catalan.",
+      "Neue Tabellen: Näherungen für π und Wurzeln (z. B. 22/7, 355/113), Fibonacci-Zahlen mit Fakultäten und Dreieckszahlen, Brüche mit Dezimalzahl und Prozent, Zehnerpotenzen mit deutschen Zahlnamen.",
+      "Tafelwerk nachgerechnet: Bahndaten der Planeten stimmen jetzt mit dem Keplerschen Gesetz überein (Saturn, Uranus und Neptun waren ungenau), beim Widerstands-Farbcode und beim Siedepunkt von Butan wurden Werte korrigiert."
+    ]
   }
 ]
