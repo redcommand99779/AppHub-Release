@@ -1,13 +1,14 @@
 /* ══════════════════════════════════
    KARTEN-RÄTSEL – Weltkarte mit echten Ländergrenzen (Daten in geo-daten.js, Natural Earth 110m, offline).
-   Drei Spielarten: „Land finden“ (Land wird genannt, du klickst es an, 3 Versuche mit Richtungs-Hinweis),
+   Vier Spielarten: „Land finden“ (Land wird genannt, du klickst es an, 3 Versuche mit Richtungs-Hinweis), „Entfernung“ (wie GeoGuessr:
+   klick irgendwohin, Punkte nach Abstand zum Land),
    „Hauptstadt“ (zur Hauptstadt das Land finden) und „Land benennen“ (Land ist markiert, 4 Antworten).
    Auswahl nach Weltteil und Schwierigkeit, Zoom (Rad/Knöpfe) und Verschieben (Ziehen). Bestwerte: zf_georaetsel
 ══════════════════════════════════ */
 const GEO_KEY='zf_georaetsel';
 const GEO_ROUNDS=10;
 const GEO_W=800,GEO_H=480;
-const GEO_MODES={find:{name:'📍 Land finden',desc:'Land wird genannt – klick es an'},capital:{name:'🏛 Hauptstadt',desc:'Zur Hauptstadt das Land finden'},name:{name:'🔤 Land benennen',desc:'Land ist markiert – wähle den Namen'}};
+const GEO_MODES={find:{name:'📍 Land finden',desc:'Land wird genannt – klick es an'},guess:{name:'🎯 Entfernung',desc:'Klick irgendwohin (auch aufs Meer) – je näher am Land, desto mehr Punkte, wie bei GeoGuessr'},capital:{name:'🏛 Hauptstadt',desc:'Zur Hauptstadt das Land finden'},name:{name:'🔤 Land benennen',desc:'Land ist markiert – wähle den Namen'}};
 const GEO_REGIONS={welt:{name:'🌍 Welt',box:[-180,180,84,-58]},Europa:{name:'Europa',box:[-25,50,72,33]},Asien:{name:'Asien',box:[25,150,58,-12]},Afrika:{name:'Afrika',box:[-20,55,38,-36]},
   Nordamerika:{name:'Nordamerika',box:[-170,-50,75,6]},Südamerika:{name:'Südamerika',box:[-85,-32,14,-57]},Ozeanien:{name:'Ozeanien',box:[110,180,2,-48]}};
 const GEO_LEVELS={leicht:{name:'Leicht (bekannte Länder)'},alle:{name:'Alle Länder'}};
@@ -56,9 +57,12 @@ function geoHit(lat,lon){
 /* Abstand und Richtung vom Klick zum nächsten Randpunkt des gesuchten Landes */
 function geoHint(lat,lon,target){
   let best=1e9,bl=0,bo=0;
-  target.rings.forEach(r=>{for(let i=0;i<r.length;i+=2){const la=r[i][1]/10,lo=r[i][0]/10,d=geoDist(lat,lon,la,lo);if(d<best){best=d;bl=la;bo=lo;}}});
-  return {km:Math.round(best/10)*10,dir:geoBearingWord(lat,lon,bl,bo)};
+  target.rings.forEach(r=>{for(let i=0;i<r.length;i++){const la=r[i][1]/10,lo=r[i][0]/10,d=geoDist(lat,lon,la,lo);if(d<best){best=d;bl=la;bo=lo;}}});
+  return {km:Math.round(best/10)*10,dir:geoBearingWord(lat,lon,bl,bo),lat:bl,lon:bo};
 }
+/* Entfernungs-Modus: im Land = 0 km, sonst Abstand zum nächsten Randpunkt; 1000 Punkte bei 0 km, dann immer weniger (wie bei GeoGuessr) */
+function geoGuessKm(lat,lon,target){return geoHit(lat,lon)===target.id?0:geoHint(lat,lon,target).km;}
+function geoGuessPoints(km){return Math.round(1000*Math.exp(-km/1500));}
 function geoScoreTry(tries){return tries===1?3:tries===2?2:tries===3?1:0;}
 function geoPool(region,level,mode){
   const base=GEO_LAND.filter(c=>(region==='welt'||c.cont===region)&&(mode!=='capital'||c.capital));
@@ -90,6 +94,14 @@ function geoFitCountry(c){
   const w=Math.max(lo1-lo0,14),h=Math.max(la1-la0,8.4),cx=(lo0+lo1)/2,cy=(la0+la1)/2;
   geoFit([cx-w/2,cx+w/2,cy+h/2,cy-h/2],1.6);
 }
+/* Bildschirmpunkt (Canvas-Pixel) → [Breite, Länge] in Grad, passend zur aktuellen Ansicht */
+function geoScreenToLatLon(x,y){return [(900-(geoV.y0+y/geoV.z))/10,(geoV.x0+x/geoV.z-1800)/10];}
+function geoLatLonToScreen(lat,lon){return [(geoWX(lon)-geoV.x0)*geoV.z,(geoWY(lat)-geoV.y0)*geoV.z];}
+function geoFitPair(lat,lon,c){
+  const b=c.bbox,lo0=Math.min(lon,b[0]/10),lo1=Math.max(lon,b[2]/10),la0=Math.min(lat,b[1]/10),la1=Math.max(lat,b[3]/10);
+  const w=Math.max(lo1-lo0,20),h=Math.max(la1-la0,12),cx=(lo0+lo1)/2,cy=(la0+la1)/2;
+  geoFit([cx-w/2,cx+w/2,cy+h/2,cy-h/2],1.5);
+}
 function geoZoomAt(f,px,py){
   const zMin=GEO_W/3600,z=Math.max(zMin,Math.min(4,geoV.z*f));
   const wx=geoV.x0+px/geoV.z,wy=geoV.y0+py/geoV.z;
@@ -109,7 +121,7 @@ function geoStart(){
   geoNewQuestion();geoRender();
 }
 function geoNewQuestion(){
-  const t=geo.list[geo.i];geo.tries=0;geo.wrong=[];geo.found=false;geo.msg='';geo.answered=-1;
+  const t=geo.list[geo.i];geo.tries=0;geo.wrong=[];geo.found=false;geo.msg='';geo.answered=-1;geo.pin=null;
   geo.opts=geo.mode==='name'?geoOptions(t,geo.region,geo.level):null;
   if(geo.mode==='name')geoFitCountry(t);else geoFit(GEO_REGIONS[geo.region].box);
 }
@@ -118,16 +130,16 @@ function geoRender(){
   const d=geoData||geoLoad();
   if(!geo){
     const s=geoSetup,best=d.best[s.mode+'|'+s.region+'|'+s.level],chips=(k,obj)=>Object.keys(obj).map(x=>`<button type="button" class="lrn-chip ${s[k]===x?'active':''}" onclick="geoSet('${k}','${x}')">${obj[x].name}</button>`).join('');
-    const n=Math.min(GEO_ROUNDS,geoPool(s.region,s.level,s.mode).length),max=s.mode==='name'?n:n*3;
+    const n=Math.min(GEO_ROUNDS,geoPool(s.region,s.level,s.mode).length),max=s.mode==='name'?n:s.mode==='guess'?n*1000:n*3;
     root.innerHTML=`<div class="lrn-card"><div class="lrn-label">Spielart</div><div class="lrn-chips">${chips('mode',GEO_MODES)}</div>
       <div style="font-size:12px;color:var(--text-3);margin:6px 0 12px">${GEO_MODES[s.mode].desc}</div>
       <div class="lrn-label">Weltteil</div><div class="lrn-chips" style="margin-bottom:12px">${chips('region',GEO_REGIONS)}</div>
       <div class="lrn-label">Schwierigkeit</div><div class="lrn-chips" style="margin-bottom:14px">${chips('level',GEO_LEVELS)}</div>
-      <div style="font-size:13px;color:var(--text-2);margin-bottom:12px">${n} Länder pro Runde${s.mode==='name'?': 1 Punkt je richtige Antwort.':': 3 Punkte beim ersten Versuch, 2 beim zweiten, 1 beim dritten. Nach jedem Fehlversuch gibt es einen Hinweis.'}${best!=null?` · 🏅 Bestwert ${best}/${max}`:''}</div>
+      <div style="font-size:13px;color:var(--text-2);margin-bottom:12px">${n} Länder pro Runde${s.mode==='name'?': 1 Punkt je richtige Antwort.':s.mode==='guess'?': bis zu 1000 Punkte je Land, je nach Entfernung deines Klicks. Ein Klick im Land gibt die volle Punktzahl.':': 3 Punkte beim ersten Versuch, 2 beim zweiten, 1 beim dritten. Nach jedem Fehlversuch gibt es einen Hinweis.'}${best!=null?` · 🏅 Bestwert ${best}/${max}`:''}</div>
       <button class="lrn-btn" onclick="geoStart()">▶ Runde starten</button></div>`;
     return;
   }
-  const max=geo.mode==='name'?geo.n:geo.n*3;
+  const max=geo.mode==='name'?geo.n:geo.mode==='guess'?geo.n*1000:geo.n*3;
   if(geo.done){
     const rec=(d.best[geoKey(geo)]||0)===geo.score&&geo.score>0;
     root.innerHTML=`<div class="lrn-card" style="text-align:center"><div style="font-size:44px">${geo.score>=max*0.8?'🏆':geo.score>=max*0.5?'🌍':'🧭'}</div><div style="font-size:26px;font-weight:800">${geo.score} von ${max} Punkten</div>
@@ -136,7 +148,7 @@ function geoRender(){
     return;
   }
   const t=geo.list[geo.i];
-  const prompt=geo.mode==='find'?`Wo liegt <span style="color:var(--accent)">${escHtml(t.name)}</span>?`:geo.mode==='capital'?`Zu welchem Land gehört die Hauptstadt <span style="color:var(--accent)">${escHtml(t.capital)}</span>?`:'Welches Land ist markiert?';
+  const prompt=geo.mode==='find'||geo.mode==='guess'?`Wo liegt <span style="color:var(--accent)">${escHtml(t.name)}</span>?`:geo.mode==='capital'?`Zu welchem Land gehört die Hauptstadt <span style="color:var(--accent)">${escHtml(t.capital)}</span>?`:'Welches Land ist markiert?';
   root.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><span class="game-chip">${geo.i+1}/${geo.n}</span><span class="game-chip">⭐ <strong>${geo.score}</strong></span></div>
     <div style="text-align:center;font-size:21px;font-weight:800;margin-bottom:8px">${prompt}</div>
     <div style="position:relative"><canvas id="geo-canvas" width="${GEO_W}" height="${GEO_H}" style="display:block;width:100%;height:auto;border-radius:12px;background:#a5d0ea;cursor:grab;touch-action:none"></canvas>
@@ -173,6 +185,11 @@ function geoDraw(){
     ctx.fillStyle=col;ctx.fill(geoPaths[c.id],'evenodd');ctx.stroke(geoPaths[c.id]);
   });
   ctx.setTransform(1,0,0,1,0,0);
+  if(geo.mode==='guess'&&geo.pin){
+    const a=geoLatLonToScreen(geo.pin.lat,geo.pin.lon);
+    if(geo.pin.to){const b=geoLatLonToScreen(geo.pin.to[0],geo.pin.to[1]);ctx.strokeStyle='#e03131';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();ctx.setLineDash([]);}
+    ctx.fillStyle='#1971c2';ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(a[0],a[1],7,0,7);ctx.fill();ctx.stroke();
+  }
   ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#fff';ctx.fillStyle='#222';
   const label=(c)=>{const px=(geoWX(c.lon)-geoV.x0)*z,py=(geoWY(c.lat)-geoV.y0)*z;if(px<0||px>GEO_W||py<0||py>GEO_H)return;ctx.strokeText(c.name,px,py);ctx.fillText(c.name,px,py);};
   if(reveal&&geo.mode!=='name')label(t);
@@ -190,11 +207,19 @@ function geoPointerMove(ev){
 function geoPointerUp(ev){
   const d=geoDrag;geoDrag=null;if(!d||d.moved||!geo||geo.done)return;
   const [x,y]=geoCanvasPos(ev);
-  geoClickAt(900-(geoV.y0+y/geoV.z)/10,(geoV.x0+x/geoV.z-1800)/10);
+  const pos=geoScreenToLatLon(x,y);geoClickAt(pos[0],pos[1]);
 }
 function geoClickAt(lat,lon){
   if(!geo||geo.done||geo.mode==='name'||geo.found||geo.tries>=3)return;
-  const t=geo.list[geo.i],hit=geoHit(lat,lon);
+  const t=geo.list[geo.i];
+  if(geo.mode==='guess'){
+    const km=geoGuessKm(lat,lon,t),pts=geoGuessPoints(km),h=geoHint(lat,lon,t);
+    geo.score+=pts;geo.found=true;geo.tries=1;geo.pin={lat,lon,to:km===0?null:[h.lat,h.lon]};
+    geo.msg=km===0?`🎯 Volltreffer! <b>${escHtml(t.name)}</b> · <b>+${pts}</b>`:`📍 Du warst <b>${km.toLocaleString('de-DE')} km</b> von ${escHtml(t.name)} entfernt · <b>+${pts}</b>`;
+    if(km>0)geoFitPair(lat,lon,t);
+    geoDraw();geoUpdateUi();return;
+  }
+  const hit=geoHit(lat,lon);
   if(hit<0){geo.msg='💧 Das ist Wasser – klick auf ein Land.';geoUpdateUi();return;}
   if(geo.wrong.includes(hit)){geo.msg='Das hattest du schon probiert.';geoUpdateUi();return;}
   geo.tries++;

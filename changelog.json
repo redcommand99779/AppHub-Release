@@ -263,5 +263,14 @@
       "Das „Karten-Rätsel“ hat jetzt echte Ländergrenzen: Länder direkt anklicken, dazu Zoomen und Verschieben.",
       "Neu im Karten-Rätsel: drei Spielarten (Land finden mit Richtungs-Hinweis, Hauptstadt, Land benennen), Auswahl nach Weltteil und Bestwerte je Einstellung."
     ]
+  },
+  {
+    "id": 26,
+    "date": "30.09.2026",
+    "title": "Karten-Rätsel: Klick-Fehler behoben und neue Spielart „Entfernung“",
+    "items": [
+      "Behoben: Im Karten-Rätsel meldete das Spiel bei jedem Klick „Wasser“. Jetzt wird das angeklickte Land richtig erkannt.",
+      "Neu: Spielart „🎯 Entfernung“ wie bei GeoGuessr – klick irgendwohin (auch aufs Meer), je näher am gesuchten Land, desto mehr Punkte (bis 1000)."
+    ]
   }
 ]
