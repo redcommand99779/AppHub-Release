@@ -321,5 +321,14 @@
     "items": [
       "Super Jumper: Das Schild-Power-up lässt sich jetzt stapeln – sammelst du mehrere ein, hast du mehrere Schilde gleichzeitig (bis 9). Jeder Treffer verbraucht nur eines. Oben links steht die Zahl (🛡️ ×3), und bis zu drei Schutzhüllen siehst du um die Figur."
     ]
+  },
+  {
+    "id": 32,
+    "date": "01.10.2026",
+    "title": "Neu: Arena-Duell (Kartenkampf in Echtzeit)",
+    "items": [
+      "Neu: Arena-Duell – ein Echtzeit-Kartenspiel im Stil von Clash Royale. Zwei Bahnen mit Brücken, je zwei Prinzessinnen-Türme und ein Königsturm. Das Elixier wächst von allein (in der letzten Minute doppelt so schnell), du spielst Karten aus deiner Hand auf deine Seite, die Truppen laufen und kämpfen selbstständig. Wer nach 3 Minuten mehr Türme (Kronen) zerstört hat, gewinnt; bei Gleichstand gibt es 1 Minute Verlängerung.",
+      "13 Karten (Ritter, Bogenschützinnen, Riese, Kobolde, Skelette, Kanone, Feuerball, Pfeile und fünf, die du durch Siege freischaltest), ein Deck aus 8 Karten und 10 Computer-Gegner mit wachsender Stärke. Sterne gibt es für 1, 2 oder 3 Kronen, dazu AppHub-Coins (5 für das erste Schaffen, 3 je neuen Stern)."
+    ]
   }
 ]
