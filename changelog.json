@@ -330,5 +330,15 @@
       "Neu: Arena-Duell – ein Echtzeit-Kartenspiel im Stil von Clash Royale. Zwei Bahnen mit Brücken, je zwei Prinzessinnen-Türme und ein Königsturm. Das Elixier wächst von allein (in der letzten Minute doppelt so schnell), du spielst Karten aus deiner Hand auf deine Seite, die Truppen laufen und kämpfen selbstständig. Wer nach 3 Minuten mehr Türme (Kronen) zerstört hat, gewinnt; bei Gleichstand gibt es 1 Minute Verlängerung.",
       "13 Karten (Ritter, Bogenschützinnen, Riese, Kobolde, Skelette, Kanone, Feuerball, Pfeile und fünf, die du durch Siege freischaltest), ein Deck aus 8 Karten und 10 Computer-Gegner mit wachsender Stärke. Sterne gibt es für 1, 2 oder 3 Kronen, dazu AppHub-Coins (5 für das erste Schaffen, 3 je neuen Stern)."
     ]
+  },
+  {
+    "id": 33,
+    "date": "01.10.2026",
+    "title": "Neu: Musikstudio",
+    "items": [
+      "Neu: Musikstudio (Kategorie Kreativ) – mach eigene Musik. Im Beat-Maker klickst du Schläge und Töne in ein Raster: 6 Schlagzeug-Spuren (Bassdrum, Snare, Clap, Hi-Hat, Hi-Hat offen, Tom) plus Melodie und Bass. Tonart und Tonleiter sorgen dafür, dass alles zusammen klingt. Dazu Tempo, Swing, 16 oder 32 Schritte, 6 Klangfarben, 5 Vorlagen (House, Hip-Hop, Rock, Chill, Spielhalle) und ein Würfel-Knopf für zufällige Beats.",
+      "Neu im Musikstudio: der Tab „Komponieren“ im Stil von Minecraft Note Block Studio. Ein Stück besteht aus bis zu 12 Ebenen mit je eigenem Instrument (16 Klänge: Klavier, Bass, Basstrommel, Snare, Klicks, Gitarre, Flöte, Glocke, Chime, Xylophon, Eisenxylophon, Kuhglocke, Didgeridoo, Bit, Banjo, Pling), Lautstärke, Stumm und Solo. Im Notenraster setzt du Töne mit einem Klick und ziehst dabei nach rechts, um sie länger zu machen. Töne packst du in der Mitte und verschiebst sie, am rechten Rand änderst du ihre Länge, per Rechtsklick oder Entf löschst du sie. Mehrere Töne wählst du mit einem Auswahlrahmen (Umschalt gedrückt halten und ziehen, oder Werkzeug „Auswählen“) oder mit Strg-Klick und verschiebst, verlängerst, kopierst, schneidest aus, fügst ein (auch in andere Ebenen) und löschst sie gemeinsam. Rückgängig und Wiederholen (Strg+Z / Strg+Y, bis 100 Schritte), Pfeiltasten und eine Links-Rechts-Verteilung (Panning) je Ebene gibt es auch. Du stellst Tempo und Länge bis 512 Ticks ein und hörst alles mit mitlaufendem Cursor und Wiederholung. Dazu zwei Beispielstücke (Ode an die Freude, Alle meine Entchen), Speichern je Konto und Export als MP3 oder WAV.",
+      "Das Klavier hat 2 Oktaven zum Anklicken oder für die Computertastatur (A W S E D F T G Y H U J K O L P ;) und eine Aufnahme zum Abspielen. Songs speicherst du je Konto, und mit „Als MP3“ oder „Als WAV“ lädst du deinen Beat als Audiodatei herunter. Für MP3 wird beim ersten Export die kleine Bibliothek lamejs (156 KB, lokal mitgeliefert) geladen."
+    ]
   }
 ]
