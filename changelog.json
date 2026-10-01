@@ -303,5 +303,23 @@
       "Neu: Die Suche (Strg+K oder oben auf „Suchen …“) findet jetzt auch Inhalte, nicht nur Apps: Zeilen und Formeln aus dem Tafelwerk, Elemente, Länder, Hauptstädte, Flüsse, Seen, Meere, Berge und Inseln – und deine eigenen Vokabeln, Notizen und Aufgaben.",
       "Ein Klick auf einen Treffer springt direkt hin: zum Tafelwerk mit dem Suchtext, zum Element im Periodensystem oder zu einer Kartenansicht mit den wichtigsten Angaben. Umlaute sind egal (aetna findet Ätna), und H2SO4 findet H₂SO₄."
     ]
+  },
+  {
+    "id": 30,
+    "date": "01.10.2026",
+    "title": "Zwei neue Spiele: Neon-Dash und Gartenwacht",
+    "items": [
+      "Neu: Neon-Dash – ein Rhythmus-Springer im Stil von Geometry Dash. 8 Level mit Stacheln, Lücken, Sprungfeldern, Orbs (Extra-Sprung in der Luft) und Schwerkraft-Portalen, je 3 geheime Münzen, Sterne, Übungsmodus mit Checkpoints und 8 Würfelfarben, die du mit Sternen freischaltest. Jedes Level ist bewiesen schaffbar (auch bei leicht veränderter Sprunghöhe, Tempo und Schwerkraft).",
+      "Neu: Gartenwacht – Pflanzen gegen Zombies. 5 Beete, Sonne sammeln, 9 Pflanzen, 7 Zombiearten, 10 Level mit Boss, Rasenmäher als letzte Rettung. Nach jedem Level kommt eine neue Pflanze dazu, ab 7 Pflanzen wählst du 6 für den Kampf aus.",
+      "In beiden Spielen gibt es Sterne und AppHub-Coins (einmalig 5 fürs erste Schaffen und 3 je neuen Stern); der Fortschritt gehört deinem Konto."
+    ]
+  },
+  {
+    "id": 31,
+    "date": "01.10.2026",
+    "title": "Super Jumper: Schilde stapeln sich",
+    "items": [
+      "Super Jumper: Das Schild-Power-up lässt sich jetzt stapeln – sammelst du mehrere ein, hast du mehrere Schilde gleichzeitig (bis 9). Jeder Treffer verbraucht nur eines. Oben links steht die Zahl (🛡️ ×3), und bis zu drei Schutzhüllen siehst du um die Figur."
+    ]
   }
 ]

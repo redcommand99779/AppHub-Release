@@ -277,7 +277,7 @@ function jrCloneFrom(L,idx){
 function jrCloneLevel(idx){return jrCloneFrom(JR_LEVELS[idx],idx);}
 function jrPlayerAt(level){
   return {x:level.start[0]*JR_T+5,y:level.start[1]*JR_T,w:22,h:JR_H_STAND,vx:0,vy:0,onGround:false,face:1,coyote:0,jbuf:0,anim:0,
-    duck:false,slam:false,nocut:false,riding:null,inv:0,shield:false,feather:0,magnet:0,dj:false,sg:0,warpT:0,fire:0,star:0,giant:false};
+    duck:false,slam:false,nocut:false,riding:null,inv:0,shield:0,feather:0,magnet:0,dj:false,sg:0,warpT:0,fire:0,star:0,giant:false};
 }
 /* Neues Spiel (idx = Startlevel) */
 function jrNewState(idx){
@@ -708,9 +708,10 @@ function jrCollectCoin(st,tx,ty){
   jrBurst(st,tx*JR_T+JR_T/2,ty*JR_T+JR_T/2,'#ffe082',3);
   jrCheckLife(st);jrSfx('jrCoin');
 }
+const JR_SHIELD_MAX=9;
 function jrGrantPower(st,type,x,y){
   const p=st.p,names={shield:'🛡️ Schild!',feather:'🪶 Doppelsprung!',magnet:'🧲 Münz-Magnet!',fire:'🔥 Feuerball! (X oder F)',giant:'🍄 Riese!',star:'⭐ Unverwundbar!'};
-  if(type==='shield')p.shield=true;
+  if(type==='shield')p.shield=Math.min(JR_SHIELD_MAX,(p.shield|0)+1);   // Schilde stapeln sich
   else if(type==='fire')p.fire=JR_POWER_FRAMES;
   else if(type==='giant')p.giant=true;
   else if(type==='star')p.star=JR_STAR_FRAMES;
@@ -731,8 +732,8 @@ function jrHurt(st,fromSpike){
     return false;
   }
   if(p.shield){
-    p.shield=false;p.inv=90;p.sg=10;p.vy=-8;p.onGround=false;p.slam=false;p.nocut=true;
-    st.popups.push({x:p.x+p.w/2,y:p.y-6,t:40,txt:'Schild weg!'});
+    p.shield--;p.inv=90;p.sg=10;p.vy=-8;p.onGround=false;p.slam=false;p.nocut=true;
+    st.popups.push({x:p.x+p.w/2,y:p.y-6,t:40,txt:p.shield>0?'Schild weg! (noch '+p.shield+')':'Schild weg!'});
     jrBurst(st,p.x+p.w/2,p.y+p.h/2,'#80d8ff',12);jrSfx('jrShield');
     return false;
   }
@@ -1136,10 +1137,10 @@ function jrDrawPlayer(ctx,st,t,sk){
     ctx.fillStyle='#222';ctx.beginPath();ctx.arc(5,-8,1.5,0,Math.PI*2);ctx.fill();
   }
   ctx.restore();
-  // Schild-Blase
-  if(p.shield){
-    ctx.save();ctx.strokeStyle='rgba(128,216,255,'+(0.6+0.25*Math.sin(t*0.15))+')';ctx.fillStyle='rgba(128,216,255,0.15)';ctx.lineWidth=2.5;
-    ctx.beginPath();ctx.ellipse(x+p.w/2,y+p.h/2,20,p.h/2+7,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
+  // Schild-Blasen (jedes Schild eine weitere Hülle)
+  for(let k=0;k<Math.min(3,p.shield|0);k++){
+    ctx.save();ctx.strokeStyle='rgba(128,216,255,'+(0.6+0.25*Math.sin(t*0.15+k))+')';ctx.fillStyle='rgba(128,216,255,0.15)';ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.ellipse(x+p.w/2,y+p.h/2,20+k*4,p.h/2+7+k*4,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
   }
   // Magnet-Aura
   if(p.magnet>0){ctx.save();ctx.strokeStyle='rgba(255,112,67,'+(0.25+0.2*Math.sin(t*0.2))+')';ctx.setLineDash([5,6]);ctx.lineWidth=2;ctx.beginPath();ctx.arc(x+p.w/2,y+p.h/2,JR_T*3,0,Math.PI*2);ctx.stroke();ctx.restore();}
@@ -1271,7 +1272,7 @@ function jrCard(ctx,title,lines,color){
 /* Anzeige der aktiven Power-ups oben links */
 function jrDrawPowers(ctx,st){
   const p=st.p,items=[];
-  if(p.shield)items.push(['🛡️','']);
+  if(p.shield>0)items.push(['🛡️',p.shield>1?'×'+p.shield:'']);
   if(p.feather>0)items.push(['🪶',Math.ceil(p.feather/60)+'s']);
   if(p.magnet>0)items.push(['🧲',Math.ceil(p.magnet/60)+'s']);
   if(p.fire>0)items.push(['🔥',Math.ceil(p.fire/60)+'s']);

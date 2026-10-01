@@ -820,6 +820,16 @@
           <div class="app-tile-name">Turmwacht</div>
           <div class="app-tile-desc">Tower Defense mit 3 Karten</div>
         </button>
+        <button class="app-tile" type="button" onclick="goTo('dash')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('dash')}" data-appid="dash" data-cat="spiele">
+          <div class="app-icon" style="background:linear-gradient(135deg,#00e5ff,#e040fb)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="3" y="11" width="8" height="8" rx="1"/><path d="M13 19l4-8 4 8z"/><path d="M2 21h20"/></svg></div>
+          <div class="app-tile-name">Neon-Dash</div>
+          <div class="app-tile-desc">Rhythmus-Springer, 8 Level</div>
+        </button>
+        <button class="app-tile" type="button" onclick="goTo('garten')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('garten')}" data-appid="garten" data-cat="spiele">
+          <div class="app-icon" style="background:linear-gradient(135deg,#7cb342,#e53935)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M12 22V12"/><path d="M12 12c-4 0-6-3-6-6 4 0 6 2 6 6z"/><path d="M12 12c4 0 6-3 6-6-4 0-6 2-6 6z"/><path d="M8 22h8"/></svg></div>
+          <div class="app-tile-name">Gartenwacht</div>
+          <div class="app-tile-desc">Pflanzen gegen Zombies, 10 Level</div>
+        </button>
         <button class="app-tile" type="button" onclick="goTo('ft')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('ft')}" data-appid="ft" data-cat="spiele">
           <div class="app-icon" style="background:linear-gradient(135deg,#ff9800,#5c6bc0)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M3 20h18"/><path d="M5 20V11l5 3V9l5 3V6h4v14"/></svg></div>
           <div class="app-tile-name">Fabrik-Tycoon</div>
@@ -1913,7 +1923,27 @@
     <div class="lrn-wrap" style="max-width:860px"><div id="td-root"></div></div>
   </div>
 
-    <div class="screen" id="screen-ft">
+<div class="screen" id="screen-dash">
+    <div class="titlebar">
+      <div class="title-wrap">
+        <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
+        <span class="title-text" style="flex:1;text-align:center">Neon-Dash</span>
+      </div>
+    </div>
+    <div class="lrn-wrap" style="max-width:860px"><div id="nd-root"></div></div>
+  </div>
+
+<div class="screen" id="screen-garten">
+    <div class="titlebar">
+      <div class="title-wrap">
+        <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
+        <span class="title-text" style="flex:1;text-align:center">Gartenwacht</span>
+      </div>
+    </div>
+    <div class="lrn-wrap" style="max-width:860px"><div id="gw-root"></div></div>
+  </div>
+
+        <div class="screen" id="screen-ft">
     <div class="titlebar">
       <div class="title-wrap">
         <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
@@ -3604,6 +3634,8 @@ function goTo(id){
   if(id==='jumprun') jrInit();
   if(id==='idle') bbInit();
   if(id==='td') tdInit();
+  if(id==='dash') ndInit();
+  if(id==='garten') gwInit();
   if(id==='ft') ftInit();
   if(id==='tictactoe') tttNew();
   if(id==='viergewinnt') vgNew();
@@ -4129,6 +4161,8 @@ function initSavedSettings(){
 <script src="apps/jump-editor.js"></script>
 <script src="apps/bahnhof-boss.js"></script>
 <script src="apps/turmwacht.js"></script>
+<script src="apps/neon-dash.js"></script>
+<script src="apps/gartenwacht.js"></script>
 <script src="apps/fabrik-tycoon.js"></script>
 <script>
 </script>

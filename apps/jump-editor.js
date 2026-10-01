@@ -246,7 +246,7 @@ function jrEdDraw(ctx){
     if(raw==='e'||raw==='f'||raw==='y'||raw==='z')jrDrawEnemy(ctx,Object.assign(jrMakeEnemy(tx,ty,{e:'walk',f:'fly',y:'spiky',z:'shoot'}[raw]),{x:tx*T+3}),{cam},t);
     else if(raw==='M'){ctx.fillStyle='#90a4ae';jrRR(ctx,x,y+8,T*3,14,6);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText('↔',x+T*1.5,y+19);}
     else if(raw==='P'){
-      ctx.save();jrDrawPlayer(ctx,{p:{x:tx*T+5,y:(ty+1)*T-34,w:22,h:34,face:1,onGround:true,vx:0,anim:0,duck:false,slam:false,inv:0,shield:false,magnet:0},mode:'play',cam},t,JR_SKIN_DEFAULT);ctx.restore();
+      ctx.save();jrDrawPlayer(ctx,{p:{x:tx*T+5,y:(ty+1)*T-34,w:22,h:34,face:1,onGround:true,vx:0,anim:0,duck:false,slam:false,inv:0,shield:0,magnet:0},mode:'play',cam},t,JR_SKIN_DEFAULT);ctx.restore();
       ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('START',x+T/2,y+8);
     }
     else if(raw==='Z'){
