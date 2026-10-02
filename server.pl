@@ -36,6 +36,7 @@ my %MIME = (
     ico => 'image/x-icon', webp => 'image/webp', txt => 'text/plain; charset=utf-8',
     md => 'text/plain; charset=utf-8', woff => 'font/woff', woff2 => 'font/woff2',
     mp3 => 'audio/mpeg', wav => 'audio/wav', ogg => 'audio/ogg',
+    wasm => 'application/wasm', zip => 'application/zip',
 );
 
 sub slurp { my ($f) = @_; open(my $h, '<:raw', $f) or return undef; local $/; my $c = <$h>; close $h; return $c; }

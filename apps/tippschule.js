@@ -1,5 +1,5 @@
 /* ══════════════════════════════════
-   TIPPSCHULE – Zehn-Finger-Schreiben in 12 Lektionen (Grundreihe, obere/untere Reihe, Großbuchstaben, Zahlen, Wörter, Sätze).
+   TIPPSCHULE – Zehn-Finger-Schreiben in 16 Lektionen (Grundreihe, obere/untere Reihe, Großbuchstaben, Zahlen, Wörter, Sätze und zum Schluss Code abtippen: Python, JavaScript, HTML & CSS, SQL & Git).
    Eine Lektion gilt als bestanden (★), wenn mindestens 90 % der Tastenanschläge stimmen; dann wird die nächste frei.
    Tastatur-Anzeige (QWERTZ) mit Fingerfarben. Dazu: Fehlerstatistik je Taste mit „Problemtasten üben“, Freies Üben mit eigenem Text und eine
    Bestenliste über alle Lektionen. Fortschritt: zf_tippschule  { stars:{id:n}, wpm:{id:n}, keys:{taste:[Anschläge,Fehler]}, free:{id:wpm} }
@@ -14,6 +14,11 @@ const TL_SHIFT_BASE={'!':'1','"':'2','§':'3','$':'4','%':'5','&':'6','/':'7','(
 const TL_WORDS_SHORT=['und','der','die','das','ist','ein','ich','du','wir','sie','nicht','auch','mit','auf','für','von','zu','im','an','es','wie','was','wo','ja','nein','hier','dort','gut','viel','alle','mehr','noch','schon','dann','wenn','aber','oder','kann','will','muss'];
 const TL_WORDS_LONG=['Geschwindigkeit','Schreibmaschine','Tastatur','Freundschaft','Abenteuer','Wirklichkeit','Regenbogen','Schmetterling','Entwicklung','Herausforderung','Kartoffelsalat','Wochenende','Bibliothek','Programmierung','Geburtstagsgeschenk','Sonnenuntergang','Straßenbahn','Zusammenarbeit','Schokoladenkuchen','Hausaufgabe'];
 const TL_SENTENCES=['Der schnelle Fuchs springt über den Zaun.','Heute scheint die Sonne den ganzen Tag.','Wer viel übt, wird immer besser.','Am Wochenende gehen wir gern spazieren.','Ohne Fleiß kein Preis, sagt das Sprichwort.','Ich lerne jeden Tag ein bisschen mehr.','Die Katze schläft auf dem warmen Sofa.','Im Herbst fallen die bunten Blätter von den Bäumen.','Gemeinsam schaffen wir das Ziel viel schneller.','Nach der Schule treffe ich meine Freunde.'];
+/* Code abtippen: Zeilen aus den Programmierkursen. Zeichen wie { } [ ] @ \ ~ | < > gibt es nicht auf dem Tastenfeld – dafür zeigt die Tippschule, wie man sie tippt (AltGr). */
+const TL_CODE_PY=['print("Hallo Welt")','name = input("Dein Name? ")','for i in range(10):','zahlen = [3, 1, 2]','if x > 5 and y < 3:','def addiere(a, b):','return a + b','while n != 0:','text = f"Hi {name}"','print(len(zahlen))','liste.append(42)','d = {"a": 1, "b": 2}'];
+const TL_CODE_JS=['const summe = (a, b) => a + b;','let zahl = 42;','console.log("Hallo");','if (x === 5) { return; }','for (let i = 0; i < 10; i++) {','const arr = [1, 2, 3];','arr.map((x) => x * 2);','document.querySelector("#knopf");','function gruss(name) {','el.textContent = "Neu";','const o = { a: 1, b: [2, 3] };'];
+const TL_CODE_WEB=['<div class="karte">','<a href="seite.html">Link</a>','<p id="text">Hallo</p>','<img src="bild.png" alt="Bild">','<ul><li>Eins</li></ul>','h1 { color: red; }','.box { margin: 0 auto; }','p > span { font-size: 16px; }','background: #ff6600;','<button id="knopf">Klick</button>'];
+const TL_CODE_SQLGIT=["SELECT * FROM tiere WHERE jahre > 3;","INSERT INTO t (a, b) VALUES (1, 2);","UPDATE tiere SET name = 'Rex';",'git commit -m "Fertig"','git add .','git push origin main','ORDER BY name DESC;','SELECT COUNT(*) FROM tiere;','git switch -c neu','git log --oneline'];
 const TL_LESSONS=[
   {id:'l1',name:'Grundreihe links',hint:'Finger auf a s d f',letters:'asdf',kind:'letters'},
   {id:'l2',name:'Grundreihe rechts',hint:'Finger auf j k l ö',letters:'jklö',kind:'letters'},
@@ -26,19 +31,26 @@ const TL_LESSONS=[
   {id:'l9',name:'Großbuchstaben',hint:'Mit Shift-Taste',words:TL_WORDS_LONG,kind:'words'},
   {id:'l10',name:'Zahlenreihe',hint:'1 2 3 4 5 6 7 8 9 0',letters:'0123456789',kind:'letters'},
   {id:'l11',name:'Sonderzeichen',hint:'. , ! ? - ( ) /',letters:'.,!?-()/asdfjkl',kind:'letters'},
-  {id:'l12',name:'Ganze Sätze',hint:'Mit Satzzeichen',sentences:TL_SENTENCES,kind:'sentences'}
+  {id:'l12',name:'Ganze Sätze',hint:'Mit Satzzeichen',sentences:TL_SENTENCES,kind:'sentences'},
+  {id:'l13',name:'Code: Python',hint:'Klammern, Anführungszeichen, Doppelpunkt',snippets:TL_CODE_PY,kind:'code',needs:'l11'},
+  {id:'l14',name:'Code: JavaScript',hint:'Dazu { } [ ] und =>',snippets:TL_CODE_JS,kind:'code',needs:'l11'},
+  {id:'l15',name:'Code: HTML & CSS',hint:'Dazu < > und #',snippets:TL_CODE_WEB,kind:'code',needs:'l11'},
+  {id:'l16',name:'Code: SQL & Git',hint:'Großbuchstaben, * und -',snippets:TL_CODE_SQLGIT,kind:'code',needs:'l11'}
 ];
+/* Zeichen ohne Taste im Tastenfeld: so tippt man sie auf einer deutschen Tastatur (Windows; Mac nur für Klammern) */
+const TL_EXTRA={'{':'AltGr + 7 (Mac: Alt + 8)','[':'AltGr + 8 (Mac: Alt + 5)',']':'AltGr + 9 (Mac: Alt + 6)','}':'AltGr + 0 (Mac: Alt + 9)','@':'AltGr + Q','\\':'AltGr + ß','~':'AltGr + +','|':'AltGr + <','<':'Taste links neben Y','>':'Shift + Taste links neben Y','+':'Taste rechts neben Ü','*':'Shift + Taste rechts neben Ü','#':'Taste links neben Enter',"'":'Shift + #'};
 const TL_LEN=45;
 
 function tlLoad(){let d=null;try{d=JSON.parse(localStorage.getItem(TL_KEY)||'null');}catch(e){}if(!d||typeof d!=='object')d={};d.stars=d.stars&&typeof d.stars==='object'?d.stars:{};d.wpm=d.wpm&&typeof d.wpm==='object'?d.wpm:{};d.keys=d.keys&&typeof d.keys==='object'&&!Array.isArray(d.keys)?d.keys:{};d.free=d.free&&typeof d.free==='object'?d.free:{};return d;}
 function tlSave(d){try{localStorage.setItem(TL_KEY,JSON.stringify(d));}catch(e){}}
-function tlUnlocked(d,i){return i===0||(d.stars[TL_LESSONS[i-1].id]|0)>0;}
+function tlUnlocked(d,i){const n=TL_LESSONS[i].needs;if(n)return (d.stars[n]|0)>0;return i===0||(d.stars[TL_LESSONS[i-1].id]|0)>0;}   // Code-Lektionen brauchen nur die Sonderzeichen-Lektion
 /* Sterne: 1 ab 90 % Genauigkeit, 2 ab 95 % und 20 WPM, 3 ab 98 % und 35 WPM */
 function tlStars(acc,wpm){if(acc>=98&&wpm>=35)return 3;if(acc>=95&&wpm>=20)return 2;if(acc>=90)return 1;return 0;}
 function tlGenerate(lesson,rnd){
   rnd=rnd||Math.random;const pick=a=>a[Math.floor(rnd()*a.length)];
   if(lesson.kind==='text')return lesson.text;
   if(lesson.kind==='sentences')return pick(lesson.sentences);
+  if(lesson.kind==='code'){const a=pick(lesson.snippets);let b=pick(lesson.snippets);for(let n=0;b===a&&n<20;n++)b=pick(lesson.snippets);return a+' '+b;}   // zwei Zeilen hintereinander
   if(lesson.kind==='words'){
     let out=[];
     if(lesson.id==='l9'){for(let i=0;i<3;i++){const w=pick(lesson.words);out.push(w);}return out.join(' ');}
@@ -53,6 +65,8 @@ function tlGenerate(lesson,rnd){
   }
   return s;
 }
+/* Zeichen, die nicht im Tastenfeld stehen: Hinweis, wie man sie tippt (sonst leer) */
+function tlExtraHint(ch){if(!ch||ch===' ')return '';const k=tlKeyFor(ch).key;if(k===' '||TL_ROWS.some(r=>r.includes(k)))return '';return TL_EXTRA[ch]||'';}
 /* Welche Taste (und ob mit Shift) braucht man für ein Zeichen? */
 function tlKeyFor(ch){
   if(ch===' ')return {key:' ',shift:false};
@@ -200,11 +214,12 @@ function tlRenderPlay(full){
     root.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px"><b>${t.i>=0?'Lektion '+(t.i+1)+': ':''}${escHtml(t.lesson.name)}</b><span><span class="game-chip">⌨️ <strong id="tl-wpm">0</strong> WPM</span> <span class="game-chip">🎯 <strong id="tl-acc">100</strong> %</span> <button class="lrn-btn ghost" onclick="tlMenu()">✕</button></span></div>
       <div class="lrn-card" onclick="tlFocus()" style="cursor:text"><div id="tl-text" style="font-size:24px;line-height:1.9;letter-spacing:.04em;font-family:ui-monospace,Consolas,monospace;word-break:break-word"></div>
       <input id="tl-in" oninput="tlOnInput(this)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="position:absolute;opacity:0;width:1px;height:1px;left:-999px"></div>
-      <div id="tl-kb" style="text-align:center"></div>
+      <div id="tl-kb" style="text-align:center"></div><div id="tl-extra" style="text-align:center;font-size:14px;font-weight:700;color:var(--accent);height:22px;margin-top:6px"></div>
       <div style="font-size:12px;color:var(--text-3);text-align:center;margin-top:10px">Tippe die markierte Taste. Ein falscher Anschlag zählt als Fehler.</div>`;
   }
   document.getElementById('tl-text').innerHTML=chars;
   document.getElementById('tl-kb').innerHTML=tlKeyboardHtml(t.text[t.pos]);
+  const ex=document.getElementById('tl-extra'),eh=tlExtraHint(t.text[t.pos]);if(ex)ex.textContent=eh?'Zeichen „'+t.text[t.pos]+'“: '+eh:'';
   const w=document.getElementById('tl-wpm'),a=document.getElementById('tl-acc');
   if(w)w.textContent=tlWpm(t);if(a)a.textContent=tlAcc(t);
   if(full)tlFocus();

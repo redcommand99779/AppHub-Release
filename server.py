@@ -21,6 +21,7 @@ MARK = os.path.join(ROOT, 'appdata.migrated')
 
 mimetypes.add_type('text/javascript', '.js')
 mimetypes.add_type('image/svg+xml', '.svg')
+mimetypes.add_type('application/wasm', '.wasm')
 
 
 def save_data(body: bytes):

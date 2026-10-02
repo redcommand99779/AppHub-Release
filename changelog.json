@@ -340,5 +340,37 @@
       "Neu im Musikstudio: der Tab „Komponieren“ im Stil von Minecraft Note Block Studio. Ein Stück besteht aus bis zu 12 Ebenen mit je eigenem Instrument (16 Klänge: Klavier, Bass, Basstrommel, Snare, Klicks, Gitarre, Flöte, Glocke, Chime, Xylophon, Eisenxylophon, Kuhglocke, Didgeridoo, Bit, Banjo, Pling), Lautstärke, Stumm und Solo. Im Notenraster setzt du Töne mit einem Klick und ziehst dabei nach rechts, um sie länger zu machen. Töne packst du in der Mitte und verschiebst sie, am rechten Rand änderst du ihre Länge, per Rechtsklick oder Entf löschst du sie. Mehrere Töne wählst du mit einem Auswahlrahmen (Umschalt gedrückt halten und ziehen, oder Werkzeug „Auswählen“) oder mit Strg-Klick und verschiebst, verlängerst, kopierst, schneidest aus, fügst ein (auch in andere Ebenen) und löschst sie gemeinsam. Rückgängig und Wiederholen (Strg+Z / Strg+Y, bis 100 Schritte), Pfeiltasten und eine Links-Rechts-Verteilung (Panning) je Ebene gibt es auch. Du stellst Tempo und Länge bis 512 Ticks ein und hörst alles mit mitlaufendem Cursor und Wiederholung. Dazu zwei Beispielstücke (Ode an die Freude, Alle meine Entchen), Speichern je Konto und Export als MP3 oder WAV.",
       "Das Klavier hat 2 Oktaven zum Anklicken oder für die Computertastatur (A W S E D F T G Y H U J K O L P ;) und eine Aufnahme zum Abspielen. Songs speicherst du je Konto, und mit „Als MP3“ oder „Als WAV“ lädst du deinen Beat als Audiodatei herunter. Für MP3 wird beim ersten Export die kleine Bibliothek lamejs (156 KB, lokal mitgeliefert) geladen."
     ]
+  },
+  {
+    "id": 34,
+    "date": "02.10.2026",
+    "title": "Neu: Malstudio und Comic-Maker",
+    "items": [
+      "Neu: Malstudio (Kategorie Kreativ) – ein Zeichenprogramm mit bis zu 8 Ebenen (sichtbar, Deckkraft, verschieben, duplizieren, nach unten verbinden), Pinsel (hart oder weich, mit Deckkraft), Radierer, Linie, Rechteck, Ellipse, Füllen mit Toleranz, Pipette und Spiegel-Zeichnen. Rückgängig/Wiederholen mit Strg+Z / Strg+Y, bis zu 5 Bilder je Konto speichern, Export als PNG, Bilder als neue Ebene laden.",
+      "Neu: Comic-Maker (Kategorie Kreativ) – Comic-Seiten aus 1 bis 6 Bildern (8 Vorlagen) mit Hintergründen (Himmel, Stadt, Zimmer, Weltall, Wiese, Meer, Manga, Farbe), Figuren aus Emojis, Sprechblasen (sagen, denken, schreien, Kasten) mit Schwanz, der auf die Figur zeigt, und freien Texten. Alles lässt sich verschieben, in der Größe ziehen, nach vorn/hinten legen und kopieren; Rückgängig/Wiederholen, bis zu 10 Comics je Konto, Export als PNG."
+    ]
+  },
+  {
+    "id": 35,
+    "date": "02.10.2026",
+    "title": "Neue Kategorie: Programmieren lernen",
+    "items": [
+      "Neu: Kategorie „Programmieren“ mit Themen und Kursen – Python (Einsteiger, Fortgeschritten, Algorithmen, Projekte), JavaScript (Einsteiger, Fortgeschrittene, im Browser), HTML & CSS, SQL und Git, dazu Fehlersuche-Kurse: insgesamt 13 Kurse mit 141 Lektionen. Jede Lektion erklärt ein Thema kurz und stellt eine Aufgabe, die du direkt im Editor löst und per Knopfdruck prüfen lässt. Die nächste Lektion wird erst frei, wenn die Aufgabe stimmt.",
+      "Der Editor färbt den Code ein (Python, JavaScript, HTML, CSS, SQL, Git), zeigt Zeilennummern, schlägt beim Tippen Wörter vor (wie in VS Code, bei SQL auch die Tabellen und Spalten) und ergänzt Klammern, Anführungszeichen und Einrückungen. Tipps gibt es in zwei Stufen, die Lösung nur auf Wunsch. HTML, CSS und JavaScript im Browser zeigen sofort eine Vorschau.",
+      "Fortschritt und eigener Code werden für jedes Konto getrennt gespeichert. JavaScript läuft mit einem Zeitlimit von 3 Sekunden – eine Endlosschleife hängt die App nicht mehr auf. Python wird beim ersten Ausführen geladen: Liegt der Ordner pyodide neben der App, kommt es von dort (kein Download, funktioniert offline), sonst einmalig aus dem Netz. HTML, CSS und JavaScript laufen immer offline."
+    ]
+  },
+  {
+    "id": 36,
+    "date": "02.10.2026",
+    "title": "Programmieren lernen: Belohnungen, Spielplatz, Spickzettel und Code-Tippschule",
+    "items": [
+      "Belohnungen: Für jede geschaffte Lektion gibt es bis zu 3 Sterne (3 ohne Tipp und Lösung, 2 mit Tipp, 1 mit Lösung) und AppHub-Coins – 2 Coins, bei 3 Sternen 3 Coins, einmal je Lektion – und 10 Coins Bonus für einen ganzen Kurs. Die Kurse zählen für die Lern-Serie.",
+      "Neu: Code-Spielplatz – Python, JavaScript, HTML mit JavaScript und SQL frei ausprobieren, ohne Aufgabe. Eigene Schnipsel lassen sich mit Namen speichern, laden und löschen (bis zu 20 je Konto).",
+      "Neue Kurse: Algorithmen mit Python (Suchen, Sortieren, Primzahlen, Fibonacci …), Python-Projekte (Taschenrechner, Quiz, Textabenteuer …), JavaScript für Fortgeschrittene, JavaScript im Browser (Seiten ändern, Klicks, Eingaben, To-do-Liste), SQL (mit einer Beispieldatenbank direkt im Browser, auch offline) und Git (Befehle werden geprüft und mit Beispielantworten gezeigt).",
+      "Fehlersuche: Zwei Kurse (Python und JavaScript) mit je 8 Programmen, in denen ein Fehler steckt, den du finden und beheben sollst.",
+      "Neu: Spickzettel (Kategorie Programmieren) – über 80 kurze Beispiele zum Nachschlagen für Python, JavaScript, HTML, CSS, SQL und Git mit Suche, Favoriten, Kopieren und „Im Spielplatz öffnen“.",
+      "Tippschule: Vier neue Lektionen zum Code abtippen (Python, JavaScript, HTML & CSS, SQL & Git). Für Zeichen wie { } [ ] @ < > zeigt die Tippschule, wie man sie auf der Tastatur tippt (z. B. AltGr + 7)."
+    ]
   }
 ]

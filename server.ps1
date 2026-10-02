@@ -18,7 +18,7 @@ $Mime = @{
   '.css'='text/css; charset=utf-8'; '.json'='application/json; charset=utf-8'; '.svg'='image/svg+xml';
   '.png'='image/png'; '.jpg'='image/jpeg'; '.jpeg'='image/jpeg'; '.gif'='image/gif'; '.ico'='image/x-icon';
   '.webp'='image/webp'; '.txt'='text/plain; charset=utf-8'; '.md'='text/plain; charset=utf-8';
-  '.woff'='font/woff'; '.woff2'='font/woff2'; '.mp3'='audio/mpeg'; '.wav'='audio/wav'; '.ogg'='audio/ogg'
+  '.woff'='font/woff'; '.woff2'='font/woff2'; '.mp3'='audio/mpeg'; '.wav'='audio/wav'; '.ogg'='audio/ogg'; '.wasm'='application/wasm'; '.zip'='application/zip'
 }
 
 function Save-Data([byte[]]$body) {

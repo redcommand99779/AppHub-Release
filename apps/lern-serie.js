@@ -4,8 +4,8 @@
    und den letzten 7 Tagen gesetzt. Daten: zf_lernserie  { days: { 'JJJJ-MM-TT': { app: Anzahl } }, best }
 ══════════════════════════════════ */
 const LS_KEY='zf_lernserie';
-const LS_APPS={vokabeln:'Vokabeln',mathe:'Mathe-Trainer',periodensystem:'Periodensystem',formeln:'Tafelwerk',tippschule:'Tippschule',georaetsel:'Karten-Rätsel'};
-const LS_SCREENS=['vokabeln','mathe','periodensystem','formeln','tippschule','georaetsel'];
+const LS_APPS={vokabeln:'Vokabeln',mathe:'Mathe-Trainer',periodensystem:'Periodensystem',formeln:'Tafelwerk',tippschule:'Tippschule',georaetsel:'Karten-Rätsel',kurs:'Programmieren'};
+const LS_SCREENS=['vokabeln','mathe','periodensystem','formeln','tippschule','georaetsel','kurs'];
 function lsDayKey(date){const d=date||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function lsShiftDay(key,n){const p=key.split('-').map(Number),d=new Date(p[0],p[1]-1,p[2]+n);return lsDayKey(d);}
 function lsLoad(){

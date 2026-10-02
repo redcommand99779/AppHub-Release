@@ -202,7 +202,7 @@
   const HIDE_GRID=['zentrale','hilfe','einstellungen'];
   const inCat=c=>tiles.filter(t=>t.cat===c&&!HIDE_GRID.includes(t.id));
   const favs=()=>(typeof favApps!=='undefined'&&Array.isArray(favApps))?favApps:[];
-  const currentScreen=()=>{const a=document.querySelector('.screen.active');return a?a.id.replace('screen-',''):'home';};
+  const currentScreen=()=>{const a=document.querySelector('.screen.active');let id=a?a.id.replace('screen-',''):'home';if(id==='kurs'&&typeof window.kursCurrentId==='function'&&window.kursCurrentId())id='kurs-'+window.kursCurrentId();return id;};   // die Kurs-Seite zählt je nach gewähltem Kurs als kurs-py1, kurs-js1 …
   const playerName=()=>{try{return(zcp().player||'').trim();}catch(e){return'';}};
   const SB_ZC_TABS=[['profile','Profil'],['board','Bestenliste'],['chal','Challenges'],['cmp','Vergleich'],['champ','Meisterschaft'],['season','Saison'],['replays','Replays'],['week','Woche'],['shop','Shop'],['bonus','Bonus & Glücksrad'],['stats','Statistik'],['groups','Gruppen']];
 
@@ -306,6 +306,7 @@
       if(c)h+=`<span>›</span><a onclick="sbGoCat('${c.id}')">${esc(c.label)}</a>`;
       h+=`<span>›</span><b>${esc(t.name)}</b>`;
       if(cur==='zentrale'&&typeof zcView!=='undefined'){const tab=SB_ZC_TABS.find(x=>x[0]===zcView);if(tab)h+=`<span>›</span><b style="font-weight:500;color:var(--text-2)">${tab[1]}</b>`;}
+    }else if(cur==='kurs'){const c=catOf('coding');if(c)h+=`<span>›</span><a onclick="sbGoCat('coding')">${esc(c.label)}</a>`;h+='<span>›</span><b>Alle Kurse</b>';   // Kursübersicht ohne gewählten Kurs
     }else h+=`<span>›</span><b>${esc(cur)}</b>`;
     cr.innerHTML=h;
     const bk=document.getElementById('tb-back');if(bk)bk.disabled=hist.length<2;

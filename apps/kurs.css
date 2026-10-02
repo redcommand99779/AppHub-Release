@@ -1,0 +1,135 @@
+/* Programmierkurse – Oberfläche (aus dem CodingKurs-Projekt, auf AppHub angepasst: alles hängt an #screen-kurs, Farben kommen aus dem AppHub-Design) */
+#screen-kurs{
+  --ck-panel:var(--surface,#fff);--ck-text:var(--text,#1f2430);--ck-muted:var(--text-2,#6b7280);--ck-border:var(--divider,#e3e6ee);
+  --ck-accent:var(--accent,#4f46e5);--ck-accent-text:#fff;--ck-bg:rgba(127,127,140,.1);
+  --ck-ok:#15803d;--ck-ok-bg:#dcfce7;--ck-err:#b91c1c;--ck-err-bg:#fee2e2;--ck-inline:rgba(127,127,150,.16);
+  --ck-code-bg:#0f172a;--ck-code-text:#e2e8f0;
+}
+:root[data-theme="dark"] #screen-kurs{--ck-ok:#86efac;--ck-ok-bg:#14301f;--ck-err:#fca5a5;--ck-err-bg:#3a1a1a}
+@media(prefers-color-scheme:dark){:root:not([data-theme]) #screen-kurs{--ck-ok:#86efac;--ck-ok-bg:#14301f;--ck-err:#fca5a5;--ck-err-bg:#3a1a1a}}
+#screen-kurs .ck-hidden,.ck-ac-popup.ck-hidden{display:none!important}
+#screen-kurs .ck-top{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+#screen-kurs .ck-total{color:var(--ck-muted);font-size:13px;margin-left:auto}
+#screen-kurs .ck-menu{display:none}
+#screen-kurs .ck-layout{display:flex;gap:18px;align-items:flex-start}
+#screen-kurs .ck-side{width:270px;flex-shrink:0;background:var(--ck-panel);border:1px solid var(--ck-border);border-radius:14px;padding:14px;overflow-y:auto;max-height:calc(100vh - 110px);position:sticky;top:12px}
+#screen-kurs .ck-side h3{margin:14px 0 6px;font-size:14px;display:flex;justify-content:space-between;align-items:baseline;cursor:pointer;color:var(--ck-text)}
+#screen-kurs .ck-side h3:first-child{margin-top:0}
+#screen-kurs .ck-side h3 small{color:var(--ck-muted);font-weight:400}
+#screen-kurs .ck-link{display:flex;gap:8px;width:100%;text-align:left;background:none;border:none;color:var(--ck-text);padding:6px 8px;border-radius:8px;cursor:pointer;font:inherit;font-size:13px}
+#screen-kurs .ck-link:hover{background:var(--ck-bg)}
+#screen-kurs .ck-link.active{background:var(--ck-accent);color:var(--ck-accent-text)}
+#screen-kurs .ck-link.locked{opacity:.45;cursor:not-allowed}
+#screen-kurs .ck-link.locked:hover{background:none}
+#screen-kurs .ck-link .mark{width:1.4em;text-align:center;flex-shrink:0}
+#screen-kurs .ck-main{flex:1;min-width:0}
+#screen-kurs .ck-home h2{margin:0 0 6px}
+#screen-kurs .ck-home p{color:var(--ck-muted);margin:0 0 4px}
+#screen-kurs .ck-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:16px}
+#screen-kurs .ck-card{background:var(--ck-panel);border:1px solid var(--ck-border);border-radius:14px;padding:16px;cursor:pointer;text-align:left;color:var(--ck-text);font:inherit;transition:transform .1s,border-color .1s}
+#screen-kurs .ck-card:hover{transform:translateY(-2px);border-color:var(--ck-accent)}
+#screen-kurs .ck-card .emoji{font-size:30px}
+#screen-kurs .ck-card h3{margin:8px 0 4px}
+#screen-kurs .ck-card p{margin:0 0 12px;color:var(--ck-muted);font-size:13px}
+#screen-kurs .ck-bar{height:8px;background:var(--ck-bg);border-radius:99px;overflow:hidden;border:1px solid var(--ck-border)}
+#screen-kurs .ck-bar>div{height:100%;background:var(--ck-accent);width:0;transition:width .3s}
+#screen-kurs .ck-card small{color:var(--ck-muted)}
+#screen-kurs .ck-lesson{display:grid;grid-template-columns:minmax(280px,5fr) minmax(340px,6fr);gap:18px;align-items:start}
+#screen-kurs .ck-text,#screen-kurs .ck-editor-wrap,#screen-kurs .ck-output-wrap{background:var(--ck-panel);border:1px solid var(--ck-border);border-radius:14px;color:var(--ck-text)}
+#screen-kurs .ck-text{padding:18px}
+#screen-kurs .ck-crumbs{color:var(--ck-muted);font-size:12px}
+#screen-kurs .ck-text h2{margin:4px 0 12px}
+#screen-kurs .ck-content p{margin:.6em 0}
+#screen-kurs .ck-content ul,#screen-kurs .ck-content ol{padding-left:1.3em}
+#screen-kurs .ck-content code,#screen-kurs .ck-task code{background:var(--ck-inline);padding:1px 6px;border-radius:5px;font-family:Consolas,"Courier New",monospace;font-size:.92em}
+#screen-kurs .ck-content pre{background:var(--ck-code-bg);color:var(--ck-code-text);padding:12px 14px;border-radius:10px;overflow-x:auto;font-family:Consolas,"Courier New",monospace;font-size:.88rem;line-height:1.45}
+#screen-kurs .ck-content pre code{background:none;padding:0;color:inherit}
+#screen-kurs .ck-example{position:relative;margin:.8em 0}
+#screen-kurs .ck-example pre{margin:0;padding-bottom:38px}
+#screen-kurs .ck-load{position:absolute;right:8px;bottom:8px;font:inherit;font-size:.78rem;padding:3px 10px;border-radius:7px;border:1px solid #475569;background:#1e293b;color:#e2e8f0;cursor:pointer}
+#screen-kurs .ck-load:hover{border-color:var(--ck-accent);color:#fff}
+#screen-kurs .tip,#screen-kurs .warn{margin:.9em 0;padding:10px 14px;border-radius:10px;font-size:.93rem}
+#screen-kurs .tip{background:var(--ck-ok-bg);color:var(--ck-text);border-left:4px solid var(--ck-ok)}
+#screen-kurs .warn{background:var(--ck-err-bg);color:var(--ck-text);border-left:4px solid var(--ck-err)}
+#screen-kurs .ck-task{margin-top:16px;padding:12px 16px;border-left:4px solid var(--ck-accent);background:var(--ck-bg);border-radius:8px}
+#screen-kurs .ck-task h3{margin:0 0 4px;font-size:1rem}
+#screen-kurs .ck-nav{display:flex;justify-content:space-between;margin-top:18px}
+#screen-kurs .ck-work{display:flex;flex-direction:column;gap:14px;position:sticky;top:12px}
+#screen-kurs .ck-head{display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--ck-border);font-size:.85rem;font-weight:600}
+#screen-kurs .ck-hint{color:var(--ck-muted);font-weight:400}
+#screen-kurs .ck-editor-wrap{overflow:hidden}
+#screen-kurs .ck-code-box{display:flex;height:300px;min-height:120px;resize:vertical;overflow:hidden;background:#0f172a}
+#screen-kurs .ck-code-box pre,#screen-kurs #ck-editor{margin:0;padding:12px 14px;font-family:Consolas,"Courier New",monospace;font-size:.95rem;line-height:1.5;letter-spacing:0;font-variant-ligatures:none;tab-size:4;white-space:pre}
+#screen-kurs .ck-gutter{flex-shrink:0;min-width:44px;padding-right:10px!important;padding-bottom:40px!important;text-align:right;color:#64748b;background:#0b1220;border-right:1px solid #1e293b;overflow:hidden;user-select:none}
+#screen-kurs .ck-code-area{position:relative;flex:1;min-width:0}
+#screen-kurs .ck-hl{position:absolute;inset:0;overflow:hidden;color:#e2e8f0;pointer-events:none}
+#screen-kurs .ck-hl code{display:block;will-change:transform;font:inherit}
+#screen-kurs #ck-editor{position:absolute;inset:0;width:100%;height:100%;border:none;outline:none;resize:none;overflow:auto;background:transparent;color:transparent;caret-color:#f8fafc}
+#screen-kurs #ck-editor::selection{background:rgba(99,102,241,.45)}
+.ck-ac-popup{position:fixed;z-index:3000;min-width:190px;max-width:340px;max-height:208px;overflow-y:auto;background:#1e293b;border:1px solid #334155;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.35);padding:3px;font-family:Consolas,"Courier New",monospace;font-size:.88rem}
+.ck-ac-item{display:flex;justify-content:space-between;gap:16px;padding:3px 8px;border-radius:5px;color:#e2e8f0;cursor:pointer}
+.ck-ac-item.sel{background:#3730a3}
+.ck-ac-item b{color:#7dd3fc;font-weight:700}
+.ck-ac-kind{color:#94a3b8;font-size:.75rem;align-self:center}
+#screen-kurs .t-com{color:#6a9955;font-style:italic}#screen-kurs .t-str{color:#ce9178}#screen-kurs .t-num{color:#b5cea8}#screen-kurs .t-kw{color:#c586c0}
+#screen-kurs .t-decl{color:#569cd6}#screen-kurs .t-fn{color:#dcdcaa}#screen-kurs .t-bi{color:#4ec9b0}#screen-kurs .t-tag{color:#569cd6}#screen-kurs .t-attr{color:#9cdcfe}
+#screen-kurs .t-sel{color:#d7ba7d}#screen-kurs .t-prop{color:#9cdcfe}#screen-kurs .t-punc{color:#94a3b8}
+#screen-kurs .ck-actions{display:flex;flex-wrap:wrap;gap:8px;padding:10px 14px;border-top:1px solid var(--ck-border)}
+#screen-kurs .ck-output-wrap{overflow:hidden}
+#screen-kurs .ck-output{margin:0;min-height:90px;max-height:260px;overflow:auto;padding:12px 14px;background:var(--ck-code-bg);color:var(--ck-code-text);font-family:Consolas,"Courier New",monospace;font-size:.9rem;white-space:pre-wrap}
+#screen-kurs .ck-output .err{color:#fca5a5}
+#screen-kurs .ck-preview{width:100%;height:260px;border:none;background:#fff;display:block}
+#screen-kurs .ck-result{padding:12px 14px;font-weight:600}
+#screen-kurs .ck-result.ok{background:var(--ck-ok-bg);color:var(--ck-ok)}
+#screen-kurs .ck-result.fail{background:var(--ck-err-bg);color:var(--ck-err)}
+#screen-kurs .ck-result.info{background:var(--ck-bg);color:var(--ck-text)}
+#screen-kurs .ck-result .extra{font-weight:400;margin-top:6px;white-space:pre-wrap}
+#screen-kurs .ck-btn{border-radius:9px;padding:8px 14px;font:inherit;font-size:.92rem;cursor:pointer;border:1px solid var(--ck-border);background:var(--ck-panel);color:var(--ck-text)}
+#screen-kurs .ck-btn:hover{border-color:var(--ck-accent)}
+#screen-kurs .ck-btn.primary{background:var(--ck-accent);color:var(--ck-accent-text);border-color:var(--ck-accent);font-weight:600}
+#screen-kurs .ck-btn.ghost{background:none;border-color:transparent;color:var(--ck-muted)}
+#screen-kurs .ck-btn:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:960px){
+  #screen-kurs .ck-menu{display:inline-block}
+  #screen-kurs .ck-layout{display:block}
+  #screen-kurs .ck-side{display:none;position:static;max-height:none;margin-bottom:12px}
+  #screen-kurs .ck-side.open{display:block}
+  #screen-kurs .ck-lesson{grid-template-columns:1fr}
+  #screen-kurs .ck-work{position:static}
+}
+#screen-kurs .ck-muted{color:var(--ck-muted);font-size:.88rem}
+#screen-kurs .ck-label{margin:14px 0 6px;font-weight:700;font-size:.9rem}
+#screen-kurs .ck-chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+#screen-kurs .ck-chip{border:1px solid var(--ck-border);background:var(--ck-panel);color:var(--ck-text);border-radius:999px;padding:6px 14px;font:inherit;font-size:.9rem;cursor:pointer}
+#screen-kurs .ck-chip.active{background:var(--ck-accent);color:var(--ck-accent-text);border-color:var(--ck-accent);font-weight:600}
+#screen-kurs .ck-input{flex:1;min-width:160px;border:1px solid var(--ck-border);background:var(--ck-panel);color:var(--ck-text);border-radius:9px;padding:8px 12px;font:inherit}
+#screen-kurs .ck-playrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+#screen-kurs .ck-snip{display:flex;align-items:center;gap:10px;padding:4px 0;border-bottom:1px solid var(--ck-border)}
+#screen-kurs .ck-snipname{flex:1;text-align:left;background:none;border:none;color:var(--ck-text);font:inherit;cursor:pointer;padding:4px 0}
+#screen-kurs .ck-snipname:hover{color:var(--ck-accent)}
+#screen-kurs .ck-ltitle{flex:1}
+#screen-kurs .ck-lstars{color:#f5b301;font-size:.8rem;margin-left:6px;white-space:nowrap}
+#screen-kurs .ck-sidefoot{margin-top:10px;border-top:1px solid var(--ck-border);padding-top:10px}
+#screen-kurs .ck-topiclink{font-weight:600}
+#screen-kurs .ck-hidden{display:none!important}
+/* Spickzettel */
+#screen-spick{--sp-border:var(--divider,#e3e6ee);--sp-muted:var(--text-2,#6b7280);--sp-accent:var(--accent,#4f46e5)}
+#screen-spick .sp-q{width:100%;box-sizing:border-box;border:1px solid var(--sp-border);background:var(--surface,#fff);color:var(--text,#1f2430);border-radius:10px;padding:10px 14px;font:inherit}
+#screen-spick .sp-chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+#screen-spick .sp-chip{border:1px solid var(--sp-border);background:var(--surface,#fff);color:var(--text,#1f2430);border-radius:999px;padding:6px 14px;font:inherit;font-size:.88rem;cursor:pointer}
+#screen-spick .sp-chip.on{background:var(--sp-accent);color:#fff;border-color:var(--sp-accent);font-weight:600}
+#screen-spick .sp-count{color:var(--sp-muted);font-size:.85rem;margin:4px 0 10px}
+#screen-spick .sp-empty{padding:24px;text-align:center;color:var(--sp-muted)}
+#screen-spick .sp-card{background:var(--surface,#fff);border:1px solid var(--sp-border);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+#screen-spick .sp-head{display:flex;align-items:center;gap:10px}
+#screen-spick .sp-title{flex:1}
+#screen-spick .sp-lang{font-size:.78rem;color:var(--sp-muted);white-space:nowrap}
+#screen-spick .sp-star{background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--sp-muted)}
+#screen-spick .sp-star.on{color:#f5b301}
+#screen-spick .sp-code{margin:10px 0;padding:12px 14px;background:#0f172a;color:#e2e8f0;border-radius:9px;overflow:auto;font-family:Consolas,"Courier New",monospace;font-size:.9rem;line-height:1.5;white-space:pre}
+#screen-spick .sp-actions{display:flex;flex-wrap:wrap;gap:8px}
+#screen-spick .sp-btn{border:1px solid var(--sp-border);background:var(--surface,#fff);color:var(--text,#1f2430);border-radius:9px;padding:6px 12px;font:inherit;font-size:.86rem;cursor:pointer}
+#screen-spick .sp-btn:hover{border-color:var(--sp-accent)}
+#screen-spick .t-com{color:#6a9955;font-style:italic}#screen-spick .t-str{color:#ce9178}#screen-spick .t-num{color:#b5cea8}#screen-spick .t-kw{color:#c586c0}
+#screen-spick .t-decl{color:#569cd6}#screen-spick .t-fn{color:#dcdcaa}#screen-spick .t-bi{color:#4ec9b0}#screen-spick .t-tag{color:#569cd6}#screen-spick .t-attr{color:#9cdcfe}
+#screen-spick .t-sel{color:#d7ba7d}#screen-spick .t-prop{color:#9cdcfe}#screen-spick .t-punc{color:#94a3b8}
