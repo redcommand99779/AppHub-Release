@@ -991,10 +991,25 @@
           <div class="app-tile-name">Code-Spielplatz</div>
           <div class="app-tile-desc">Frei ausprobieren</div>
         </button>
+        <button class="app-tile" type="button" onclick="goTo('webbau')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('webbau')}" data-appid="webbau" data-cat="coding">
+          <div class="app-icon" style="background:linear-gradient(135deg,#26a69a,#5c6bc0);font-size:26px;line-height:1">🏗️</div>
+          <div class="app-tile-name">Webseiten-Baukasten</div>
+          <div class="app-tile-desc">Eigene Seiten bauen, als ZIP</div>
+        </button>
         <button class="app-tile" type="button" onclick="goTo('spick')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('spick')}" data-appid="spick" data-cat="coding">
           <div class="app-icon" style="background:linear-gradient(135deg,#455a64,#90a4ae);font-size:26px;line-height:1">📋</div>
           <div class="app-tile-name">Spickzettel</div>
           <div class="app-tile-desc">Schnell nachschlagen</div>
+        </button>
+        <button class="app-tile" type="button" onclick="goTo('pixelanim')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('pixelanim')}" data-appid="pixelanim" data-cat="kreativ">
+          <div class="app-icon" style="background:linear-gradient(135deg,#ec407a,#5c6bc0)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="3" y="3" width="6" height="6"/><rect x="15" y="3" width="6" height="6"/><rect x="9" y="15" width="6" height="6"/></svg></div>
+          <div class="app-tile-name">Pixel-Animator</div>
+          <div class="app-tile-desc">Pixelbilder und GIF-Animationen</div>
+        </button>
+        <button class="app-tile" type="button" onclick="goTo('stimmen')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('stimmen')}" data-appid="stimmen" data-cat="kreativ">
+          <div class="app-icon" style="background:linear-gradient(135deg,#ff7043,#e91e63)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg></div>
+          <div class="app-tile-name">Stimmenstudio</div>
+          <div class="app-tile-desc">Aufnehmen und Effekte</div>
         </button>
         <button class="app-tile" type="button" onclick="goTo('studio')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('studio')}" data-appid="studio" data-cat="kreativ">
           <div class="app-icon" style="background:linear-gradient(135deg,#ec407a,#7e57c2)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
@@ -2020,6 +2035,16 @@
     <div class="lrn-wrap" style="max-width:900px"><div id="spick-root"></div></div>
   </div>
 
+<div class="screen" id="screen-webbau">
+    <div class="titlebar">
+      <div class="title-wrap">
+        <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
+        <span class="title-text" style="flex:1;text-align:center">Webseiten-Baukasten</span>
+      </div>
+    </div>
+    <div class="lrn-wrap" style="max-width:1400px"><div id="wb-root"></div></div>
+  </div>
+
 <div class="screen" id="screen-kurs">
     <div class="titlebar">
       <div class="title-wrap">
@@ -2028,6 +2053,26 @@
       </div>
     </div>
     <div class="lrn-wrap" style="max-width:1500px"><div id="kurs-root"></div></div>
+  </div>
+
+<div class="screen" id="screen-pixelanim">
+    <div class="titlebar">
+      <div class="title-wrap">
+        <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
+        <span class="title-text" style="flex:1;text-align:center">Pixel-Animator</span>
+      </div>
+    </div>
+    <div class="lrn-wrap" style="max-width:1100px"><div id="pa-root"></div></div>
+  </div>
+
+<div class="screen" id="screen-stimmen">
+    <div class="titlebar">
+      <div class="title-wrap">
+        <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
+        <span class="title-text" style="flex:1;text-align:center">Stimmenstudio</span>
+      </div>
+    </div>
+    <div class="lrn-wrap" style="max-width:900px"><div id="sv-root"></div></div>
   </div>
 
 <div class="screen" id="screen-studio">
@@ -3757,8 +3802,11 @@ function goTo(id){
   if(id==='garten') gwInit();
   if(id==='arena') arInit();
   if(id==='studio') msInit();
+  if(id==='stimmen') svInit();
+  if(id==='pixelanim') paInit();
   if(id==='kurs') kursInit(window._kursPick);
   if(id==='spick') spickInit();
+  if(id==='webbau') wbInit();
   if(id==='comic') cmInit();
   if(id==='malen') mzInit();
   if(id==='ft') ftInit();
@@ -4290,6 +4338,8 @@ function initSavedSettings(){
 <script src="apps/gartenwacht.js"></script>
 <script src="apps/arena.js"></script>
 <script src="apps/notenblock.js"></script>
+<script src="apps/stimmenstudio.js"></script>
+<script src="apps/pixelanim.js"></script>
 <script src="apps/kurs-daten.js"></script>
 <script src="apps/kurs-daten2.js"></script>
 <script src="apps/kurs-daten3.js"></script>
@@ -4298,6 +4348,7 @@ function initSavedSettings(){
 <script src="apps/kurs-autocomplete.js"></script>
 <script src="apps/kurs.js"></script>
 <script src="apps/spick.js"></script>
+<script src="apps/webbau.js"></script>
 <script src="apps/comic.js"></script>
 <script src="apps/malstudio.js"></script>
 <script src="apps/studio.js"></script>

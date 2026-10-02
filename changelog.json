@@ -372,5 +372,16 @@
       "Neu: Spickzettel (Kategorie Programmieren) – über 80 kurze Beispiele zum Nachschlagen für Python, JavaScript, HTML, CSS, SQL und Git mit Suche, Favoriten, Kopieren und „Im Spielplatz öffnen“.",
       "Tippschule: Vier neue Lektionen zum Code abtippen (Python, JavaScript, HTML & CSS, SQL & Git). Für Zeichen wie { } [ ] @ < > zeigt die Tippschule, wie man sie auf der Tastatur tippt (z. B. AltGr + 7)."
     ]
+  },
+  {
+    "id": 37,
+    "date": "02.10.2026",
+    "title": "Webseiten-Baukasten, Pixel-Animator, Stimmenstudio und Zertifikate",
+    "items": [
+      "Neu: Webseiten-Baukasten (Kategorie Programmieren) – eigene Webseiten aus mehreren HTML-, CSS- und JavaScript-Dateien bauen, mit Vorlagen (leere Seite, Visitenkarte, Seite mit zwei Unterseiten), Live-Vorschau, Links zwischen Seiten und Export als ZIP-Datei. Bis zu 10 Projekte mit je 8 Dateien je Konto.",
+      "Neu: Pixel-Animator (Kategorie Kreativ) – Pixelbilder in 16, 32 oder 48 Pixeln zeichnen (Stift, Radierer, Füllen, Pipette, 16 Farben, Zwiebelhaut), bis zu 24 Bilder zu einer Animation zusammensetzen, abspielen und als GIF speichern (mit durchsichtigem Hintergrund). Bis zu 8 Animationen je Konto.",
+      "Neu: Stimmenstudio (Kategorie Kreativ) – Stimme mit dem Mikrofon aufnehmen oder eine Audiodatei laden, zuschneiden, Effekte anwenden (Roboter, Echo, Hall, Chipmunk, Monster, Rückwärts, Radio, Lauter), rückgängig machen und als WAV oder MP3 speichern. Es wird nichts hochgeladen.",
+      "Programmierkurse: Wer alle Lektionen eines Themas geschafft hat, bekommt ein Zertifikat mit Namen, Datum und Sternen – anzeigen und als Bild speichern auf der Kursübersicht."
+    ]
   }
 ]

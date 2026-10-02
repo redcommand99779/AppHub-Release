@@ -167,6 +167,28 @@ function kursDomSrcdoc(code,after,id){
 }
 function kursDomParse(html){try{return new DOMParser().parseFromString(html,'text/html');}catch(e){return null;}}
 
+/* Zertifikat: ein Thema ist geschafft, wenn alle Lektionen aller seiner Kurse gelöst sind */
+function kursTopicDone(t,courses,done){const tot=kursTotals(kursTopicCourses(t,courses),done);return tot.all>0&&tot.done===tot.all;}
+function kursCertInfo(t,courses,store,name){
+  const cs=kursTopicCourses(t,courses),tot=kursTotals(cs,store.done),d=new Date();
+  return {name:String(name||'').trim()||'Gast',topic:t.name,emoji:t.emoji,courses:cs.map(c=>c.title),lessons:tot.done,all:tot.all,stars:kursStarSum(cs,store.stars),maxStars:tot.all*3,date:String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(),complete:tot.all>0&&tot.done===tot.all};
+}
+function kursCertDraw(info){
+  const cv=document.createElement('canvas');cv.width=1200;cv.height=850;const g=cv.getContext('2d');
+  g.fillStyle='#fffdf5';g.fillRect(0,0,1200,850);
+  g.strokeStyle='#c9a227';g.lineWidth=14;g.strokeRect(30,30,1140,790);g.lineWidth=3;g.strokeRect(54,54,1092,742);
+  g.textAlign='center';g.fillStyle='#1f2430';
+  g.font='bold 30px Georgia,serif';g.fillStyle='#8a6d0b';g.fillText('AppHub · Programmieren lernen',600,130);
+  g.fillStyle='#1f2430';g.font='bold 74px Georgia,serif';g.fillText('Zertifikat',600,235);
+  g.font='26px Georgia,serif';g.fillText('Hiermit wird bestätigt, dass',600,310);
+  g.font='bold 64px Georgia,serif';g.fillStyle='#4f46e5';g.fillText(info.name,600,400,1000);
+  g.fillStyle='#1f2430';g.font='26px Georgia,serif';g.fillText('alle '+info.all+' Lektionen im Thema',600,470);
+  g.font='bold 54px Georgia,serif';g.fillText(info.emoji+' '+info.topic,600,545,1000);
+  g.font='22px Georgia,serif';g.fillStyle='#555';g.fillText(info.courses.join(' · '),600,600,1000);
+  g.fillStyle='#1f2430';g.font='26px Georgia,serif';g.fillText('erfolgreich gelöst hat – mit '+info.stars+' von '+info.maxStars+' Sternen.',600,670);
+  g.font='22px Georgia,serif';g.fillStyle='#555';g.fillText('Ausgestellt am '+info.date,600,750);
+  return cv;
+}
 /* ── Oberfläche ── */
 let kursCourse=null,kursTopic=null,kursMode='home',kursIdx=0,kursPlayLang='python',kursStore=kursLoadStore(),kursBuilt=false,kursAc=null,kursRunning=false,kursTimer=null,kursPy=null,kursEls={},kursAnnounced='',kursRunId=0;
 const kursEl=id=>document.getElementById('ck-'+id);
@@ -181,7 +203,7 @@ function kursBuild(){
   const root=document.getElementById('kurs-root');if(!root)return false;
   root.innerHTML=`<div class="ck-top"><button class="ck-btn ck-menu" id="ck-menu" type="button">☰ Menü</button><button class="ck-btn" id="ck-overview" type="button">🏠 Alle Kurse</button><button class="ck-btn" id="ck-playbtn" type="button">🧪 Spielplatz</button><span class="ck-total" id="ck-total"></span></div>
   <div class="ck-layout"><nav class="ck-side" id="ck-side"></nav><main class="ck-main">
-    <section id="ck-home" class="ck-home"><h2>Programmieren lernen 💻</h2><p>Wähle ein Thema. Jede Lektion erklärt etwas kurz und gibt dir dann eine Aufgabe, die du direkt hier im Editor löst. Dein Fortschritt, deine Sterne und deine Coins werden automatisch gespeichert – für jedes Konto getrennt.</p><div id="ck-topics" class="ck-cards"></div></section>
+    <section id="ck-home" class="ck-home"><h2>Programmieren lernen 💻</h2><p>Wähle ein Thema. Jede Lektion erklärt etwas kurz und gibt dir dann eine Aufgabe, die du direkt hier im Editor löst. Dein Fortschritt, deine Sterne und deine Coins werden automatisch gespeichert – für jedes Konto getrennt.</p><div id="ck-topics" class="ck-cards"></div><h3 class="ck-label">🎓 Zertifikate</h3><div id="ck-certs" class="ck-muted"></div><div id="ck-certview"></div></section>
     <section id="ck-topic" class="ck-home ck-hidden"><h2 id="ck-topicTitle"></h2><p id="ck-topicDesc"></p><div id="ck-cards" class="ck-cards"></div></section>
     <section id="ck-lesson" class="ck-lesson ck-hidden">
       <article class="ck-text" id="ck-textbox"><div class="ck-crumbs" id="ck-crumbs"></div><h2 id="ck-lessonTitle"></h2><div id="ck-lessonContent" class="ck-content"></div>
@@ -304,6 +326,24 @@ function kursRenderHome(){
   });
   const play=document.createElement('button');play.type='button';play.className='ck-card';play.innerHTML='<div class="emoji">🧪</div><h3>Spielplatz</h3><p>Code frei ausprobieren: Python, JavaScript, HTML und SQL, mit gespeicherten Schnipseln.</p><small>ohne Aufgabe und Prüfung</small>';play.onclick=kursShowPlay;kursEls.topics.appendChild(play);
 }
+function kursRenderCerts(){
+  const box=kursEl('certs');if(!box)return;box.innerHTML='';
+  KURS_TOPICS.forEach(t=>{
+    const tot=kursTotals(kursTopicCourses(t,kursCourses()),kursStore.done),row=document.createElement('div');row.className='ck-snip';
+    const ok=kursTopicDone(t,kursCourses(),kursStore.done);
+    row.innerHTML='<span class="ck-snipname"></span>'+(ok?'<button type="button" class="ck-btn primary">🎓 Anzeigen</button>':'<span class="ck-muted">'+tot.done+' / '+tot.all+' Lektionen</span>');
+    row.querySelector('.ck-snipname').textContent=t.emoji+' '+t.name;
+    if(ok)row.querySelector('button').onclick=()=>kursShowCert(t);
+    box.appendChild(row);
+  });
+}
+function kursShowCert(t){
+  const info=kursCertInfo(t,kursCourses(),kursStore,kursAccount());if(!info.complete)return;
+  const cv=kursCertDraw(info),view=kursEl('certview');view.innerHTML='';
+  const img=document.createElement('img');img.src=cv.toDataURL('image/png');img.alt='Zertifikat '+t.name;img.style.cssText='max-width:100%;border:1px solid var(--ck-border);border-radius:8px;margin-top:10px';
+  const a=document.createElement('a');a.href=img.src;a.download='Zertifikat-'+t.name.replace(/[^\w-]+/g,'_')+'.png';a.className='ck-btn primary';a.textContent='⬇ Als Bild speichern';a.style.cssText='display:inline-block;margin-top:10px;text-decoration:none';
+  view.append(a,document.createElement('br'),img);
+}
 function kursRenderTopic(){
   kursEl('topicTitle').textContent=kursTopic.emoji+' '+kursTopic.name;kursEl('topicDesc').textContent=kursTopic.desc;kursEls.cards.innerHTML='';
   kursTopicCourses(kursTopic,kursCourses()).forEach(c=>{
@@ -312,7 +352,7 @@ function kursRenderTopic(){
     card.querySelector('h3').textContent=c.title;card.querySelector('p').textContent=c.desc;card.onclick=()=>kursOpenLesson(c,kursFirstOpen(c,kursStore.done));kursEls.cards.appendChild(card);
   });
 }
-function kursShowHome(){kursCourse=null;kursTopic=null;kursView('home');kursRenderHome();kursRenderSidebar();kursRenderTotal();kursAnnounce();}
+function kursShowHome(){kursCourse=null;kursTopic=null;kursView('home');kursRenderHome();kursRenderCerts();kursEl('certview').innerHTML='';kursRenderSidebar();kursRenderTotal();kursAnnounce();}
 function kursShowTopic(t){
   kursCourse=null;kursTopic=t;const cs=kursTopicCourses(t,kursCourses());
   if(cs.length===1){kursOpenLesson(cs[0],kursFirstOpen(cs[0],kursStore.done));return;}   // Thema mit nur einem Kurs: gleich hinein
