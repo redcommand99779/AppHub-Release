@@ -161,32 +161,32 @@
 #screen-webbau .t-sel{color:#d7ba7d}#screen-webbau .t-prop{color:#9cdcfe}#screen-webbau .t-punc{color:#94a3b8}
 @media(max-width:900px){#screen-webbau .wb-split{grid-template-columns:1fr}}
 /* Pixel-Animator */
-#screen-pixelanim{--pa-border:var(--divider,#e3e6ee);--pa-muted:var(--text-2,#6b7280);--pa-accent:var(--accent,#4f46e5)}
-#screen-pixelanim .pa-muted{color:var(--pa-muted);font-size:.86rem}
-#screen-pixelanim .pa-card{background:var(--surface,#fff);border:1px solid var(--pa-border);border-radius:12px;padding:14px;margin:12px 0}
-#screen-pixelanim .pa-row,#screen-pixelanim .pa-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
-#screen-pixelanim .pa-spacer{flex:1}
-#screen-pixelanim .pa-input{flex:1;min-width:140px;border:1px solid var(--pa-border);background:var(--surface,#fff);color:var(--text,#1f2430);border-radius:9px;padding:8px 12px;font:inherit}
-#screen-pixelanim .pa-narrow{flex:0 0 auto;min-width:0}
-#screen-pixelanim .pa-btn{border:1px solid var(--pa-border);background:var(--surface,#fff);color:var(--text,#1f2430);border-radius:9px;padding:8px 14px;font:inherit;font-size:.9rem;cursor:pointer}
-#screen-pixelanim .pa-btn.primary,#screen-pixelanim .pa-btn.on{background:var(--pa-accent);color:#fff;border-color:var(--pa-accent);font-weight:600}
-#screen-pixelanim .pa-btn.ghost{background:none;border-color:transparent;color:var(--pa-muted)}
-#screen-pixelanim .pa-proj{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--pa-border)}
-#screen-pixelanim .pa-open{flex:1;text-align:left;background:none;border:none;color:var(--text,#1f2430);font:inherit;font-weight:600;cursor:pointer;padding:6px 0}
-#screen-pixelanim .pa-main{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
-#screen-pixelanim .pa-tools{display:flex;flex-direction:column;gap:8px;width:180px}
-#screen-pixelanim #pa-toolbtns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-#screen-pixelanim .pa-pal{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
-#screen-pixelanim .pa-sw{aspect-ratio:1;border:2px solid var(--pa-border);border-radius:6px;cursor:pointer;padding:0;background:repeating-conic-gradient(#ccc 0 25%,#fff 0 50%) 0 0/10px 10px}
-#screen-pixelanim .pa-sw.on{border-color:var(--pa-accent);box-shadow:0 0 0 2px var(--pa-accent)}
-#screen-pixelanim .pa-stage{flex:1;min-width:280px;max-width:560px}
-#screen-pixelanim #pa-cv,#screen-pixelanim #pa-prev,#screen-pixelanim .pa-fr canvas{image-rendering:pixelated;background:repeating-conic-gradient(#ccc 0 25%,#fff 0 50%) 0 0/16px 16px;display:block}
-#screen-pixelanim #pa-cv{width:100%;aspect-ratio:1;border:1px solid var(--pa-border);touch-action:none;cursor:crosshair}
-#screen-pixelanim #pa-prev{width:128px;height:128px;border:1px solid var(--pa-border)}
-#screen-pixelanim .pa-frames{display:flex;gap:8px;overflow-x:auto;padding:10px 0}
-#screen-pixelanim .pa-fr{flex:0 0 auto;border:2px solid var(--pa-border);background:var(--surface,#fff);border-radius:8px;padding:4px;cursor:pointer;color:var(--text,#1f2430)}
-#screen-pixelanim .pa-fr.on{border-color:var(--pa-accent)}
-#screen-pixelanim .pa-fr canvas{width:64px;height:64px}
+#screen-pixelanim{--pn-border:var(--divider,#e3e6ee);--pn-muted:var(--text-2,#6b7280);--pn-accent:var(--accent,#4f46e5)}
+#screen-pixelanim .pn-muted{color:var(--pn-muted);font-size:.86rem}
+#screen-pixelanim .pn-card{background:var(--surface,#fff);border:1px solid var(--pn-border);border-radius:12px;padding:14px;margin:12px 0}
+#screen-pixelanim .pn-row,#screen-pixelanim .pn-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+#screen-pixelanim .pn-spacer{flex:1}
+#screen-pixelanim .pn-input{flex:1;min-width:140px;border:1px solid var(--pn-border);background:var(--surface,#fff);color:var(--text,#1f2430);border-radius:9px;padding:8px 12px;font:inherit}
+#screen-pixelanim .pn-narrow{flex:0 0 auto;min-width:0}
+#screen-pixelanim .pn-btn{border:1px solid var(--pn-border);background:var(--surface,#fff);color:var(--text,#1f2430);border-radius:9px;padding:8px 14px;font:inherit;font-size:.9rem;cursor:pointer}
+#screen-pixelanim .pn-btn.primary,#screen-pixelanim .pn-btn.on{background:var(--pn-accent);color:#fff;border-color:var(--pn-accent);font-weight:600}
+#screen-pixelanim .pn-btn.ghost{background:none;border-color:transparent;color:var(--pn-muted)}
+#screen-pixelanim .pn-proj{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--pn-border)}
+#screen-pixelanim .pn-open{flex:1;text-align:left;background:none;border:none;color:var(--text,#1f2430);font:inherit;font-weight:600;cursor:pointer;padding:6px 0}
+#screen-pixelanim .pn-main{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+#screen-pixelanim .pn-tools{display:flex;flex-direction:column;gap:8px;width:180px}
+#screen-pixelanim #pn-toolbtns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#screen-pixelanim .pn-pal{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+#screen-pixelanim .pn-sw{aspect-ratio:1;border:2px solid var(--pn-border);border-radius:6px;cursor:pointer;padding:0;background:repeating-conic-gradient(#ccc 0 25%,#fff 0 50%) 0 0/10px 10px}
+#screen-pixelanim .pn-sw.on{border-color:var(--pn-accent);box-shadow:0 0 0 2px var(--pn-accent)}
+#screen-pixelanim .pn-stage{flex:1;min-width:280px;max-width:560px}
+#screen-pixelanim #pn-cv,#screen-pixelanim #pn-prev,#screen-pixelanim .pn-fr canvas{image-rendering:pixelated;background:repeating-conic-gradient(#ccc 0 25%,#fff 0 50%) 0 0/16px 16px;display:block}
+#screen-pixelanim #pn-cv{width:100%;aspect-ratio:1;border:1px solid var(--pn-border);touch-action:none;cursor:crosshair}
+#screen-pixelanim #pn-prev{width:128px;height:128px;border:1px solid var(--pn-border)}
+#screen-pixelanim .pn-frames{display:flex;gap:8px;overflow-x:auto;padding:10px 0}
+#screen-pixelanim .pn-fr{flex:0 0 auto;border:2px solid var(--pn-border);background:var(--surface,#fff);border-radius:8px;padding:4px;cursor:pointer;color:var(--text,#1f2430)}
+#screen-pixelanim .pn-fr.on{border-color:var(--pn-accent)}
+#screen-pixelanim .pn-fr canvas{width:64px;height:64px}
 /* Stimmenstudio */
 #screen-stimmen{--sv-border:var(--divider,#e3e6ee);--sv-muted:var(--text-2,#6b7280);--sv-accent:var(--accent,#4f46e5)}
 #screen-stimmen .sv-muted{color:var(--sv-muted);font-size:.86rem}
