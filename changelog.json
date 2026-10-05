@@ -383,5 +383,16 @@
       "Neu: Stimmenstudio (Kategorie Kreativ) – Stimme mit dem Mikrofon aufnehmen oder eine Audiodatei laden, zuschneiden, Effekte anwenden (Roboter, Echo, Hall, Chipmunk, Monster, Rückwärts, Radio, Lauter), rückgängig machen und als WAV oder MP3 speichern. Es wird nichts hochgeladen.",
       "Programmierkurse: Wer alle Lektionen eines Themas geschafft hat, bekommt ein Zertifikat mit Namen, Datum und Sternen – anzeigen und als Bild speichern auf der Kursübersicht."
     ]
+  },
+  {
+    "id": 38,
+    "date": "05.10.2026",
+    "title": "Neon-Dash: Level-Werkstatt",
+    "items": [
+      "Neu: Level-Werkstatt für Neon-Dash (Knopf im Level-Menü) – baue eigene Level aus Stacheln, Block-Türmen, Lücken, Sprungfeldern, Orbs, Münzen, schwebenden Blöcken und Checkpoints, 80 bis 300 Kacheln lang. Probiere dein Level sofort aus.",
+      "„Beweis prüfen“: Der Löser des Spiels probiert jede Eingabe Bild für Bild und sagt dir, ob dein Level schaffbar ist (und ob alle Münzen in einem Lauf gehen). Nur bewiesen schaffbare Level bekommen einen Teilen-Code (ND1-…), den Freunde in ihrer Werkstatt einfügen können; Tippfehler im Code werden erkannt.",
+      "Bis zu 10 eigene Level je Konto. Eigene Level geben keine Sterne und keine Coins.",
+      "Aussehen und Musik: Jedes eigene Level hat seine eigene Farbwelt (8 Vorlagen oder freier Farbton) und eigene Musik – an oder aus, Tonleiter, Grundton und Tempo, mit Hörprobe. Beides steckt auch im Teilen-Code."
+    ]
   }
 ]

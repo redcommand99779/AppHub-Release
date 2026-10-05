@@ -221,11 +221,12 @@ function ndRegisterSounds(){
 const ND_SCALES=[[0,3,7,10],[0,2,7,9],[0,4,7,11],[0,3,5,10],[0,2,4,7],[0,3,7,8],[0,5,7,10],[0,3,6,10]];
 let ndMus=null;
 function ndMusicStop(){if(ndMus){clearInterval(ndMus.timer);ndMus=null;}}
-function ndMusicStart(idx){
-  ndMusicStop();
+/* mu = Musik eines eigenen Levels { on, s: Tonleiter 0–7, r: Grundton 0–11 Halbtöne, t: Tempo in BPM }; ohne mu gilt die Musik des Levels idx */
+function ndMusicStart(idx,mu){
+  ndMusicStop();if(mu&&!mu.on)return;
   if(typeof sfxCtx!=='function'||typeof SFX_MUTED==='undefined')return;
   const c=sfxCtx();if(!c)return;
-  const step=60/ND_BPM/4,root=110*Math.pow(2,(idx*2%12)/12),scale=ND_SCALES[idx%ND_SCALES.length];
+  const step=60/(mu?mu.t:ND_BPM)/4,root=110*Math.pow(2,(mu?mu.r:idx*2%12)/12),scale=ND_SCALES[mu?mu.s:idx%ND_SCALES.length];
   const m={c,t0:c.currentTime+0.05,n:0,timer:null};
   const play=(n,when)=>{
     if(SFX_MUTED)return;const d=Math.max(0,when-c.currentTime),s=n%16,bar=Math.floor(n/16);
@@ -244,17 +245,23 @@ let nd=null,ndView='menu',ndRaf=null,ndLast=0,ndAcc=0,ndHold=false,ndPractice=fa
 function ndActive(){const s=document.getElementById('screen-dash');return !!s&&s.classList.contains('active');}
 function ndInit(){ndRegisterSounds();ndStopLoop();ndMusicStop();ndView='menu';nd=null;ndRenderView();}
 function ndStopLoop(){if(ndRaf){cancelAnimationFrame(ndRaf);ndRaf=null;}}
-function ndShowMenu(){ndStopLoop();ndMusicStop();ndView='menu';nd=null;ndRenderView();}
+function ndShowMenu(){ndStopLoop();ndMusicStop();const back=nd&&nd.custom&&typeof ndwBack==='function'?ndwBack:null;ndView='menu';nd=null;if(back){ndView='werk';back();return;}ndRenderView();}
 function ndStart(idx){
   const p=ndProf();if(idx<0||idx>=ND_LEVELS.length||!ndUnlocked(p,idx))return;
   nd={idx,L:ND_LEVELS[idx],st:null,attempt:0,practice:ndPractice,check:null,deadT:0,over:null,paused:false,frame:0};
   ndParts=[];ndView='game';ndRenderView();ndNewAttempt();ndLast=0;ndAcc=0;ndStopLoop();ndRaf=requestAnimationFrame(ndLoop);
 }
+/* Eigenes Level aus der Werkstatt (idx −1): spielbar, aber ohne Fortschritt, Sterne und Coins */
+function ndStartCustom(L){
+  nd={idx:-1,custom:true,L,st:null,attempt:0,practice:ndPractice,check:null,deadT:0,over:null,paused:false,frame:0};
+  ndParts=[];ndView='game';ndRenderView();ndNewAttempt();ndLast=0;ndAcc=0;ndStopLoop();ndRaf=requestAnimationFrame(ndLoop);
+}
+const ndMusicGo=()=>ndMusicStart(nd&&nd.idx>=0?nd.idx:3,nd&&nd.custom?nd.L.music:null);
 function ndNewAttempt(){
   nd.attempt++;nd.deadT=0;nd.over=null;
   nd.st=ndNewState(nd.L,nd.practice?nd.check:null);
-  if(!nd.practice)ndCountAttempt(nd.idx);
-  ndMusicStart(nd.idx);
+  if(!nd.practice&&nd.idx>=0)ndCountAttempt(nd.idx);
+  ndMusicGo();
 }
 function ndLoop(ts){
   if(!ndActive()||!nd||ndView!=='game'){ndRaf=null;ndMusicStop();return;}
@@ -271,7 +278,7 @@ function ndTick(){
     nd.deadT++;
     if(nd.deadT===1){
       ndBurst(st,26,'#fff');ndShake=10;ndSfx('ndDie');ndMusicStop();
-      if(!nd.practice)ndRecordRun(nd.idx,{progress:ndProgress(st),won:false,coins:0});
+      if(!nd.practice&&nd.idx>=0)ndRecordRun(nd.idx,{progress:ndProgress(st),won:false,coins:0});
     }
     if(nd.deadT>=34)ndNewAttempt();
     return;
@@ -293,15 +300,16 @@ function ndBurst(st,n,col){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,
 function ndWon(){
   const st=nd.st;if(nd.over)return;
   ndMusicStop();ndSfx('ndWin');ndBurst(st,40,'#ffd54f');
-  if(nd.practice)nd.over={practice:true};
+  if(nd.custom)nd.over={custom:true,coins:ndBits(st.coins)};
+  else if(nd.practice)nd.over={practice:true};
   else{const res=ndRecordRun(nd.idx,{progress:100,won:true,coins:st.coins});nd.over=Object.assign({coins:ndBits(st.coins)},res);}
   ndRenderView();
 }
 function ndSetPractice(v){ndPractice=!!v;ndRenderView();}
 function ndSetColor(i){const p=ndProf();if(!ndColorOpen(p,i))return;p.color=i;ndSaveProf(p);ndRenderView();}
-function ndTogglePause(){if(!nd||nd.over)return;nd.paused=!nd.paused;if(nd.paused)ndMusicStop();else if(!nd.st.dead)ndMusicStart(nd.idx);ndRenderView();}
+function ndTogglePause(){if(!nd||nd.over)return;nd.paused=!nd.paused;if(nd.paused)ndMusicStop();else if(!nd.st.dead)ndMusicGo();ndRenderView();}
 function ndRestartRun(){if(!nd)return;nd.check=null;nd.paused=false;ndNewAttempt();ndRenderView();}
-function ndNextLevel(){if(nd&&nd.idx+1<ND_LEVELS.length)ndStart(nd.idx+1);else ndShowMenu();}
+function ndNextLevel(){if(nd&&nd.custom){ndShowMenu();return;}if(nd&&nd.idx+1<ND_LEVELS.length)ndStart(nd.idx+1);else ndShowMenu();}
 
 function ndRenderView(){
   const root=document.getElementById('nd-root');if(!root)return;
@@ -312,6 +320,7 @@ function ndRenderView(){
         <button type="button" class="lrn-chip ${ndPractice?'active':''}" onclick="ndSetPractice(${!ndPractice})" title="Bei einem Fehler geht es am letzten Checkpoint weiter. Zählt nicht für Sterne.">🔧 Übungsmodus ${ndPractice?'an':'aus'}</button></div>
       <div class="lrn-label" style="text-align:center">Würfelfarbe</div>
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px">${ND_COLORS.map((c,i)=>{const open=ndColorOpen(p,i);return `<button type="button" onclick="ndSetColor(${i})" title="${open?'Farbe wählen':'ab '+c[1]+' Sternen'}" style="width:34px;height:34px;border-radius:8px;border:2.5px solid ${p.color===i?'var(--text)':'var(--divider)'};background:${open?c[0]:'var(--bg)'};cursor:${open?'pointer':'default'};opacity:${open?1:0.5};font-size:11px;color:var(--text-3)">${open?'':'🔒'}</button>`;}).join('')}</div>
+      <div style="text-align:center;margin-bottom:12px"><button type="button" class="lrn-btn" onclick="ndwOpen()">🛠️ Level-Werkstatt – eigene Level bauen und teilen</button></div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px">${ND_LEVELS.map((L,i)=>{
         const r=p.lv[L.id],open=ndUnlocked(p,i);
         return `<button type="button" class="lrn-card" ${open?`onclick="ndStart(${i})"`:'disabled'} style="text-align:left;cursor:${open?'pointer':'default'};opacity:${open?1:0.5};font-family:inherit;color:var(--text);border-left:5px solid hsl(${L.hue},80%,55%)">
@@ -332,6 +341,7 @@ function ndRenderView(){
 }
 function ndOverHtml(o){
   const ghost='background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)';
+  if(o.custom)return `<div class="td-over"><div style="font-size:44px">🏁</div><div style="font-size:22px;font-weight:800">Dein Level geschafft!</div><div style="font-size:13px;margin:6px 0 12px">${o.coins}/${nd.L.coins} Münzen · ${nd.attempt} Versuch${nd.attempt===1?'':'e'} · Eigene Level geben keine Sterne und Coins.</div><div style="display:flex;gap:8px"><button class="lrn-btn" onclick="ndRestartRun()">Nochmal</button><button class="lrn-btn ghost" style="${ghost}" onclick="ndShowMenu()">Zurück zur Werkstatt</button></div></div>`;
   if(o.practice)return `<div class="td-over"><div style="font-size:40px">🔧</div><div style="font-size:22px;font-weight:800">Übung geschafft!</div><div style="font-size:13px;margin:6px 0 12px">Jetzt ohne Übungsmodus versuchen – nur dann gibt es Sterne.</div><div style="display:flex;gap:8px"><button class="lrn-btn" onclick="ndSetPractice(false);ndStart(nd.idx)">Ohne Übungsmodus</button><button class="lrn-btn ghost" style="${ghost}" onclick="ndShowMenu()">Menü</button></div></div>`;
   return `<div class="td-over"><div style="font-size:44px">🏆</div><div style="font-size:22px;font-weight:800">Level geschafft!</div>
     <div style="color:#ffca28;font-size:30px;letter-spacing:5px;margin:4px 0">${'★'.repeat(o.stars)}<span style="opacity:.3">${'★'.repeat(3-o.stars)}</span></div>
@@ -348,7 +358,7 @@ function ndDraw(ctx){
   ctx.fillStyle=`hsla(${hue},70%,60%,0.07)`;                                    // Streifen im Hintergrund (bewegen sich langsamer als der Vordergrund)
   for(let i=-1;i<8;i++){const x=((i*140-(cam*0.3)%140)+140)%1120-140;ctx.fillRect(x,0,60,ND_H);}
   const c0=Math.max(0,Math.floor(cam/T)-1),c1=Math.min(L.cols-1,c0+Math.ceil(ND_W/T)+2);
-  const edge=`hsl(${hue},85%,62%)`,fill=`hsl(${hue},45%,${13+pulse*3}%)`,have=ndProf().lv[L.id].coins;
+  const edge=`hsl(${hue},85%,62%)`,fill=`hsl(${hue},45%,${13+pulse*3}%)`,have=(ndProf().lv[L.id]||{coins:0}).coins;
   for(let c=c0;c<=c1;c++)for(let r=0;r<ND_ROWS;r++){
     const t=L.rows[r][c];if(t==='.')continue;const x=c*T-cam,y=r*T;
     if(t==='#'){ctx.fillStyle=fill;ctx.fillRect(x,y,T,T);ctx.strokeStyle=edge;ctx.lineWidth=2;ctx.strokeRect(x+1,y+1,T-2,T-2);}
