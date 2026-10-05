@@ -394,5 +394,16 @@
       "Bis zu 10 eigene Level je Konto. Eigene Level geben keine Sterne und keine Coins.",
       "Aussehen und Musik: Jedes eigene Level hat seine eigene Farbwelt (8 Vorlagen oder freier Farbton) und eigene Musik – an oder aus, Tonleiter, Grundton und Tempo, mit Hörprobe. Beides steckt auch im Teilen-Code."
     ]
+  },
+  {
+    "id": 39,
+    "date": "05.10.2026",
+    "title": "Neues Spiel: Jenga",
+    "items": [
+      "Neu: Jenga (Kategorie Spiele) – ein Turm aus 18 Etagen mit je 3 Steinen in 2.5D-Ansicht. Steine ziehst du mit gedrückter Maustaste heraus und legst sie oben auf; wer den Turm zum Einsturz bringt, verliert. Ob der Turm hält, berechnet die App nach der Statik (Schwerpunkt über der Auflagefläche); wenn er knapp ist, wackelt er sichtbar, beim Einsturz fallen die Steine durcheinander.",
+      "Realistisches Ziehen: Jeder Stein sitzt unterschiedlich fest (locker, fest oder klemmend – je nachdem, wie viel Last er trägt, dazu etwas Zufall). Wer hastig an einem festen Stein zieht, erschüttert den Turm und kann ihn auch dann zum Einsturz bringen, wenn er statisch gestanden hätte; langsam und gleichmäßig ziehen bleibt ruhig. Der Stein folgt der Maus in jede Richtung: längs, seitlich (wenn dort kein Nachbarstein im Weg ist, am Rand nach außen immer) und schräg. Antippen testet, wie fest ein Stein sitzt. Eine Anzeige zeigt die Erschütterung, und der Turm schwankt umso stärker, je knapper er steht. Auch die KI zieht je nach Stufe hastig oder vorsichtig.",
+      "Modi: gegen die KI (leicht, mittel, schwer), 2 Spieler mit zwei Accounts, 3 bis 4 Spieler am selben PC und Solo (wie viele Züge schaffst du, mit Bestwert). Der Stein, über dem du mit der Maus bist, leuchtet in der Farbe des Spielers am Zug.",
+      "Jenga ist an die Spielzentrale angebunden wie Schach oder Vier gewinnt: Account, Emoji und Farbe wählen, Ränge (PR), Hall of Fame, Best-of-Serie, Cup, Replay-Ergebnis, Schnellduell und Meisterschaft. Wertung gibt es gegen die KI und mit 2 Spielern; 3–4 Spieler und Solo sind Freundschaftsspiele. Sieg gegen die KI gibt zusätzlich 3, 5 oder 8 AppHub-Coins (je Stufe einmal pro Tag)."
+    ]
   }
 ]

@@ -12,7 +12,8 @@ const ZC_GAMES=[
   {id:'bs',title:'Schiffe versenken',icon:'🚢',kind:'sm'},
   {id:'mem',title:'Memory (2P)',icon:'🃏',kind:'sm'},
   {id:'hm',title:'Hangman (2P)',icon:'🔤',kind:'sm'},
-  {id:'mm',title:'Mau-Mau',icon:'🂡',kind:'sm'}
+  {id:'mm',title:'Mau-Mau',icon:'🂡',kind:'sm'},
+  {id:'jg',title:'Jenga',icon:'🧱',kind:'sm'}
 ];
 let zcView='profile';
 let zcName='';
@@ -743,7 +744,8 @@ const ZC_CHAMP_GAMES=[
   {id:'chess',screen:'schach',mode:()=>chessSetMode('2p')},
   {id:'bs',screen:'schiffe',mode:()=>bsSetMode('2p')},
   {id:'mem',screen:'memory',mode:()=>memSetMode('2p')},
-  {id:'hm',screen:'hangman',mode:()=>hmSetMode('2p')}
+  {id:'hm',screen:'hangman',mode:()=>hmSetMode('2p')},
+  {id:'jg',screen:'jenga',mode:()=>jgSetMode('2p')}
 ];
 let zcChampForm={a:'',b:'',games:['ttt','vg','chess','bs'],rounds:1};
 function zcChampGameInfo(id){return ZC_GAMES.find(g=>g.id===id)||{title:id,icon:'🎮'};}

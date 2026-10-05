@@ -338,6 +338,7 @@ const ZC_DUEL_GAMES=[
   {id:'bs',icon:'🚢',title:'Schiffe versenken',mode:()=>bsSetMode('2p')},
   {id:'mem',icon:'🃏',title:'Memory',mode:()=>memSetMode('2p')},
   {id:'hm',icon:'🔤',title:'Hangman',mode:()=>hmSetMode('2p')},
+  {id:'jg',icon:'🧱',title:'Jenga',screen:'jenga',mode:()=>jgSetMode('2p')},
   {id:'kniffel',icon:'🎲',title:'Kniffel',mode:null},
   {id:'mono',icon:'🏠',title:'Monopoly',mode:null}
 ];
@@ -368,7 +369,7 @@ function zcDuelStart(oppName,gameId){
   zcDuelClose();
   const la=zcAccountLook(self),lb=zcAccountLook(oppName);
   if(g.mode){
-    goTo(g.id);
+    goTo(g.screen||g.id);
     setTimeout(()=>{
       g.mode();
       const s=smS(g.id).setup;
