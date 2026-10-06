@@ -339,6 +339,7 @@ const ZC_DUEL_GAMES=[
   {id:'mem',icon:'🃏',title:'Memory',mode:()=>memSetMode('2p')},
   {id:'hm',icon:'🔤',title:'Hangman',mode:()=>hmSetMode('2p')},
   {id:'jg',icon:'🧱',title:'Jenga',screen:'jenga',mode:()=>jgSetMode('2p')},
+  {id:'bil',icon:'🎱',title:'Billard',screen:'billard',mode:()=>bilSetMode('2p')},
   {id:'kniffel',icon:'🎲',title:'Kniffel',mode:null},
   {id:'mono',icon:'🏠',title:'Monopoly',mode:null}
 ];

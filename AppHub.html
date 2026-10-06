@@ -1016,6 +1016,11 @@
           <div class="app-tile-name">Jenga</div>
           <div class="app-tile-desc">Turm-Spiel für 1–4 Spieler oder gegen die KI</div>
         </button>
+        <button class="app-tile" type="button" onclick="goTo('billard')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('billard')}" data-appid="billard" data-cat="spiele">
+          <div class="app-icon" style="background:linear-gradient(135deg,#1b7a4a,#0b3d26)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div class="app-tile-name">Billard</div>
+          <div class="app-tile-desc">8-Ball-Pool gegen die KI oder Freunde</div>
+        </button>
         <button class="app-tile" type="button" onclick="goTo('studio')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('studio')}" data-appid="studio" data-cat="kreativ">
           <div class="app-icon" style="background:linear-gradient(135deg,#ec407a,#7e57c2)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
           <div class="app-tile-name">Musikstudio</div>
@@ -2088,6 +2093,16 @@
       </div>
     </div>
     <div class="lrn-wrap" style="max-width:780px"><div id="jg-root"></div></div>
+  </div>
+
+<div class="screen" id="screen-billard">
+    <div class="titlebar">
+      <div class="title-wrap">
+        <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
+        <span class="title-text" style="flex:1;text-align:center">Billard</span>
+      </div>
+    </div>
+    <div class="lrn-wrap" style="max-width:1000px"><div id="bil-root"></div></div>
   </div>
 
 <div class="screen" id="screen-studio">
@@ -3817,6 +3832,7 @@ function goTo(id){
   if(id==='garten') gwInit();
   if(id==='arena') arInit();
   if(id==='studio') msInit();
+  if(id==='billard') bilInit();
   if(id==='jenga') jgInit();
   if(id==='stimmen') svInit();
   if(id==='pixelanim') pnInit();
@@ -4355,6 +4371,7 @@ function initSavedSettings(){
 <script src="apps/gartenwacht.js"></script>
 <script src="apps/arena.js"></script>
 <script src="apps/notenblock.js"></script>
+<script src="apps/billard.js"></script>
 <script src="apps/jenga.js"></script>
 <script src="apps/stimmenstudio.js"></script>
 <script src="apps/pixelanim.js"></script>

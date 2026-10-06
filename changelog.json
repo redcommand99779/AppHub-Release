@@ -405,5 +405,16 @@
       "Modi: gegen die KI (leicht, mittel, schwer), 2 Spieler mit zwei Accounts, 3 bis 4 Spieler am selben PC und Solo (wie viele Züge schaffst du, mit Bestwert). Der Stein, über dem du mit der Maus bist, leuchtet in der Farbe des Spielers am Zug.",
       "Jenga ist an die Spielzentrale angebunden wie Schach oder Vier gewinnt: Account, Emoji und Farbe wählen, Ränge (PR), Hall of Fame, Best-of-Serie, Cup, Replay-Ergebnis, Schnellduell und Meisterschaft. Wertung gibt es gegen die KI und mit 2 Spielern; 3–4 Spieler und Solo sind Freundschaftsspiele. Sieg gegen die KI gibt zusätzlich 3, 5 oder 8 AppHub-Coins (je Stufe einmal pro Tag)."
     ]
+  },
+  {
+    "id": 40,
+    "date": "05.10.2026",
+    "title": "Neues Spiel: Billard",
+    "items": [
+      "Neu: Billard (Kategorie Spiele) – 8-Ball-Pool von oben mit 15 Kugeln, weißer Kugel und 6 Taschen. Physik mit festem Zeitschritt: elastische Stöße, Banden mit Verlust, Rollreibung. Zielen mit der Maus (Ziellinie mit Geisterkugel), Maustaste gedrückt halten lädt die Kraft, Loslassen stößt.",
+      "Regeln: Gruppen (volle 1–7 oder halbe 9–15) werden mit der ersten versenkten Kugel verteilt, wer eigene Kugeln versenkt, bleibt am Tisch. Fouls (weiße Kugel versenkt, keine oder falsche Kugel getroffen, keine Bande) geben dem Gegner die weiße Kugel in die Hand. Die schwarze 8 gewinnt erst, wenn alle eigenen Kugeln weg sind.",
+      "Modi: gegen die KI (leicht, mittel, schwer – sie berechnet Zielkugel, Tasche und Winkel, mit Ungenauigkeit je Stufe), 2 Spieler mit zwei Accounts (Ränge, Serie, Cup, Hall of Fame, Schnellduell und Meisterschaft der Spielzentrale) und Üben. Sieg gegen die KI gibt 3, 5 oder 8 AppHub-Coins, je Stufe einmal pro Tag.",
+      "Regeln nachlesen: Knopf „Regeln“ im Menü und im Spiel. Jede Foul-Meldung erklärt die Regel dazu (z. B. dass es ein Foul ist, wenn die weiße Kugel keine andere Kugel trifft). Wer es lockerer mag, schaltet „Strenge Fouls“ aus – dann ist nur die weiße Kugel in der Tasche ein Foul; solche Partien zählen nicht für Ränge und geben keine Coins."
+    ]
   }
 ]
