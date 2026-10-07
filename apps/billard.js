@@ -5,6 +5,13 @@
    keine Kugel getroffen, falsche Kugel zuerst getroffen (die 8 erst, wenn alle eigenen weg sind), nichts versenkt und keine Bande nach dem Treffer – der Gegner darf die weiße Kugel
    frei setzen. Die 8 versenken gewinnt, wenn alle eigenen Kugeln weg sind und kein Foul passiert; sonst verliert man.
    Regeln nachlesen: Knopf „Regeln“ im Menü und im Spiel. „Strenge Fouls“ lässt sich ausschalten (lockere Regeln: nur die weiße Kugel zu versenken ist ein Foul); solche Partien zählen nicht für Ränge.
+   Die 8 muss in die Tasche gegenüber der Tasche, in der die letzte Kugel der eigenen Gruppe versenkt wurde (Ecke ↔ Gegenecke, Seitentasche ↔ Seitentasche gegenüber); die Tasche wird
+   beim Schuss auf die 8 markiert. Nur bei strengen Regeln.
+   Rückgängig: Knopf „Rückgängig“ (falls man sich verklickt): bricht den laufenden Stoß ab oder nimmt den letzten Zug zurück – gegen die KI samt ihrer Antwort, bis man wieder dran ist.
+   Technik: Stand vor jedem Zug über smSnap/smUndo von spielmeta (Schnappschuss der Kugeln, Gruppen, Tasche und Gefallenen).
+   Einlochen: Eine versenkte Kugel verschwindet nicht sofort, sondern rollt sichtbar in die Tasche und wird dabei kleiner (q.sink, rein zur Anzeige; die Spiellogik zählt sie ab der Berührung der Tasche als versenkt).
+   Replay: Für das Replay der Spielzentrale werden die Kugelpositionen während jedes Stoßes aufgezeichnet (etwa 15 Bilder je Sekunde, bis zu 300 Bilder je Replay, die Kugeln
+   laufen im Replay also wirklich); gezeichnet wird in RPL_DRAW.bil (Tisch, Kugeln, wer am Zug ist, Gruppen).
    Modi: gegen die KI (leicht, mittel, schwer; berechnet Zielkugel, Tasche und Schusswinkel, mit Ungenauigkeit je Stufe), 2 Spieler (zwei Accounts über spielmeta wie Schach: PR, Serie, Cup,
    Hall of Fame) und Üben (freier Tisch). Sieg gegen die KI: 3 / 5 / 8 AppHub-Coins, je Stufe einmal pro Tag (zf_billard).
 ══════════════════════════════════ */
@@ -13,6 +20,7 @@ const BIL_W=840,BIL_H=420,BIL_R=10.5,BIL_STEP=1/240,BIL_VMAX=1500,BIL_DEC=220,BI
 const BIL_POCKETS=[[0,0,25],[BIL_W/2,-4,22],[BIL_W,0,25],[0,BIL_H,25],[BIL_W/2,BIL_H+4,22],[BIL_W,BIL_H,25]];
 const BIL_COLORS=['#fff','#fbc02d','#1565c0','#e53935','#6a1b9a','#fb8c00','#2e7d32','#8d1c1c','#111'];
 /* ── Reine Physik und Regeln (wird getestet) ── */
+const BIL_OPPOSITE=[5,4,3,2,1,0];   // Taschen: 0 oben links, 1 oben Mitte, 2 oben rechts, 3 unten links, 4 unten Mitte, 5 unten rechts
 const bilGroup=id=>id===0?'cue':id===8?'eight':id<8?'solid':'stripe';
 function bilRack(){
   const order=[1,9,2,10,8,3,11,4,12,5,13,6,14,15,7],balls=[{id:0,x:BIL_W*0.25,y:BIL_H/2,vx:0,vy:0,out:false}];
@@ -29,7 +37,7 @@ function bilStep(balls,dt,ev){
     q.x+=q.vx*dt;q.y+=q.vy*dt;
     let s=Math.hypot(q.vx,q.vy);
     if(s>0){const ns=Math.max(0,s-BIL_DEC*dt)*Math.exp(-BIL_AIR*dt);if(ns<3){q.vx=0;q.vy=0;}else{q.vx*=ns/s;q.vy*=ns/s;}}
-    for(const p of BIL_POCKETS){if(Math.hypot(q.x-p[0],q.y-p[1])<p[2]){q.out=true;q.vx=q.vy=0;ev.pocketed.push(q.id);break;}}
+    for(const p of BIL_POCKETS){if(Math.hypot(q.x-p[0],q.y-p[1])<p[2]){q.out=true;q.sink={x:q.x,y:q.y,px:p[0],py:p[1],t:0};q.vx=q.vy=0;ev.pocketed.push(q.id);ev.pockets.push(BIL_POCKETS.indexOf(p));break;}}
     if(q.out)continue;
     let hit=false;
     if(q.x<BIL_R){q.x=BIL_R;q.vx=Math.abs(q.vx)*BIL_WALL;hit=true;}else if(q.x>BIL_W-BIL_R){q.x=BIL_W-BIL_R;q.vx=-Math.abs(q.vx)*BIL_WALL;hit=true;}
@@ -46,7 +54,7 @@ function bilStep(balls,dt,ev){
       if(ev.first===null){if(a.id===0)ev.first=b.id;else if(b.id===0)ev.first=a.id;}
     }}
 }
-const bilEvents=()=>({first:null,pocketed:[],rail:false});
+const bilEvents=()=>({first:null,pocketed:[],pockets:[],rail:false});
 /* Schuss ausführen: Winkel (Bogenmaß) und Kraft 0–1; läuft bis alles steht (höchstens 60 s Spielzeit); Ergebnis: Ereignisse */
 function bilShoot(balls,angle,power,ev){
   const c=balls[0],v=Math.max(0,Math.min(1,power))*BIL_VMAX;c.vx=Math.cos(angle)*v;c.vy=Math.sin(angle)*v;
@@ -69,8 +77,10 @@ function bilJudge(st,balls,ev,wasLeft,loose){
   }
   const res={foul,reason,groups,next:me,inHand:false,winner:null,why:''};
   if(eight){
-    const ok=!foul&&mine&&needEight;
-    res.winner=ok?me:opp;res.why=ok?'Die 8 sauber versenkt':(!mine?'Die 8 bei offenem Tisch versenkt':foul?'Die 8 mit Foul versenkt ('+reason+')':'Die 8 zu früh versenkt');return res;
+    const lp=st.lastPocket&&mine?st.lastPocket[mine]:undefined,need=!loose&&lp!==undefined?BIL_OPPOSITE[lp]:undefined,pi=ev.pockets?ev.pockets[ev.pocketed.indexOf(8)]:undefined;
+    const wrongPocket=!foul&&mine&&needEight&&need!==undefined&&pi!==undefined&&pi!==need;
+    const ok=!foul&&mine&&needEight&&!wrongPocket;
+    res.winner=ok?me:opp;res.why=ok?'Die 8 sauber versenkt':(!mine?'Die 8 bei offenem Tisch versenkt':foul?'Die 8 mit Foul versenkt ('+reason+')':wrongPocket?'Die 8 in der falschen Tasche (sie muss gegenüber der letzten eigenen Kugel in die Tasche)':'Die 8 zu früh versenkt');return res;
   }
   if(!mine&&!foul&&pk.length){const g=bilGroup(pk[0]);groups[me]=g;groups[opp]=g==='solid'?'stripe':'solid';res.groups=groups;}
   const g2=res.groups[me];
@@ -80,17 +90,17 @@ function bilJudge(st,balls,ev,wasLeft,loose){
 }
 /* Kurze Erklärung zu jedem Foul (für die Meldung im Spiel) */
 const BIL_FOUL_WHY={'Weiße Kugel versenkt':'Die weiße Kugel darf nie in der Tasche landen.','Keine Kugel getroffen':'Die weiße Kugel muss eine andere Kugel berühren – sonst ist es ein Foul.','Zuerst muss die 8 getroffen werden':'Sind alle eigenen Kugeln weg, muss die 8 zuerst getroffen werden.','Falsche Kugel zuerst getroffen':'Zuerst muss eine Kugel der eigenen Gruppe getroffen werden.','Die 8 darf nicht zuerst getroffen werden':'Bei offenem Tisch darf die 8 nicht zuerst getroffen werden.','Keine Bande nach dem Treffer':'Nach dem Treffer muss eine Kugel versenkt werden oder eine Kugel an die Bande laufen.'};
-const BIL_RULES=['Ziel: Versenke alle Kugeln deiner Gruppe (volle 1–7 oder halbe 9–15) und danach die schwarze 8.','Gruppen: Die erste versenkte Kugel bestimmt, welche Gruppe du bekommst. Bis dahin ist der Tisch offen.','Du bleibst am Tisch, solange du eine Kugel deiner Gruppe versenkst.','Foul: Die weiße Kugel muss immer zuerst eine Kugel deiner Gruppe berühren (die 8 erst am Ende). Wer keine Kugel trifft, die falsche trifft oder die weiße Kugel versenkt, begeht ein Foul. Auch nichts zu versenken und keine Bande zu berühren ist ein Foul.','Nach einem Foul darf der Gegner die weiße Kugel frei auf den Tisch setzen (Kugel in der Hand).','Die 8: Wer sie zu früh, bei offenem Tisch oder mit einem Foul versenkt, verliert. Sauber nach allen eigenen Kugeln versenkt, gewinnt man.'];
+const BIL_RULES=['Ziel: Versenke alle Kugeln deiner Gruppe (volle 1–7 oder halbe 9–15) und danach die schwarze 8.','Gruppen: Die erste versenkte Kugel bestimmt, welche Gruppe du bekommst. Bis dahin ist der Tisch offen.','Du bleibst am Tisch, solange du eine Kugel deiner Gruppe versenkst.','Foul: Die weiße Kugel muss immer zuerst eine Kugel deiner Gruppe berühren (die 8 erst am Ende). Wer keine Kugel trifft, die falsche trifft oder die weiße Kugel versenkt, begeht ein Foul. Auch nichts zu versenken und keine Bande zu berühren ist ein Foul.','Nach einem Foul darf der Gegner die weiße Kugel frei auf den Tisch setzen (Kugel in der Hand).','Die 8: Wer sie zu früh, bei offenem Tisch oder mit einem Foul versenkt, verliert. Sauber nach allen eigenen Kugeln versenkt, gewinnt man.','Die 8 muss in die Tasche gegenüber der Tasche, in der deine letzte Kugel versenkt wurde (Ecke ↔ Gegenecke, Seitentasche ↔ Seitentasche gegenüber). Die Tasche wird beim Schuss markiert. Landet die 8 woanders, hast du verloren.'];
 /* ── KI ── */
 const bilDist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
 function bilSegDist(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],l2=dx*dx+dy*dy;let t=l2?((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l2:0;t=Math.max(0,Math.min(1,t));return Math.hypot(p[0]-(a[0]+t*dx),p[1]-(a[1]+t*dy));}
 /* Alle sinnvollen Schüsse (Zielkugel, Tasche): Geisterkugel-Verfahren; Wert niedriger = besser */
-function bilShots(balls,group,cue){
+function bilShots(balls,group,cue,needPocket){
   const c=cue||[balls[0].x,balls[0].y],left=group?bilLeft(balls,group):99,want=group?(left===0?'eight':group):null,out=[];
   for(const t of balls){
     if(t.out||t.id===0)continue;const g=bilGroup(t.id);
     if(want?g!==want:g==='eight')continue;
-    for(const p of BIL_POCKETS){
+    for(const p of (want==='eight'&&needPocket!==undefined?[BIL_POCKETS[needPocket]]:BIL_POCKETS)){
       const pc=[p[0]+(p[0]===0?6:p[0]===BIL_W?-6:0),p[1]+(p[1]===0?6:p[1]===BIL_H?-6:0)],tp=[t.x,t.y],dt=bilDist(tp,pc);if(dt<1)continue;
       const ux=(pc[0]-tp[0])/dt,uy=(pc[1]-tp[1])/dt,gh=[tp[0]-ux*2*BIL_R,tp[1]-uy*2*BIL_R],dc=bilDist(c,gh);if(dc<2)continue;
       if(gh[0]<BIL_R||gh[0]>BIL_W-BIL_R||gh[1]<BIL_R||gh[1]>BIL_H-BIL_R)continue;
@@ -107,8 +117,8 @@ function bilShots(balls,group,cue){
 const BIL_AI={leicht:{err:0.075,pw:0.22,pick:1},mittel:{err:0.018,pw:0.08,pick:0.3},schwer:{err:0.008,pw:0.05,pick:0}};   // Winkelfehler (Bogenmaß), Kraftfehler, Chance auf eine schlechtere Wahl
 function bilKraft(dist){return Math.max(0.22,Math.min(0.95,(260+dist*1.15)/BIL_VMAX));}
 /* Wählt den Schuss: { angle, power }; ohne klaren Schuss ein vorsichtiger Treffer auf die nächste Zielkugel */
-function bilAiShot(balls,group,level,rnd){
-  rnd=rnd||Math.random;const L=BIL_AI[level]||BIL_AI.mittel,shots=bilShots(balls,group),gauss=()=>(rnd()+rnd()+rnd()-1.5)/0.75;
+function bilAiShot(balls,group,level,rnd,needPocket){
+  rnd=rnd||Math.random;const L=BIL_AI[level]||BIL_AI.mittel,shots=bilShots(balls,group,undefined,needPocket),gauss=()=>(rnd()+rnd()+rnd()-1.5)/0.75;
   const noise=a=>a+gauss()*L.err;
   if(shots.length){
     const pickIdx=rnd()<L.pick?Math.min(shots.length-1,Math.floor(rnd()*shots.length)):0,s=shots[pickIdx];
@@ -120,11 +130,11 @@ function bilAiShot(balls,group,level,rnd){
   return {angle:noise(Math.atan2(t.y-c.y,t.x-c.x)),power:0.35+rnd()*0.2,ball:t.id,planned:false};
 }
 /* Platz für die weiße Kugel (Kugel in der Hand): der Ort mit dem besten Schuss; beim Anstoß hinter der Kopflinie */
-function bilAiPlace(balls,group,level,rnd,breakShot){
+function bilAiPlace(balls,group,level,rnd,breakShot,needPocket){
   rnd=rnd||Math.random;let best=null,bs=1e9;const free=(x,y)=>!balls.some(q=>!q.out&&q.id!==0&&Math.hypot(q.x-x,q.y-y)<2*BIL_R+1);
   for(let i=0;i<60;i++){
     const x=breakShot?BIL_R+rnd()*(BIL_W*0.25-BIL_R):BIL_R+rnd()*(BIL_W-2*BIL_R),y=BIL_R+rnd()*(BIL_H-2*BIL_R);if(!free(x,y))continue;
-    const sh=bilShots(balls,group,[x,y]),sc=sh.length?sh[0].score:500+rnd()*50;if(sc<bs){bs=sc;best=[x,y];}
+    const sh=bilShots(balls,group,[x,y],needPocket),sc=sh.length?sh[0].score:500+rnd()*50;if(sc<bs){bs=sc;best=[x,y];}
   }
   return best||[BIL_W*0.2,BIL_H/2];
 }
@@ -156,7 +166,7 @@ function bilWin(level,pay){
 /* ── Oberfläche ── */
 const BIL_CW=960,BIL_CH=560,BIL_OX=60,BIL_OY=60;
 const BIL_LEVEL_MAP={easy:'leicht',medium:'mittel',hard:'schwer'},BIL_LEVEL_BACK={leicht:'easy',mittel:'medium',schwer:'hard'};
-let bil=null,bilRaf=null,bilMouse=[BIL_W/2,BIL_H/2];
+let bil=null,bilRaf=null,bilMouse=[BIL_W/2,BIL_H/2],bilAiT=null;
 const bilEsc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const bilHasPlayers=()=>!!bil&&(bil.mode==='ki'||bil.mode==='lokal');
 const bilIsRanked=()=>bilHasPlayers()&&!bil.loose;   // lockere Regeln zählen nicht für Ränge
@@ -177,8 +187,10 @@ function bilLevel(l){bil.level=l;bilRender();}
 function bilSetMode(m){if(!bil)bil={view:'menu',mode:'ki',level:'mittel',loose:false};bil.mode=m==='ai'?'ki':'lokal';if(bil.view==='game')bilMenu();else bilRender();}
 function bilMenu(){bilStopLoop();bil.view='menu';bilRender();}
 function bilStart(){
-  bilStopLoop();Object.assign(bil,{view:'game',balls:bilRack(),groups:[null,null],turn:0,phase:'aim',inHand:false,breakShot:true,angle:0,power:0,charging:false,t0:0,ev:null,msg:'',over:null,time:0,fouls:0,pocketedLog:[[],[]]});
-  bil.angle=0;bilRender();bilHud();bilLoop();if(bil.mode==='ki'&&bil.turn===1)setTimeout(bilAiTurn,700);
+  bilStopLoop();Object.assign(bil,{view:'game',balls:bilRack(),groups:[null,null],turn:0,phase:'aim',inHand:false,breakShot:true,angle:0,power:0,charging:false,t0:0,ev:null,msg:'',over:null,time:0,fouls:0,pocketedLog:[[],[]],lastPocket:{}});
+  bil.angle=0;bilRender();bilHud();bilLoop();if(bil.mode==='ki'&&bil.turn===1)bilAiT=setTimeout(bilAiTurn,700);
+  if(typeof smSnap==='function')smSnap('bil',true);   // Stand vor dem ersten Zug
+  if(typeof rplBegin==='function')rplBegin('bil');bilRec();
 }
 function bilRender(){
   const root=document.getElementById('bil-root');if(!root)return;
@@ -192,7 +204,7 @@ function bilRender(){
     <div style="margin-top:12px"><button class="lrn-btn" onclick="bilStart()">▶ Spiel starten</button></div></div>`;
     if(typeof smRefresh==='function')smRefresh('bil');return;
   }
-  root.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:8px"><button class="lrn-btn ghost" onclick="bilMenu()">← Menü</button><button class="lrn-btn ghost" onclick="bilToggleRules()">📖 Regeln</button><span class="game-chip" id="bil-turn"></span><span class="game-chip" id="bil-info"></span></div>
+  root.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:8px"><button class="lrn-btn ghost" onclick="bilMenu()">← Menü</button><button class="lrn-btn ghost" onclick="bilUndoClick()" title="Falls du dich verklickt hast: Stoß abbrechen oder letzten Zug zurücknehmen">↩ Rückgängig</button><button class="lrn-btn ghost" onclick="bilToggleRules()">📖 Regeln</button><span class="game-chip" id="bil-turn"></span><span class="game-chip" id="bil-info"></span></div>
     <div style="position:relative;max-width:${BIL_CW}px;margin:0 auto"><canvas id="bil-canvas" width="${BIL_CW}" height="${BIL_CH}" style="display:block;width:100%;height:auto;border-radius:14px;box-shadow:0 6px 22px rgba(0,0,0,.35);touch-action:none;cursor:crosshair"></canvas><div id="bil-over"></div></div>
     <div id="bil-hint" style="font-size:12px;color:var(--text-3);text-align:center;margin-top:8px"></div>
     <div id="bil-rules" class="lrn-card" style="display:none;margin-top:10px"><b>📖 Regeln</b>${bilRulesHtml()}</div>`;
@@ -208,9 +220,12 @@ function bilHud(){
   const gn=g=>g==='solid'?'volle':g==='stripe'?'halbe':'offen';
   t.innerHTML='<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+bilCol(bil.turn)+'"></span> '+bilEsc(bilName(bil.turn))+(bil.over?'':bil.inHand?' · weiße Kugel setzen':bil.phase==='roll'?' · …':' · am Stoß');
   i.textContent=bil.mode==='ueben'?'🎱 '+bil.balls.filter(q=>!q.out&&q.id).length+' Kugeln':bilName(0)+': '+gn(bil.groups[0])+' · '+bilName(1)+': '+gn(bil.groups[1]);
-  if(h)h.textContent=bil.msg||(bil.inHand?(bil.breakShot?'Klicke hinter die linke Linie, um die weiße Kugel zu setzen.':'Foul des Gegners: Setze die weiße Kugel frei auf den Tisch (Klick).'):bil.phase==='aim'?'Zielen mit der Maus. Maustaste gedrückt halten lädt die Kraft, Loslassen stößt.':'');
+  if(h)h.textContent=bil.msg||(bilNeedPocket(bil.turn)!==undefined&&!bil.inHand&&bil.phase==='aim'?'Jetzt die 8: Sie muss in die markierte Tasche ('+BIL_POCKET_NAMES[bilNeedPocket(bil.turn)]+'), gegenüber deiner letzten Kugel.':bil.inHand?(bil.breakShot?'Klicke hinter die linke Linie, um die weiße Kugel zu setzen.':'Foul des Gegners: Setze die weiße Kugel frei auf den Tisch (Klick).'):bil.phase==='aim'?'Zielen mit der Maus. Maustaste gedrückt halten lädt die Kraft, Loslassen stößt.':'');
 }
 /* Zielen, Kraft laden, Stoßen, Kugel setzen */
+/* Tasche, in die die 8 gehört (gegenüber der letzten eigenen Kugel), sonst undefined: nur streng, nur wenn alle eigenen Kugeln weg sind */
+function bilNeedPocket(i){const g=bil&&bil.groups?bil.groups[i]:null;if(!g||bil.loose||bil.mode==='ueben'||bilLeft(bil.balls,g)!==0)return undefined;const lp=bil.lastPocket&&bil.lastPocket[g];return lp===undefined?undefined:BIL_OPPOSITE[lp];}
+const BIL_POCKET_NAMES=['oben links','oben Mitte','oben rechts','unten links','unten Mitte','unten rechts'];
 function bilTo(p){return Math.atan2(p[1]-bil.balls[0].y,p[0]-bil.balls[0].x);}
 function bilDown(){
   if(!bil||bil.view!=='game'||bil.over||!bilHuman()||bil.phase!=='aim')return;
@@ -226,7 +241,7 @@ function bilPlaceCue(x,y){
   const lim=bil.breakShot?BIL_W*0.25:BIL_W-BIL_R;
   if(x<BIL_R||x>lim||y<BIL_R||y>BIL_H-BIL_R)return false;
   if(bil.balls.some(q=>!q.out&&q.id!==0&&Math.hypot(q.x-x,q.y-y)<2*BIL_R+1))return false;
-  const c=bil.balls[0];c.x=x;c.y=y;c.vx=c.vy=0;c.out=false;bil.inHand=false;bil.msg='';bilHud();return true;
+  const c=bil.balls[0];c.x=x;c.y=y;c.vx=c.vy=0;c.out=false;delete c.sink;bil.inHand=false;bil.msg='';bilHud();return true;
 }
 function bilFire(angle,power){
   const c=bil.balls[0];c.vx=Math.cos(angle)*power*BIL_VMAX;c.vy=Math.sin(angle)*power*BIL_VMAX;
@@ -234,8 +249,8 @@ function bilFire(angle,power){
 }
 function bilAiTurn(){
   if(!bil||bil.view!=='game'||bil.over||bil.mode!=='ki'||bil.turn!==1||bil.phase!=='aim')return;
-  if(bil.inHand){const p=bilAiPlace(bil.balls,bil.groups[1],bil.level,Math.random,bil.breakShot);bilPlaceCue(p[0],p[1]);}
-  const sh=bilAiShot(bil.balls,bil.groups[1],bil.level);bil.angle=sh.angle;bil.aiShot=sh;bil.aimT=0;bil.phase='aiaim';
+  if(bil.inHand){const p=bilAiPlace(bil.balls,bil.groups[1],bil.level,Math.random,bil.breakShot,bilNeedPocket(1));bilPlaceCue(p[0],p[1]);}
+  const sh=bilAiShot(bil.balls,bil.groups[1],bil.level,undefined,bilNeedPocket(1));bil.angle=sh.angle;bil.aiShot=sh;bil.aimT=0;bil.phase='aiaim';
 }
 function bilLoop(){
   if(!bilActive()||!bil||bil.view!=='game'){bilRaf=null;return;}
@@ -243,28 +258,31 @@ function bilLoop(){
 }
 let bilAcc=0,bilLastTs=0;
 function bilTick(){
-  const now=performance.now();bilAcc+=Math.min(0.05,(now-(bilLastTs||now))/1000);bilLastTs=now;bil.time++;
+  const now=performance.now();bilAcc+=Math.min(0.05,(now-(bilLastTs||now))/1000);bilLastTs=now;bil.time++;for(const q of bil.balls||[]){if(q.sink&&q.sink.t<1)q.sink.t=Math.min(1,q.sink.t+1/16);}
   if(bil.phase==='aiaim'){bil.aimT++;if(bil.aimT>45){bil.phase='aim';bilFire(bil.angle,bil.aiShot.power);}return;}
   if(bil.phase==='aim'&&bil.charging)bil.power=Math.min(1,(now-bil.t0)/1400);
   if(bil.phase==='aim'&&!bil.charging&&!bil.inHand&&bilHuman())bil.angle=bilTo(bilMouse);
   if(bil.phase!=='roll'){bilAcc=0;return;}
   let n=0;while(bilAcc>=BIL_STEP&&n<20){bilStep(bil.balls,BIL_STEP,bil.ev);bilAcc-=BIL_STEP;n++;}
-  if(!bilMoving(bil.balls))bilResolve();
+  if(bil.time%4===0)bilRec();
+  if(!bilMoving(bil.balls)&&!bil.balls.some(q=>q.sink&&q.sink.t<1))bilResolve();   // erst auswerten, wenn alle Kugeln auch fertig eingerollt sind
 }
 function bilResolve(){
   bilAcc=0;const ev=bil.ev,balls=bil.balls;bil.phase='aim';
-  if(bil.mode==='ueben'){const c=balls[0];if(c.out){c.out=false;c.x=BIL_W*0.25;c.y=BIL_H/2;c.vx=c.vy=0;bil.msg='Weiße Kugel versenkt – neu gesetzt.';}if(balls.every(q=>q.id===0||q.out))bil.msg='Alles versenkt – gut gemacht! (Menü → neu starten)';bil.inHand=false;bil.breakShot=false;bilHud();return;}
-  const r=bilJudge({groups:bil.groups,turn:bil.turn},balls,ev,bil.wasLeft,!!bil.loose);
+  if(bil.mode==='ueben'){const c=balls[0];if(c.out){c.out=false;delete c.sink;c.x=BIL_W*0.25;c.y=BIL_H/2;c.vx=c.vy=0;bil.msg='Weiße Kugel versenkt – neu gesetzt.';}if(balls.every(q=>q.id===0||q.out))bil.msg='Alles versenkt – gut gemacht! (Menü → neu starten)';bil.inHand=false;bil.breakShot=false;bilHud();if(typeof smSnap==='function')smSnap('bil');return;}
+  const r=bilJudge({groups:bil.groups,turn:bil.turn,lastPocket:bil.lastPocket},balls,ev,bil.wasLeft,!!bil.loose);
+  ev.pocketed.forEach((id,k)=>{if(id&&id!==8&&ev.pockets&&ev.pockets[k]!==undefined)bil.lastPocket[bilGroup(id)]=ev.pockets[k];});   // letzte Tasche je Gruppe (wer auch immer versenkt hat)
   ev.pocketed.filter(id=>id).forEach(id=>bil.pocketedLog[bilGroup(id)==='stripe'?1:0].push(id));
   bil.breakShot=false;
-  if(r.winner!==null){bil.groups=r.groups;bilOver(r.winner,r.why);return;}
+  if(r.winner!==null){bilRec();bil.groups=r.groups;bilOver(r.winner,r.why);return;}
   bil.groups=r.groups;
   const was=bil.turn;bil.turn=r.next;bil.inHand=r.inHand;
-  if(balls[0].out){balls[0].out=false;balls[0].vx=balls[0].vy=0;}
+  if(balls[0].out){balls[0].out=false;delete balls[0].sink;balls[0].vx=balls[0].vy=0;}
   bil.msg=r.foul?'Foul: '+r.reason+'. '+(BIL_FOUL_WHY[r.reason]||'')+' '+bilName(bil.turn)+' setzt die weiße Kugel.':(r.next===was?bilName(was)+' bleibt am Tisch.':bilName(bil.turn)+' ist dran.');
   if(r.groups[0]&&!bil.groupsShown){bil.groupsShown=true;}
-  bilHud();
-  if(bil.mode==='ki'&&bil.turn===1)setTimeout(bilAiTurn,900);
+  bilHud();bilRec();
+  if(typeof smSnap==='function')smSnap('bil');   // Stand zu Beginn des nächsten Zugs
+  if(bil.mode==='ki'&&bil.turn===1)bilAiT=setTimeout(bilAiTurn,900);
 }
 function bilOver(winner,why){
   bil.over={winner,why};bil.phase='over';bilHud();
@@ -273,9 +291,28 @@ function bilOver(winner,why){
   if(!bilIsRanked()&&el&&bil.mode!=='ueben'){el.innerHTML='<div class="td-over"><div style="font-size:40px">'+(winner===0?'🏆':'🎱')+'</div><div style="font-size:22px;font-weight:800">'+bilEsc(bilName(winner))+' gewinnt!</div><div style="font-size:13px;margin:8px 0 12px">'+bilEsc(why||'')+'<br>Lockere Regeln – keine Wertung.</div><div style="display:flex;gap:8px"><button class="lrn-btn" onclick="bilStart()">Nochmal</button><button class="lrn-btn ghost" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" onclick="bilMenu()">Menü</button></div></div>';}
   if(bilIsRanked()){smReport('bil',{winner});if(c&&typeof showToast==='function')showToast('🪙 +'+c+' AppHub-Coins für den Sieg gegen die KI',3000);}
 }
+/* ── Replay: Kugelpositionen aufzeichnen (nur Anzeige) ── */
+const bilFrame=()=>({b:bil.balls.filter(q=>!q.out).map(q=>[q.id,Math.round(q.x*10)/10,Math.round(q.y*10)/10]),t:bil.turn,g:bil.groups.slice()});
+function bilRec(){if(bil&&bil.balls&&bil.mode!=='ueben'&&typeof rplPush==='function')rplPush('bil',bilFrame());}
+/* ── Rückgängig: Schnappschuss und Wiederherstellen ── */
+function bilSnapshot(){return {balls:bil.balls.map(q=>({id:q.id,x:q.x,y:q.y,vx:0,vy:0,out:q.out})),groups:bil.groups.slice(),turn:bil.turn,inHand:bil.inHand,breakShot:bil.breakShot,lastPocket:Object.assign({},bil.lastPocket),pocketedLog:bil.pocketedLog.map(a=>a.slice()),wasLeft:bil.wasLeft};}
+function bilRestore(st){
+  clearTimeout(bilAiT);bilAiT=null;
+  Object.assign(bil,{balls:st.balls.map(q=>Object.assign({},q)),groups:st.groups.slice(),turn:st.turn,inHand:st.inHand,breakShot:st.breakShot,lastPocket:Object.assign({},st.lastPocket),pocketedLog:st.pocketedLog.map(a=>a.slice()),wasLeft:st.wasLeft,phase:'aim',charging:false,power:0,ev:null,over:null,msg:'',aiShot:null});
+  const el=document.getElementById('bil-over');if(el)el.innerHTML='';
+  bilHud();if(bil.mode==='ki'&&bil.turn===1)bilAiT=setTimeout(bilAiTurn,900);
+}
+/* Knopf: läuft mein Stoß noch, wird er abgebrochen (Stand vom Zugbeginn); sonst wird der letzte Zug zurückgenommen (gegen die KI samt ihrer Antwort) */
+function bilUndoClick(){
+  if(!bil||bil.view!=='game')return;
+  const sn=(typeof SM_SNAP!=='undefined'&&SM_SNAP.bil)||[];
+  if(bil.phase==='roll'&&bilHuman()&&sn.length){bilRestore(sn[sn.length-1]);if(typeof showToast==='function')showToast('↩ Stoß abgebrochen',1800);return;}
+  if(typeof smUndo==='function')smUndo('bil');
+}
 /* ── Zeichnen ── */
-function bilBall(ctx,x,y,id,alpha){
+function bilBall(ctx,x,y,id,alpha,sc){
   const col=BIL_COLORS[id===0?0:id===8?8:(id-1)%7+1];ctx.save();ctx.globalAlpha=alpha===undefined?1:alpha;
+  if(sc!==undefined&&sc!==1){ctx.translate(x,y);ctx.scale(sc,sc);x=0;y=0;}
   ctx.shadowColor='rgba(0,0,0,.45)';ctx.shadowBlur=6;ctx.shadowOffsetY=2;
   ctx.beginPath();ctx.arc(x,y,BIL_R,0,7);ctx.fillStyle=id>8?'#f4f1ea':col;ctx.fill();ctx.shadowColor='transparent';
   if(id>8){ctx.save();ctx.beginPath();ctx.arc(x,y,BIL_R,0,7);ctx.clip();ctx.fillStyle=col;ctx.fillRect(x-BIL_R,y-BIL_R*0.55,BIL_R*2,BIL_R*1.1);ctx.restore();}
@@ -290,6 +327,7 @@ function bilDraw(ctx){
   ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(BIL_W*0.25,0);ctx.lineTo(BIL_W*0.25,BIL_H);ctx.stroke();
   ctx.fillStyle='rgba(255,255,255,.25)';ctx.beginPath();ctx.arc(BIL_W*0.72,BIL_H/2,2.5,0,7);ctx.fill();
   for(const p of BIL_POCKETS){ctx.fillStyle='#0b0b0b';ctx.beginPath();ctx.arc(p[0],p[1],p[2]-3,0,7);ctx.fill();}
+  const np=bilNeedPocket(bil.turn);if(np!==undefined&&!bil.over){const p=BIL_POCKETS[np],pu=0.5+0.5*Math.sin(bil.time*0.12);ctx.strokeStyle='rgba(255,215,64,'+(0.6+pu*0.4)+')';ctx.lineWidth=4;ctx.beginPath();ctx.arc(p[0],p[1],p[2]+2+pu*3,0,7);ctx.stroke();ctx.fillStyle='#ffd740';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText('8',p[0],p[1]+4);}
   if(!bil.balls){ctx.restore();return;}
   const b=bil.balls,cue=b[0],moving=bil.phase==='roll';
   // Ziellinie
@@ -299,7 +337,7 @@ function bilDraw(ctx){
     ctx.beginPath();ctx.arc(r.x,r.y,BIL_R,0,7);ctx.strokeStyle='rgba(255,255,255,.8)';ctx.stroke();
     if(r.ball){const nx=r.ball.x-r.x,ny=r.ball.y-r.y,l=Math.hypot(nx,ny)||1;ctx.strokeStyle='rgba(255,230,120,.8)';ctx.beginPath();ctx.moveTo(r.ball.x,r.ball.y);ctx.lineTo(r.ball.x+nx/l*60,r.ball.y+ny/l*60);ctx.stroke();}
   }
-  for(const q of b){if(!q.out)bilBall(ctx,q.x,q.y,q.id);}
+  for(const q of b){if(!q.out)bilBall(ctx,q.x,q.y,q.id);else if(q.sink&&q.sink.t<1){const k=q.sink.t,e=k*k*(3-2*k);bilBall(ctx,q.sink.x+(q.sink.px-q.sink.x)*e,q.sink.y+(q.sink.py-q.sink.y)*e,q.id,1-k*0.6,1-k*0.45);}}   // rollt in die Tasche und wird kleiner
   if(bil.inHand&&bil.view==='game'&&!bil.over&&bilHuman()){   // Kugel in der Hand: Vorschau unter der Maus
     const lim=bil.breakShot?BIL_W*0.25:BIL_W-BIL_R,x=Math.max(BIL_R,Math.min(lim,bilMouse[0])),y=Math.max(BIL_R,Math.min(BIL_H-BIL_R,bilMouse[1]));bilBall(ctx,x,y,0,0.55);
     if(bil.breakShot){ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(0,0,BIL_W*0.25,BIL_H);}
@@ -315,10 +353,21 @@ function bilDraw(ctx){
   if(bil.charging||(bil.phase==='aiaim'&&bil.aiShot)){const pw=bil.phase==='aiaim'?Math.min(1,bil.aimT/45)*bil.aiShot.power:bil.power;ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(BIL_OX,BIL_CH-34,240,12);ctx.fillStyle=pw<0.5?'#66bb6a':pw<0.8?'#ffca28':'#ef5350';ctx.fillRect(BIL_OX+1,BIL_CH-33,238*pw,10);ctx.fillStyle='#fff';ctx.font='11px sans-serif';ctx.textAlign='left';ctx.fillText('Kraft',BIL_OX+248,BIL_CH-24);}
   if(bil.pocketedLog&&bil.mode!=='ueben'){[0,1].forEach(i=>{bil.pocketedLog[i].forEach((id,k)=>bilBall(ctx,BIL_CW-BIL_OX-14-k*24,BIL_CH-28-(i?0:0),id,1));});}
 }
+/* ── Replay-Anzeige in der Spielzentrale ── */
+if(typeof RPL_TITLES!=='undefined'){RPL_TITLES.bil='Billard';if(typeof RPL_LIVE_PREF!=='undefined')RPL_LIVE_PREF.bil=true;}   // Bilder kommen aus bilRec, nicht aus den Zug-Schnappschüssen
+if(typeof RPL_DRAW!=='undefined')RPL_DRAW.bil=(ctx,f,a,m)=>{
+  const k=Math.min((a.w-24)/BIL_W,(a.h-34)/BIL_H),ox=a.x+(a.w-BIL_W*k)/2,oy=a.y+(a.h-BIL_H*k)/2+10,names=m.names||[];
+  ctx.fillStyle='#6b4423';ctx.fillRect(ox-8,oy-8,BIL_W*k+16,BIL_H*k+16);ctx.fillStyle='#22915a';ctx.fillRect(ox,oy,BIL_W*k,BIL_H*k);
+  ctx.fillStyle='#0b0b0b';for(const p of BIL_POCKETS){ctx.beginPath();ctx.arc(ox+p[0]*k,oy+p[1]*k,(p[2]-3)*k,0,7);ctx.fill();}
+  ctx.save();ctx.translate(ox,oy);ctx.scale(k,k);for(const q of f.b)bilBall(ctx,q[1],q[2],q[0]);ctx.restore();
+  const gn=g=>g==='solid'?'volle':g==='stripe'?'halbe':'offen';
+  if(typeof rplT==='function')rplT(ctx,'Am Zug: '+(names[f.t]||'Spieler '+(f.t+1))+' ('+gn(f.g[f.t])+')',a.x+14,a.y+12,13,'#c9d1e6','left',true);
+};
 /* ── Anbindung an spielmeta (Ränge, Hall of Fame, Serie, Cup, Duell) ── */
 if(typeof SM_HERO!=='undefined')SM_HERO.bil=['🎱','#1b7a4a','8-Ball: erst deine Kugeln, dann die 8'];
 if(typeof smRegister==='function')smRegister({id:'bil',screen:'screen-billard',title:'Billard',sides:['Spieler 1','Spieler 2'],
-  isOver:()=>!bil||bil.view!=='game'||!!bil.over,cancelPending:()=>{},
+  isOver:()=>!bil||bil.view!=='game'||!!bil.over,cancelPending:()=>{clearTimeout(bilAiT);bilAiT=null;},
+  snapshot:()=>bilSnapshot(),restore:st=>bilRestore(st),undoUntil:st=>!bil||bil.mode!=='ki'||st.turn===0,
   active:()=>bilIsRanked(),
   levels:['easy','medium','hard'],setLevel:l=>{if(bil&&BIL_LEVEL_MAP[l])bil.level=BIL_LEVEL_MAP[l];},
   sideAI:()=>[false,!!bil&&bil.mode==='ki'],difficulty:()=>bil&&bil.mode==='ki'?BIL_LEVEL_BACK[bil.level]:null,
