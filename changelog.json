@@ -420,5 +420,19 @@
       "Einlochen: Versenkte Kugeln verschwinden nicht mehr sofort, sondern rollen sichtbar in die Tasche und werden dabei kleiner – auch die weiße Kugel direkt nach einem Treffer. Der Zug wird erst ausgewertet, wenn alle Kugeln eingerollt sind.",
       "Replay: Billard-Partien (gegen die KI oder mit 2 Spielern, gewertet) lassen sich in der Spielzentrale als Replay ansehen und als Video speichern – die Kugeln laufen dabei wirklich über den Tisch, mit Anzeige, wer am Zug ist."
     ]
+  },
+  {
+    "id": 41,
+    "date": "07.10.2026",
+    "title": "Neues Spiel: Verlies (Roguelike-Dungeon)",
+    "items": [
+      "Neu: Verlies (Kategorie Spiele) – ein rundenbasierter Dungeon-Crawler. Jede Etage wird zufällig aus Räumen und Gängen erzeugt (immer vollständig begehbar, die Treppe liegt weit vom Start), mit Gegnern, Beute und Nebel des Krieges: Du siehst nur, was in deinem Blickfeld liegt, Gesehenes bleibt auf der Karte.",
+      "Du ziehst, dann ziehen die Gegner. Steuerung mit Pfeiltasten oder WASD (auch Ziffernblock), Leertaste wartet, Q trinkt einen Heiltrank; per Mausklick läufst du zu bekannten Feldern (stoppt, sobald ein Gegner in Sicht kommt). Neun Gegnerarten mit eigenem Verhalten (Fledermäuse taumeln, Zombies sind langsam, Magier greifen aus der Ferne an) und alle 5 Etagen ein Boss.",
+      "Beute mit zufälligen Werten: Waffen und Rüstungen werden angelegt, wenn sie besser sind, dazu Tränke und Gold; Erfahrung gibt Stufen. Wer fällt, behält Seelen (nach Tiefe, Siegen, Gold und Bossen) und kauft damit dauerhafte Stärkungen (Zähigkeit, Kampfkraft, Vorrat) für alle weiteren Durchgänge. Der laufende Durchgang wird nach jedem Zug gespeichert und kann später fortgesetzt werden.",
+      "Mausklicks im Verlies: Jeder Klick hat jetzt eine Wirkung oder eine Meldung. Diagonale Felder werden über das freie Nachbarfeld erreicht, mit Gegnern in Sicht geht es Schritt für Schritt (auch auf einen fernen Gegner zu), Klicks auf Wände oder unbekannte Felder melden sich im Protokoll.",
+      "Orientierung: „🧭 Erkunden“ (Taste X) läuft zum nächsten unerforschten Bereich, „🪜 Treppe“ (Taste T) läuft zur Treppe, sobald du sie gesehen hast. Beides hält an, wenn ein Gegner in Sicht kommt. In 360 geprüften Etagen fand das Erkunden immer die Treppe und alle Räume (höchstens etwa 320 Schritte).",
+      "Händler: ab Etage 2 steht manchmal ein Händler (🛒) in einem Raum. Ein Schritt auf ihn öffnet den Laden, dort gibst du Gold für Heiltränke, eine Vollheilung, eine Waffe oder eine Rüstung aus. Das Einkaufen kostet keinen Zug.",
+      "AppHub-Coins: einmalige Belohnungen für Etage 3, 5, 8, 10, 15 und 20, für den ersten Boss und für drei Bosse in einem Durchgang (zusammen 190 Coins), dazu 3 Coins für den ersten Durchgang des Tages, der mindestens Etage 2 erreicht. Das Menü zeigt, was du schon bekommen hast."
+    ]
   }
 ]

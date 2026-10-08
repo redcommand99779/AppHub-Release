@@ -1021,6 +1021,11 @@
           <div class="app-tile-name">Billard</div>
           <div class="app-tile-desc">8-Ball-Pool gegen die KI oder Freunde</div>
         </button>
+        <button class="app-tile" type="button" onclick="goTo('verlies')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('verlies')}" data-appid="verlies" data-cat="spiele">
+          <div class="app-icon" style="background:linear-gradient(135deg,#5e35b1,#263238)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6"/></svg></div>
+          <div class="app-tile-name">Verlies</div>
+          <div class="app-tile-desc">Roguelike-Dungeon: jede Runde anders</div>
+        </button>
         <button class="app-tile" type="button" onclick="goTo('studio')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'){goTo('studio')}" data-appid="studio" data-cat="kreativ">
           <div class="app-icon" style="background:linear-gradient(135deg,#ec407a,#7e57c2)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
           <div class="app-tile-name">Musikstudio</div>
@@ -2103,6 +2108,16 @@
       </div>
     </div>
     <div class="lrn-wrap" style="max-width:1000px"><div id="bil-root"></div></div>
+  </div>
+
+<div class="screen" id="screen-verlies">
+    <div class="titlebar">
+      <div class="title-wrap">
+        <button class="btn-back" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>Zurück</button>
+        <span class="title-text" style="flex:1;text-align:center">Verlies</span>
+      </div>
+    </div>
+    <div class="lrn-wrap" style="max-width:760px"><div id="vl-root"></div></div>
   </div>
 
 <div class="screen" id="screen-studio">
@@ -3832,6 +3847,7 @@ function goTo(id){
   if(id==='garten') gwInit();
   if(id==='arena') arInit();
   if(id==='studio') msInit();
+  if(id==='verlies') vlInit();
   if(id==='billard') bilInit();
   if(id==='jenga') jgInit();
   if(id==='stimmen') svInit();
@@ -4371,6 +4387,7 @@ function initSavedSettings(){
 <script src="apps/gartenwacht.js"></script>
 <script src="apps/arena.js"></script>
 <script src="apps/notenblock.js"></script>
+<script src="apps/verlies.js"></script>
 <script src="apps/billard.js"></script>
 <script src="apps/jenga.js"></script>
 <script src="apps/stimmenstudio.js"></script>
