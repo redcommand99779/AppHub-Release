@@ -434,5 +434,17 @@
       "Händler: ab Etage 2 steht manchmal ein Händler (🛒) in einem Raum. Ein Schritt auf ihn öffnet den Laden, dort gibst du Gold für Heiltränke, eine Vollheilung, eine Waffe oder eine Rüstung aus. Das Einkaufen kostet keinen Zug.",
       "AppHub-Coins: einmalige Belohnungen für Etage 3, 5, 8, 10, 15 und 20, für den ersten Boss und für drei Bosse in einem Durchgang (zusammen 190 Coins), dazu 3 Coins für den ersten Durchgang des Tages, der mindestens Etage 2 erreicht. Das Menü zeigt, was du schon bekommen hast."
     ]
+  },
+  {
+    "id": 42,
+    "date": "08.10.2026",
+    "title": "Verlies: Klassen, Fallen, Truhen und seltene Ausrüstung",
+    "items": [
+      "Drei Klassen: Krieger (Schildwall, Taste F), Magier (Feuerball F und Frostblitz G, mit Mana) und Dieb (Schatten F, Schleichangriff dreifach, öffnet Truhen ohne Schlüssel, entschärft Fallen). Magier und Dieb schaltest du im Menü für je 60 Seelen frei, die Klasse wählst du vor jedem Durchgang.",
+      "Zustände: Gift (Spinne, Giftfalle), Brand (Feuerball) und Frost (Frostblitz); die Leiste zeigt Mana, Schlüssel, Abklingzeit, Schild, Schatten und Gift.",
+      "Fallen ab Etage 2: Stachelfalle, Giftfalle und Alarmfalle. Sie sind verborgen, bis du daneben stehst (der Dieb sieht sie schon auf 3 Felder). Automatisches Laufen meidet bekannte Fallen und hält davor an.",
+      "Truhen und Schlüssel: Manche Etagen haben eine verschlossene Truhe und irgendwo einen Schlüssel dafür. In der Truhe liegen Gold und mindestens seltene Ausrüstung.",
+      "Seltenheit: Waffen und Rüstungen gibt es als gewöhnlich, selten, episch und legendär (Werte ×1, ×1,3, ×1,6, ×2). Tiefere Etagen würfeln bessere Stücke; auf dem Boden zeigt ein farbiger Rahmen die Seltenheit."
+    ]
   }
 ]
